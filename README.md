@@ -135,6 +135,7 @@ erDiagram
     }
     DONATION {
       int id PK
+      int profile_id FK
       string donor_name
       string donor_email
       decimal amount
