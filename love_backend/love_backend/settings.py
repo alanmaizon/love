@@ -1,25 +1,22 @@
 from pathlib import Path
 import os
-import dj_database_url
 from dotenv import load_dotenv
+import dj_database_url
 
-load_dotenv()  # Load environment variables from .env
+load_dotenv()  # Load .env variables
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ==========================================================================================
-# Security & Debug
-# ==========================================================================================
+# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
+
+# Debug setting
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# When DEBUG is False, make sure your domain(s) are in ALLOWED_HOSTS
-# e.g. ALLOWED_HOSTS=love-backend-8wbj.onrender.com,.onrender.com
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# ALLOWED_HOSTS: defaults to localhost and 127.0.0.1 for local testing
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
 
-# ==========================================================================================
-# Installed Apps & Middleware
-# ==========================================================================================
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,14 +24,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'rest_framework',
-    'corsheaders',      # django-cors-headers
-    'donations',        # Your custom app
+    'corsheaders',
+    'donations',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',                 # Must be high in the list
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -45,15 +41,11 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
-# ==========================================================================================
-# CORS & REST Framework
-# ==========================================================================================
+# For local development, allow all origins or specify from .env
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    # Ensure you set CORS_ALLOWED_ORIGINS in your Render environment variables
-    # e.g. CORS_ALLOWED_ORIGINS=https://love-frontend.onrender.com
-    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -66,26 +58,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-# ==========================================================================================
-# Database
-# ==========================================================================================
-# Use dj_database_url for parsing DATABASE_URL environment variable.
-# e.g. DATABASE_URL=postgres://USER:PASSWORD@HOST:PORT/DB_NAME
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}"
-    )
-}
-
-# ==========================================================================================
-# URLs & WSGI
-# ==========================================================================================
 ROOT_URLCONF = 'love_backend.urls'
-WSGI_APPLICATION = 'love_backend.wsgi.application'
 
-# ==========================================================================================
-# Templates
-# ==========================================================================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -102,62 +76,67 @@ TEMPLATES = [
     },
 ]
 
-# ==========================================================================================
-# Password Validators
-# ==========================================================================================
+WSGI_APPLICATION = 'love_backend.wsgi.application'
+
+# Database configuration with default fallback to SQLite for local testing:
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}")
+    )
+}
+
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
-# ==========================================================================================
 # Internationalization
-# ==========================================================================================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# ==========================================================================================
-# Static Files & WhiteNoise
-# ==========================================================================================
-STATIC_URL = '/static/'
+# Static files
+STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise allows your app to serve its own static files
-# more efficiently.
-# Docs: http://whitenoise.evans.io/en/stable/
-# e.g. add any additional settings here if needed.
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==========================================================================================
-# Security & SSL
-# ==========================================================================================
+
+# Production secure settings
 if DEBUG:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_DOMAIN = None
+    CSRF_COOKIE_DOMAIN = None
 else:
     SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # Force all subdomains of .onrender.com
+    SESSION_COOKIE_DOMAIN = ".onrender.com"
+    CSRF_COOKIE_DOMAIN = ".onrender.com"
     SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-
-# Cookie domain settings for .onrender.com subdomains:
-# This tells Django to allow cookies to be valid for any subdomain under onrender.com
-SESSION_COOKIE_DOMAIN = ".onrender.com"
-CSRF_COOKIE_DOMAIN = ".onrender.com"
 
 # Enable cross-site cookies
 SESSION_COOKIE_SAMESITE = None
 CSRF_COOKIE_SAMESITE = None
 
-# ==========================================================================================
-# Logging
-# ==========================================================================================
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -171,5 +150,3 @@ LOGGING = {
         'level': 'WARNING',
     },
 }
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
