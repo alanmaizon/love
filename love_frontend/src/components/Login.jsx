@@ -1,25 +1,37 @@
 // src/components/Login.jsx
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post('/login/', { username, password });
-      // Toast a success message
-      toast.success(response.data.message || 'Login successful!');
-      // Redirect to the dashboard
+      // 1. Post to /login
+      await axiosInstance.post('/login/', { username, password });
+      toast.success('Login successful!');
+
+      // 2. Fetch user profile
+      const profileRes = await axiosInstance.get('/profile/');
+      // Suppose it returns { user_username: 'alan', bride_name: '...', etc. }
+      // Store in context
+      setUser({
+        username: profileRes.data.user_username,
+        // or whatever fields you want from profileRes
+        ...profileRes.data,
+      });
+
+      // 3. Navigate
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
-        // Toast an error message from the server or a fallback
         toast.error(error.response.data.error || 'Login failed');
       } else {
         toast.error('An error occurred');

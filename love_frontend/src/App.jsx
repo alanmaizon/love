@@ -1,29 +1,29 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import { useContext } from 'react';
+import { AuthContext } from './context/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
-import Login from './components/Login';
-import Logout from './components/Logout';
-import Home from './components/Home';
-import ExploreCharities from './components/ExploreCharities'; 
-import DonationForm from './components/DonationForm';
-import DonationConfirmation from './components/DonationConfirmation';
-import UserDashboard from './components/UserDashboard';
-import AdminDashboard from './components/AdminDashboard';
-import PaymentInstructions from './components/PaymentInstructions';
-import AddCharity from './components/AddCharity';
-import ManageCharities from './components/ManageCharities';
-import EditCharity from './components/EditCharity';
-import Profile from './components/Profile';
-import PrivateRoute from './components/PrivateRoute'; 
+
+// ... other imports
 
 function Header() {
+  const { user } = useContext(AuthContext);
+
   return (
-    <nav>
+    <nav style={{ display: 'flex', gap: '1rem' }}>
       <Link to="/">Home</Link>
       <Link to="/charities">Charities</Link>
-      <Link to="/login">Login</Link>
-      {/* or a brand logo, etc. */}
+
+      {user ? (
+        <>
+          {/* Example if we store user.username in AuthContext */}
+          <span>Hello, {user.username || 'User'}!</span>
+          <Link to="/logout">Logout</Link>
+        </>
+      ) : (
+        <Link to="/login">Login</Link>
+      )}
     </nav>
   );
 }
@@ -35,18 +35,10 @@ function Footer() {
 function App() {
   return (
     <Router>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <Header />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -62,6 +54,7 @@ function App() {
         <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
         <Route path="/payment-instructions" element={<PaymentInstructions />} />
       </Routes>
+
       <Footer />
     </Router>
   );
