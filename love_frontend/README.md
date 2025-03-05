@@ -74,7 +74,7 @@ Copy index.html to 404.html to enable SPA routing fallback:
 
 Deployment Checklist for Render.com
 	•	Environment Variables:
-Set VITE_API_URL (e.g., https://love-backend-8wbj.onrender.com) in Render’s environment variables.
+Set VITE_API_URL in Render’s environment variables.
 	•	Publish Directory:
 Set to dist (or love_frontend/dist if using a Root Directory).
 	•	Build Command:
