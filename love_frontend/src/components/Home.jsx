@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import CountdownTimer from './CountdownTimer';
+import { Link } from 'react-router-dom';
 
 function Home() {
   const [analytics, setAnalytics] = useState(null);
@@ -43,8 +44,9 @@ function Home() {
           Celebrating love by inspiring generosity. Join us in supporting charities that reflect our values.
         </p>
         <div className="hero-buttons mt-3">
-          <a href="/donate" className="btn btn-primary me-2">Donate Now</a>
-          <a href="/charities" className="btn btn-secondary">Explore Charities</a>
+          <Link to="/login" className="btn btn-secondary">Login</Link>
+          <Link to="/donate" className="btn btn-primary me-2">Donate Now</Link>
+          <Link to="/charities" className="btn btn-secondary">Explore Charities</Link>
         </div>
       </section>
 
