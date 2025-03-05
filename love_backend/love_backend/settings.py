@@ -139,3 +139,9 @@ LOGGING = {
         'level': 'WARNING',
     },
 }
+
+# HSTS (HTTP Strict Transport Security) settings
+
+SECURE_HSTS_SECONDS = 3600  # or 31536000 for 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True

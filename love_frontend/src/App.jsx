@@ -15,9 +15,26 @@ import EditCharity from './components/EditCharity';
 import Profile from './components/Profile';
 import PrivateRoute from './components/PrivateRoute'; 
 
+function Header() {
+  return (
+    <nav>
+      <Link to="/">Home</Link>
+      <Link to="/charities">Charities</Link>
+      <Link to="/login">Login</Link>
+      {/* or a brand logo, etc. */}
+    </nav>
+  );
+}
+
+function Footer() {
+  return <footer> Love © 2025 by Anna & Alan</footer>;
+}
+
 function App() {
   return (
     <Router>
+      <Header />
+      <h1>Love Thy Neighbor</h1>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -33,6 +50,7 @@ function App() {
         <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
         <Route path="/payment-instructions" element={<PaymentInstructions />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }
