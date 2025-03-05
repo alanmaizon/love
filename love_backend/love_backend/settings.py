@@ -113,23 +113,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
-#
-# Cookie and security settings for production
-#
-if DEBUG:
-    # Development settings:
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_DOMAIN = None
-    CSRF_COOKIE_DOMAIN = None
-else:
-    # Production settings:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 3600
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+SESSION_COOKIE_DOMAIN = "love-backend-8wbj.onrender.com"
+CSRF_COOKIE_DOMAIN = "love-backend-8wbj.onrender.com"
+
 
 # Enable cross-site cookies
 SESSION_COOKIE_SAMESITE = None
