@@ -4,6 +4,20 @@ import { ToastContainer } from 'react-toastify';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Logout from './pages/Logout';
+import Profile from './pages/Profile';
+import ExploreCharities from './pages/ExploreCharities';
+import DonationForm from './pages/DonationForm';
+import DonationConfirmation from './pages/DonationConfirmation';
+import UserDashboard from './pages/UserDashboard';
+import AddCharity from './pages/AddCharity';
+import ManageCharities from './pages/ManageCharities';
+import EditCharity from './pages/EditCharity';
+import AdminDashboard from './pages/AdminDashboard';
+import PaymentInstructions from './pages/PaymentInstructions';
+import PrivateRoute from './components/PrivateRoute';
 
 // ... other imports
 
