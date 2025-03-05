@@ -127,8 +127,8 @@ else:
     # Production settings:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_DOMAIN = ".onrender.com"       # So cookies work across your subdomains
-    CSRF_COOKIE_DOMAIN = ".onrender.com"
+    SESSION_COOKIE_DOMAIN = os.environ.get('ALLOWED_HOSTS')
+    CSRF_COOKIE_DOMAIN = os.environ.get('ALLOWED_HOSTS')
     SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
