@@ -114,19 +114,20 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Production secure settings
+#
+# Cookie and security settings for production
+#
 if DEBUG:
-    SECURE_SSL_REDIRECT = False
+    # Development settings:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_DOMAIN = None
     CSRF_COOKIE_DOMAIN = None
 else:
-    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
+    # Production settings:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # Force all subdomains of .onrender.com
-    SESSION_COOKIE_DOMAIN = ".onrender.com"
+    SESSION_COOKIE_DOMAIN = ".onrender.com"       # So cookies work across your subdomains
     CSRF_COOKIE_DOMAIN = ".onrender.com"
     SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
