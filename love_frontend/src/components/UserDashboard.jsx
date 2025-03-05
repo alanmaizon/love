@@ -1,7 +1,7 @@
 // src/components/UserDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
 
 function UserDashboard() {
   const [donations, setDonations] = useState([]);
@@ -10,7 +10,7 @@ function UserDashboard() {
 
   const fetchDonations = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/donations/', { withCredentials: true });
+      const response = await axiosInstance.get('/donations/', { withCredentials: true });
       setDonations(response.data);
       setLoading(false);
     } catch (err) {

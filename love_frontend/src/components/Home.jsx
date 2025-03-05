@@ -1,6 +1,6 @@
 // src/components/Home.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import CountdownTimer from './CountdownTimer';
 
 function Home() {
@@ -13,8 +13,8 @@ function Home() {
     const fetchData = async () => {
       try {
         const [analyticsRes, profileRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/analytics/', { withCredentials: true }),
-          axios.get('http://localhost:8000/api/public_profile/')
+          axiosInstance.get('/analytics/', { withCredentials: true }),
+          axiosInstance.get('/public_profile/')
         ]);
         setAnalytics(analyticsRes.data);
         setProfile(profileRes.data);

@@ -1,6 +1,6 @@
 // src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 
 function AdminDashboard() {
   const [donations, setDonations] = useState([]);
@@ -10,7 +10,7 @@ function AdminDashboard() {
   // Function to fetch donation data.
   const fetchDonations = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/donations/', { withCredentials: true });
+      const response = await axiosInstance.get('/donations/');
       // Check if response.data.results exists (paginated response), otherwise use response.data directly.
       const donationArray = response.data.results ? response.data.results : response.data;
       setDonations(donationArray);
@@ -21,7 +21,6 @@ function AdminDashboard() {
     }
   };
   
-
   useEffect(() => {
     fetchDonations();
   }, []);
@@ -29,11 +28,7 @@ function AdminDashboard() {
   // Custom action to confirm a donation via /confirm/ endpoint.
   const confirmDonation = async (donationId) => {
     try {
-      await axios.patch(
-        `http://localhost:8000/api/donations/${donationId}/confirm/`,
-        {},
-        { withCredentials: true }
-      );
+      await axiosInstance.patch(`/donations/${donationId}/confirm/`, {});
       fetchDonations();
     } catch (err) {
       console.error('Error confirming donation', err);
@@ -43,11 +38,7 @@ function AdminDashboard() {
   // Custom action to mark a donation as failed via /fail/ endpoint.
   const failDonation = async (donationId) => {
     try {
-      await axios.patch(
-        `http://localhost:8000/api/donations/${donationId}/fail/`,
-        {},
-        { withCredentials: true }
-      );
+      await axiosInstance.patch(`/donations/${donationId}/fail/`, {});
       fetchDonations();
     } catch (err) {
       console.error('Error marking donation as failed', err);
@@ -125,7 +116,7 @@ function AnalyticsSection() {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/analytics/', { withCredentials: true });
+      const response = await axiosInstance.get('/analytics/');
       setAnalytics(response.data);
       setLoading(false);
     } catch (err) {
@@ -160,7 +151,7 @@ function AnalyticsSection() {
       <div className="mt-5">
         <h4>Combined Analytics</h4>
         <img
-          src="http://localhost:8000/api/charts/"
+          src={`${axiosInstance.defaults.baseURL}/charts/`}
           alt="Combined Analytics Charts"
           style={{ maxWidth: '100%', height: 'auto' }}
         />

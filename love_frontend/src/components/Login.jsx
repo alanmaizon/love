@@ -1,6 +1,6 @@
 // src/components/Login.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
@@ -12,13 +12,9 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        'http://localhost:8000/api/login/',
-        { username, password },
-        { withCredentials: true } // ensures session cookies are handled
-      );
+      const response = await axiosInstance.post('/login/', { username, password }, { withCredentials: true });
       setMessage(response.data.message);
-      // On successful login, redirect to the profile page (or dashboard)
+      // On successful login, redirect to the dashboard
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {

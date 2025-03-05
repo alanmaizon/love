@@ -1,7 +1,7 @@
 // src/components/PaymentInstructions.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
 
 function PaymentInstructions() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ function PaymentInstructions() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/public_profile/')
+    axiosInstance.get('/public_profile/')
       .then(response => {
         setBankInfo(response.data);
         setLoading(false);

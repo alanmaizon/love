@@ -1,7 +1,7 @@
 // src/components/ManageCharities.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
 
 function ManageCharities() {
   const [charities, setCharities] = useState([]);
@@ -12,7 +12,7 @@ function ManageCharities() {
   useEffect(() => {
     const fetchCharities = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/charities/', { withCredentials: true });
+        const response = await axiosInstance.get('/charities/', { withCredentials: true });
         setCharities(response.data);
         setLoading(false);
       } catch (err) {

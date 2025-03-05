@@ -1,7 +1,7 @@
 // src/components/EditCharity.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
 
 function EditCharity() {
   const { id } = useParams();
@@ -19,7 +19,7 @@ function EditCharity() {
   useEffect(() => {
     const fetchCharity = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/charities/${id}/`, { withCredentials: true });
+        const response = await axiosInstance.get(`/charities/${id}/`);
         setCharity(response.data);
         setLoading(false);
       } catch (err) {
@@ -43,8 +43,7 @@ function EditCharity() {
     }
 
     try {
-      await axios.put(`http://localhost:8000/api/charities/${id}/`, formData, {
-        withCredentials: true,
+      await axiosInstance.put(`/charities/${id}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

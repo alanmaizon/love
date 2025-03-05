@@ -1,6 +1,6 @@
 // src/components/AddCharity.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 
 function AddCharity() {
@@ -24,7 +24,7 @@ function AddCharity() {
     }
 
     try {
-      await axios.post('http://localhost:8000/api/charities/', data, {
+      await axiosInstance.post('/charities/', data, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',

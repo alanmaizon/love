@@ -1,7 +1,7 @@
 // src/components/Profile.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
 
 function Profile() {
   const [profile, setProfile] = useState({
@@ -21,7 +21,7 @@ function Profile() {
 
   // Fetch profile details on mount, redirect if not authenticated
   useEffect(() => {
-    axios.get('http://localhost:8000/api/profile/', { withCredentials: true })
+    axiosInstance.get('/profile/', { withCredentials: true })
       .then(response => {
         setProfile(response.data);
         setLoading(false);
@@ -60,7 +60,7 @@ function Profile() {
     if (profile.profile_picture instanceof File) {
       formData.append('profile_picture', profile.profile_picture);
     }
-    axios.put('http://localhost:8000/api/profile/', formData, {
+    axiosInstance.put('/profile/', formData, {
       withCredentials: true,
       headers: {
         'Content-Type': 'multipart/form-data'

@@ -1,6 +1,6 @@
 // src/components/DonationForm.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 function DonationForm() {
@@ -18,7 +18,7 @@ function DonationForm() {
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/charities/', { withCredentials: true })
+    axiosInstance.get('/charities/')
       .then(response => {
         setCharities(response.data);
       })
@@ -51,11 +51,7 @@ function DonationForm() {
     };
 
     try {
-      const response = await axios.post(
-        'http://localhost:8000/api/donations/',
-        donationData,
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post('/donations/', donationData);
       // Navigate to confirmation page, passing donation details if needed
       navigate('/confirmation', { state: { donation: response.data } });
     } catch (error) {
