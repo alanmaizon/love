@@ -121,8 +121,9 @@ CSRF_COOKIE_DOMAIN = "love-backend-8wbj.onrender.com"
 
 
 # Enable cross-site cookies
-SESSION_COOKIE_SAMESITE = None
-CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
+
 
 
 LOGGING = {
