@@ -2,25 +2,27 @@
 import React, { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post('/login/', { username, password }, { withCredentials: true });
-      setMessage(response.data.message);
-      // On successful login, redirect to the dashboard
+      const response = await axiosInstance.post('/login/', { username, password });
+      // Toast a success message
+      toast.success(response.data.message || 'Login successful!');
+      // Redirect to the dashboard
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
-        setMessage(error.response.data.error || 'Login failed');
+        // Toast an error message from the server or a fallback
+        toast.error(error.response.data.error || 'Login failed');
       } else {
-        setMessage('An error occurred');
+        toast.error('An error occurred');
       }
     }
   };
@@ -28,7 +30,6 @@ function Login() {
   return (
     <div className="container mt-5">
       <h2>Login</h2>
-      {message && <div className="alert alert-info">{message}</div>}
       <form onSubmit={handleLogin}>
         <div className="mb-3">
           <label htmlFor="username" className="form-label">Username</label>

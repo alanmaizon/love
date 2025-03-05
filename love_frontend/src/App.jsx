@@ -1,5 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import Home from './components/Home';
@@ -33,8 +35,18 @@ function Footer() {
 function App() {
   return (
     <Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Header />
-      <h1>Love Thy Neighbor</h1>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
