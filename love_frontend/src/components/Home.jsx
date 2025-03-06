@@ -34,10 +34,10 @@ function Home() {
       <section className="hero-section text-center">
         <h1 className="fw-bold">Love That Gives Back</h1>
         <p className="lead">
-          Celebrating love by inspiring generosity. Join us in supporting charities that reflect our values.
+          Contribute to our wedding gift fund supporting meaningful causes we love.
         </p>
         <div className="hero-buttons mt-3">
-          <Link to="/donate" className="btn btn-primary me-2">Donate Now</Link>
+          <Link to="/donate" className="btn btn-primary me-2">Gift Contribution</Link>
           <Link to="/charities" className="btn btn-secondary">Explore Charities</Link>
         </div>
       </section>
@@ -75,9 +75,9 @@ function Home() {
         <div className="alert alert-danger text-center mt-4">{analyticsError}</div>
       ) : (
         <section className="stats-section mt-5 text-center">
-          <h2>Live Charity Stats</h2>
-          <p><strong>Total Donations:</strong> ${analytics.total_amount.toLocaleString()}</p>
-          <p><strong>Donations Count:</strong> {analytics.donations_count.toLocaleString()}</p>
+          <h2>Live Contribution Stats</h2>
+          <p><strong>Total Contributions:</strong> ${analytics.total_amount.toLocaleString()}</p>
+          <p><strong>Participation Count:</strong> {analytics.donations_count.toLocaleString()}</p>
         </section>
       )}
     </div>
