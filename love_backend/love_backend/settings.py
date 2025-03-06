@@ -14,7 +14,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS: defaults to localhost and 127.0.0.1 for local testing
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -116,8 +116,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-SESSION_COOKIE_DOMAIN = "love-backend-8wbj.onrender.com"
-CSRF_COOKIE_DOMAIN = "love-backend-8wbj.onrender.com"
+SESSION_COOKIE_DOMAIN = "api.lovethatgivesback.com"
+CSRF_COOKIE_DOMAIN = "api.lovethatgivesback.com"
 
 
 # Enable cross-site cookies
