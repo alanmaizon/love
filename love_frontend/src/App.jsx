@@ -21,22 +21,22 @@ function Header() {
   const { user } = useContext(AuthContext);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">Love That Gives Back</Link>
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon" />
         </button>
-        <div className="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
-          <ul className="navbar-nav mb-2 mb-lg-0">
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
             <li className="nav-item">
               <Link className="nav-link" to="/">Home</Link>
             </li>
@@ -66,8 +66,8 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="bg-dark text-light text-center py-3 mt-4 w-100">
-      <div className="container">
+    <footer className="bg-dark text-light text-center py-3" style={{ width: '100%' }}>
+      <div className="container-fluid">
         <p className="mb-0">Love © 2025 by Anna & Alan</p>
       </div>
     </footer>

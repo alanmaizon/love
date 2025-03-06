@@ -1,68 +1,51 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Magic Header Styles */
+.navbar {
+  /* Full width, fixed at the top */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  /* Gradient background and subtle shadow */
+  background: linear-gradient(90deg, #1a1a1a, #323232);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Change background on hover for a magic effect */
+.navbar:hover {
+  background: linear-gradient(90deg, #323232, #1a1a1a);
 }
 
+/* Ensure nav links have proper spacing and styling */
+.navbar .navbar-nav .nav-link {
+  color: #f9f9f9;
+  transition: color 0.3s ease;
+}
+.navbar .navbar-nav .nav-link:hover {
+  color: #ffd700;
+}
+
+/* Magic Footer Styles */
+footer {
+  width: 100%;
+  /* Fixed at the bottom if you want a sticky footer, or use relative positioning */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  /* Gradient background */
+  background: linear-gradient(90deg, #1a1a1a, #323232);
+  color: #f9f9f9;
+  text-align: center;
+  padding: 0.75rem 0;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
+}
+footer:hover {
+  background: linear-gradient(90deg, #323232, #1a1a1a);
+}
+
+/* Additional adjustments to ensure content doesn't get hidden under fixed header/footer */
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  padding-top: 60px; /* Adjust based on your header height */
+  padding-bottom: 60px; /* Adjust based on your footer height */
 }
