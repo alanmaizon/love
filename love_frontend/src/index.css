@@ -41,20 +41,6 @@ html, body, #root {
   color: #A67B5B !important; /* Warm Coffee */
 }
 
-/* 🎨 Footer */
-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #3D2C1E; /* Dark Brown */
-  color: #EAD7BB;
-  text-align: center;
-  padding: 10px 0;
-  font-size: 14px;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-}
-
 /* 🎨 Buttons */
 .btn-primary {
   background-color: #8B5E3B !important; /* Accent Brown */
