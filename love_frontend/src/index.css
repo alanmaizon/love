@@ -1,3 +1,14 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  padding-top: 60px;  /* Height of your fixed header */
+  padding-bottom: 60px;  /* Height of your fixed footer */
+}
+
 /* Magic Header Styles */
 .navbar {
   /* Full width, fixed at the top */
@@ -42,10 +53,4 @@ footer {
 }
 footer:hover {
   background: linear-gradient(90deg, #323232, #1a1a1a);
-}
-
-/* Additional adjustments to ensure content doesn't get hidden under fixed header/footer */
-body {
-  padding-top: 60px; /* Adjust based on your header height */
-  padding-bottom: 60px; /* Adjust based on your footer height */
 }
