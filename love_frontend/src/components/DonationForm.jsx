@@ -62,9 +62,9 @@ function DonationForm() {
 
   return (
     <div className="container mt-5">
-      <h2>Make a Donation</h2>
       {feedback && <div role="alert" className="alert alert-info">{feedback}</div>}
       <form onSubmit={handleSubmit} noValidate>
+        <h2>Make a Donation</h2>
         {/* Donor Name */}
         <div className="mb-3">
           <label htmlFor="donorName" className="form-label">Name</label>
