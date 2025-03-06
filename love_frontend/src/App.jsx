@@ -21,7 +21,7 @@ function Header() {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container">
+      <div className="container-fluid">
         <Link className="navbar-brand" to="/">Love That Gives Back</Link>
         <button
           className="navbar-toggler"
@@ -63,7 +63,7 @@ function Header() {
 function Footer({ isContentLoaded }) {
   return (
     <footer className={`footer ${isContentLoaded ? 'visible' : ''}`}>
-      <div className="container">
+      <div className="container-fluid text-center py-3">
         <p className="mb-0">Love © 2025 by Anna & Alan</p>
       </div>
     </footer>
@@ -73,9 +73,8 @@ function Footer({ isContentLoaded }) {
 function App() {
   const [isContentLoaded, setIsContentLoaded] = useState(false);
 
-  // Simulate content loading
   useEffect(() => {
-    const timer = setTimeout(() => setIsContentLoaded(true), 1000); // Simulates loading delay
+    const timer = setTimeout(() => setIsContentLoaded(true), 1000); // Simulates content loading delay
     return () => clearTimeout(timer);
   }, []);
 
@@ -83,7 +82,7 @@ function App() {
     <Router>
       <div className="app-container">
         <Header />
-        <div className="main-content">
+        <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -99,7 +98,7 @@ function App() {
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
             <Route path="/payment-instructions" element={<PaymentInstructions />} />
           </Routes>
-        </div>
+        </main>
         <Footer isContentLoaded={isContentLoaded} />
       </div>
     </Router>
