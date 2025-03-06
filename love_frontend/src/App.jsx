@@ -1,9 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
-import 'react-toastify/dist/ReactToastify.css';
 import Home from './components/Home';
 import Login from './components/Login';
 import Logout from './components/Logout';
@@ -79,10 +77,7 @@ function Footer() {
 function App() {
   return (
     <Router>
-      <ToastContainer position="top-right" autoClose={3000} />
-
       <Header />
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -98,7 +93,6 @@ function App() {
         <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
         <Route path="/payment-instructions" element={<PaymentInstructions />} />
       </Routes>
-
       <Footer />
     </Router>
   );

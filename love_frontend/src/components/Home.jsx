@@ -44,7 +44,6 @@ function Home() {
           Celebrating love by inspiring generosity. Join us in supporting charities that reflect our values.
         </p>
         <div className="hero-buttons mt-3">
-          <Link to="/login" className="btn btn-secondary">Login</Link>
           <Link to="/donate" className="btn btn-primary me-2">Donate Now</Link>
           <Link to="/charities" className="btn btn-secondary">Explore Charities</Link>
         </div>
