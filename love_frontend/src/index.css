@@ -1,132 +1,138 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  width: 100%;
-  height: 100%;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Reset default margins/paddings and ensure full height */
+/* 🎨 General Reset */
 html, body, #root {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   overflow-x: hidden; /* Prevents horizontal scrolling */
+  background-color: #5A3E2B; /* Medium Brown */
+  color: #EAD7BB; /* Soft Beige */
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Ensure root container starts at the very top */
+/* 🎨 Root Container */
 #root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensures it covers the full viewport height */
+  min-height: 100vh;
 }
 
-/* Make sure content below the fixed header is visible */
-body {
-  padding-top: 60px; /* Adjust based on header height */
-  padding-bottom: 60px; /* Adjust based on footer height */
-}
-
-/* Global link styles */
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-
-/* Magic Header Styles */
+/* 🎨 Header */
 .navbar {
-  /* Full width, fixed at the top */
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
-  /* Gradient background and subtle shadow */
-  background: linear-gradient(90deg, #1a1a1a, #323232);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease;
+  background: linear-gradient(90deg, #3D2C1E, #5A3E2B); /* Dark Brown Gradient */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Change background on hover for a magic effect */
-.navbar:hover {
-  background: linear-gradient(90deg, #323232, #1a1a1a);
+.navbar .navbar-brand {
+  color: #EAD7BB !important;
+  font-weight: bold;
 }
 
-/* Ensure nav links have proper spacing and styling */
 .navbar .navbar-nav .nav-link {
-  color: #f9f9f9;
+  color: #EAD7BB !important;
   transition: color 0.3s ease;
 }
+
 .navbar .navbar-nav .nav-link:hover {
-  color: #ffd700;
+  color: #A67B5B !important; /* Warm Coffee */
 }
 
-/* Magic Footer Styles */
+/* 🎨 Footer */
 footer {
-  width: 100%;
-  /* Fixed at the bottom if you want a sticky footer, or use relative positioning */
   position: fixed;
   bottom: 0;
   left: 0;
-  /* Gradient background */
-  background: linear-gradient(90deg, #1a1a1a, #323232);
-  color: #f9f9f9;
+  width: 100%;
+  background: #3D2C1E; /* Dark Brown */
+  color: #EAD7BB;
   text-align: center;
-  padding: 0.75rem 0;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease;
-}
-footer:hover {
-  background: linear-gradient(90deg, #323232, #1a1a1a);
+  padding: 10px 0;
+  font-size: 14px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* 🎨 Buttons */
+.btn-primary {
+  background-color: #8B5E3B !important; /* Accent Brown */
+  border-color: #8B5E3B !important;
+}
+
+.btn-primary:hover {
+  background-color: #A67B5B !important; /* Warm Coffee */
+  border-color: #A67B5B !important;
+}
+
+/* 🎨 Links */
+a {
+  color: #A67B5B;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #EAD7BB;
+  text-decoration: underline;
+}
+
+/* 🎨 Forms & Inputs */
+input, textarea {
+  background-color: #EAD7BB;
+  color: #3D2C1E;
+  border: 1px solid #A67B5B;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+input:focus, textarea:focus {
+  border-color: #8B5E3B;
+  outline: none;
+}
+
+/* 🎨 Cards & Containers */
+.card {
+  background-color: #3D2C1E;
+  color: #EAD7BB;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* 🎨 Layout Fixes */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* 🎨 Spacing Adjustments */
+.mt-5 {
+  margin-top: 50px !important;
+}
+
+.pt-5 {
+  padding-top: 50px !important;
+}
+
+.pb-5 {
+  padding-bottom: 50px !important;
+}
+
+/* 🎨 Responsive Fixes */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px;
   }
-  a:hover {
-    color: #747bff;
+
+  footer {
+    font-size: 12px;
+    padding: 8px 0;
   }
-  button {
-    background-color: #f9f9f9;
+
+  .container {
+    padding: 10px;
   }
 }

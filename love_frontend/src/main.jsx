@@ -8,10 +8,15 @@ import { AuthProvider } from './context/AuthContext';
 
 axios.defaults.withCredentials = true
 
+// Lazy load App for faster initial rendering
+const App = React.lazy(() => import('./App'));
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <App />
+      <Suspense fallback={<div>Loading...</div>}>
+        <App />
+      </Suspense>
     </AuthProvider>
-  </StrictMode>,
-)
+  </StrictMode>
+);
