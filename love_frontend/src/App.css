@@ -12,13 +12,14 @@ html, body, #root, .app-container {
   flex-shrink: 0; /* Keeps header from resizing */
 }
 
-/* Main content should take up remaining space */
+/* Main content should take up 80% of the height */
 .main-content {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center; /* Centers content vertically */
   padding: 20px;
+  height: 80%;
 }
 
 /* Footer */
