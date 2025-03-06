@@ -1,19 +1,29 @@
-/* Full-page layout */
+/* Ensure full-page structure */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensures the main app content grows, keeping footer at the bottom */
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* Ensures main content grows, keeping footer at the bottom */
+/* Pushes footer to the bottom when there's not enough content */
 .main-content {
   flex: 1;
 }
 
-/* 🎨 Footer */
+/* Footer default state: hidden until content loads */
 .footer {
-  display: none; /* Initially hidden */
-  background-color: #3D2C1E; /* Dark Brown */
+  display: none;
+  background-color: #3D2C1E; /* Brown color */
   color: #EAD7BB;
   text-align: center;
   padding: 10px 0;

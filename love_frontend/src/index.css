@@ -4,10 +4,17 @@ html, body, #root {
   padding: 0;
   height: 100%;
   width: 100%;
-  background-color: #ffffff !important; /* Set white background */
-  color: #333; /* Standard readable text */
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+  background-color: #5A3E2B; /* Medium Brown */
+  color: #EAD7BB; /* Soft Beige */
   font-family: 'Poppins', sans-serif;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* 🎨 Root Container */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* 🎨 Header */
@@ -16,22 +23,36 @@ html, body, #root {
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: linear-gradient(90deg, #3D2C1E, #5A3E2B); /* Brown Gradient */
+  background: linear-gradient(90deg, #3D2C1E, #5A3E2B); /* Dark Brown Gradient */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .navbar .navbar-brand {
-  color: #3D2C1E !important;
+  color: #EAD7BB !important;
   font-weight: bold;
 }
 
 .navbar .navbar-nav .nav-link {
-  color: #3D2C1E !important;
+  color: #EAD7BB !important;
   transition: color 0.3s ease;
 }
 
 .navbar .navbar-nav .nav-link:hover {
   color: #A67B5B !important; /* Warm Coffee */
+}
+
+/* 🎨 Footer */
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #3D2C1E; /* Dark Brown */
+  color: #EAD7BB;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* 🎨 Buttons */
@@ -45,9 +66,20 @@ html, body, #root {
   border-color: #A67B5B !important;
 }
 
+/* 🎨 Links */
+a {
+  color: #A67B5B;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #EAD7BB;
+  text-decoration: underline;
+}
+
 /* 🎨 Forms & Inputs */
 input, textarea {
-  background-color: #fff; /* Ensure white background */
+  background-color: #EAD7BB;
   color: #3D2C1E;
   border: 1px solid #A67B5B;
   padding: 10px;
@@ -61,8 +93,8 @@ input:focus, textarea:focus {
 
 /* 🎨 Cards & Containers */
 .card {
-  background-color: #fff; /* White cards for consistency */
-  color: #3D2C1E;
+  background-color: #3D2C1E;
+  color: #EAD7BB;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   padding: 20px;
@@ -76,10 +108,28 @@ input:focus, textarea:focus {
   padding: 20px;
 }
 
+/* 🎨 Spacing Adjustments */
+.mt-5 {
+  margin-top: 50px !important;
+}
+
+.pt-5 {
+  padding-top: 50px !important;
+}
+
+.pb-5 {
+  padding-bottom: 50px !important;
+}
+
 /* 🎨 Responsive Fixes */
 @media (max-width: 768px) {
   .navbar {
     padding: 10px;
+  }
+
+  footer {
+    font-size: 12px;
+    padding: 8px 0;
   }
 
   .container {
