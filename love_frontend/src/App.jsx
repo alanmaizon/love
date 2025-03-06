@@ -1,8 +1,8 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
-import Header from './components/Header';
-import Footer from './components/Footer';
 import Home from './components/Home';
 import Login from './components/Login';
 import Logout from './components/Logout';
@@ -16,6 +16,63 @@ import ManageCharities from './components/ManageCharities';
 import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PaymentInstructions from './components/PaymentInstructions';
+
+function Header() {
+  const { user } = useContext(AuthContext);
+
+  return (
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+      <div className="container-fluid">
+        <Link className="navbar-brand" to="/">Love That Gives Back</Link>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon" />
+        </button>
+        <div className="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+          <ul className="navbar-nav mb-2 mb-lg-0">
+            <li className="nav-item">
+              <Link className="nav-link" to="/">Home</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/charities">Charities</Link>
+            </li>
+            {user ? (
+              <>
+                <li className="nav-item">
+                  <span className="nav-link">Hello, {user.username || 'User'}!</span>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/logout">Logout</Link>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <Link className="nav-link" to="/login">Login</Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="bg-dark text-light text-center py-3 mt-4 w-100">
+      <div className="container">
+        <p className="mb-0">Love © 2025 by Anna & Alan</p>
+      </div>
+    </footer>
+  );
+}
 
 function App() {
   return (
