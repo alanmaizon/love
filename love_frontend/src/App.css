@@ -1,33 +1,37 @@
-/* Full height layout */
+/* Ensure full viewport height */
 html, body, #root, .app-container {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* Header */
+/* Header stays at top (using sticky or fixed if desired) */
 .navbar {
-  flex-shrink: 0; /* Keeps header from resizing */
+  flex-shrink: 0;
 }
 
-/* Main content should take up 80% of the height */
+/* Main content takes up remaining space, scrollable if needed */
 .main-content {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center; /* Centers content vertically */
+  overflow-y: auto; /* Enables vertical scrolling if content exceeds available height */
   padding: 20px;
-  height: 80%;
+  /* Add extra padding-bottom equal to the footer's height (e.g., 60px) */
+  padding-bottom: 60px;
 }
 
-/* Footer */
+/* Fixed footer at bottom */
 .footer {
-  flex-shrink: 0;
-  background: #3D2C1E; /* Dark brown */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #3D2C1E; /* Dark Brown */
   color: #EAD7BB;
   text-align: center;
   padding: 15px 0;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }

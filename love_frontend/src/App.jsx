@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useContext, useState, useEffect } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -21,7 +21,7 @@ function Header() {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container-fluid">
+      <div className="container">
         <Link className="navbar-brand" to="/">Love That Gives Back</Link>
         <button
           className="navbar-toggler"
@@ -60,10 +60,10 @@ function Header() {
   );
 }
 
-function Footer({ isContentLoaded }) {
+function Footer() {
   return (
-    <footer className={`footer ${isContentLoaded ? 'visible' : ''}`}>
-      <div className="container-fluid text-center py-3">
+    <footer className="footer">
+      <div className="container text-center">
         <p className="mb-0">Love © 2025 by Anna & Alan</p>
       </div>
     </footer>
@@ -71,13 +71,6 @@ function Footer({ isContentLoaded }) {
 }
 
 function App() {
-  const [isContentLoaded, setIsContentLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsContentLoaded(true), 1000); // Simulates content loading delay
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <Router>
       <div className="app-container">
@@ -99,7 +92,7 @@ function App() {
             <Route path="/payment-instructions" element={<PaymentInstructions />} />
           </Routes>
         </main>
-        <Footer isContentLoaded={isContentLoaded} />
+        <Footer />
       </div>
     </Router>
   );
