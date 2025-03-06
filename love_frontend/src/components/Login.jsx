@@ -31,9 +31,9 @@ function Login() {
 
   return (
     <div className="container mt-5">
-      <h2>Login</h2>
       {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
       <form onSubmit={handleLogin}>
+        <h2>Login</h2>
         <div className="mb-3">
           <label htmlFor="username" className="form-label">Username</label>
           <input

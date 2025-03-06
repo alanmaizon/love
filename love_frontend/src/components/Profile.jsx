@@ -82,9 +82,9 @@ function Profile() {
 
   return (
     <div className="container mt-5">
-      <h2>Edit Profile</h2>
       {feedback && <div className="alert alert-info">{feedback}</div>}
       <form onSubmit={handleSubmit}>
+        <h2>Edit Profile</h2>
         <div className="mb-3">
           <label htmlFor="bride_name" className="form-label">Bride Name</label>
           <input

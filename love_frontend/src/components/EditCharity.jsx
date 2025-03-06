@@ -66,11 +66,11 @@ function EditCharity() {
 
   return (
     <div className="container mt-5">
-      <h2>Edit Charity</h2>
       {loading ? (
         <p>Loading charity details...</p>
       ) : (
         <form onSubmit={handleSubmit}>
+          <h2>Edit Charity</h2>
           {feedback && <div className="alert alert-info">{feedback}</div>}
           <div className="mb-3">
             <label htmlFor="name" className="form-label">Charity Name</label>
