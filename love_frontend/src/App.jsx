@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
 import Home from './components/Home';
 import Login from './components/Login';
 import Logout from './components/Logout';
@@ -15,7 +16,7 @@ import ManageCharities from './components/ManageCharities';
 import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PaymentInstructions from './components/PaymentInstructions';
-import PrivateRoute from './components/PrivateRoute';
+
 
 
 function Header() {

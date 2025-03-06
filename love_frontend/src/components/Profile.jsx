@@ -28,8 +28,8 @@ function Profile() {
       })
       .catch(error => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          // Not authenticated, redirect to login
-          navigate('/login');
+            // Not authenticated, redirect to home
+            navigate('/');
         } else {
           setFeedback('Error fetching profile data.');
           setLoading(false);

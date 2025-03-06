@@ -15,7 +15,7 @@ function Logout() {
       })
       .finally(() => {
         setUser(null);
-        navigate('/login');
+        navigate('/');
       });
   }, [navigate, setUser]);
 

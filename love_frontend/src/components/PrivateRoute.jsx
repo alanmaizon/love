@@ -22,8 +22,8 @@ const PrivateRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
-  // If authenticated, render the protected component; otherwise redirect to login.
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  // If authenticated, render the protected component; otherwise redirect to root.
+  return isAuthenticated ? children : <Navigate to="/" replace />;
 };
 
 export default PrivateRoute;
