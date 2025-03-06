@@ -67,7 +67,6 @@ html, body, #root {
 .btn-primary {
   background-color: #8B5E3B !important; /* Accent Brown */
   border-color: #8B5E3B !important;
-  margin-right: 10px; /* Add space between buttons */
 }
 
 .btn-primary:hover {
@@ -80,6 +79,7 @@ html, body, #root {
 a {
   color: #A67B5B;
   text-decoration: none;
+  margin-right: 10px; /* Add space between buttons */
 }
 
 a:hover {
