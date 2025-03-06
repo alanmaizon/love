@@ -1,36 +1,42 @@
-/* Ensure full-page structure */
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Ensures the main app content grows, keeping footer at the bottom */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Pushes footer to the bottom when there's not enough content */
-.main-content {
-  flex: 1;
-}
-
-/* Footer default state: hidden until content loads */
-.footer {
-  display: none;
-  background-color: #3D2C1E; /* Brown color */
-  color: #EAD7BB;
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
   text-align: center;
-  padding: 10px 0;
-  width: 100%;
 }
 
-/* Show footer when page content is ready */
-.footer.visible {
-  display: block;
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }
