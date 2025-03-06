@@ -1,7 +1,5 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
 import Footer from './components/Footer';
