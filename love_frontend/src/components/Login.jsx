@@ -1,4 +1,3 @@
-// src/components/Login.jsx
 import React, { useState, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
@@ -20,15 +19,10 @@ function Login() {
 
       // 2. Fetch user profile
       const profileRes = await axiosInstance.get('/profile/');
-      // Suppose it returns { user_username: 'alan', bride_name: '...', etc. }
-      // Store in context
-      setUser({
-        username: profileRes.data.user_username,
-        // or whatever fields you want from profileRes
-        ...profileRes.data,
-      });
+      const displayName = `${profileRes.data.bride_name} & ${profileRes.data.groom_name}`;
+      setUser({ username: displayName, ...profileRes.data });
 
-      // 3. Navigate
+      // 3. Navigate to dashboard
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
@@ -45,25 +39,11 @@ function Login() {
       <form onSubmit={handleLogin}>
         <div className="mb-3">
           <label htmlFor="username" className="form-label">Username</label>
-          <input
-            type="text"
-            className="form-control"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+          <input type="text" className="form-control" id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
         </div>
         <div className="mb-3">
           <label htmlFor="password" className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
         <button type="submit" className="btn btn-primary">Login</button>
       </form>

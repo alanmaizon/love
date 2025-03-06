@@ -1,23 +1,19 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
-// Create the AuthContext
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); 
-  // user will store e.g. { username: 'anna' } or something
+  const [user, setUser] = useState(null);
 
-  // Optionally, fetch user info on mount (to persist login between refreshes)
   useEffect(() => {
-    // Example: if session cookie is present, we can fetch the profile
     axiosInstance.get('/profile/')
       .then((res) => {
-        // Might contain bride_name, groom_name, or username
-        setUser({ username: res.data.user_username, ...res.data });
+        // Compute display name from the profile data.
+        const displayName = `${res.data.bride_name} & ${res.data.groom_name}`;
+        setUser({ username: displayName, ...res.data });
       })
       .catch(() => {
-        // Not logged in or 403
         setUser(null);
       });
   }, []);

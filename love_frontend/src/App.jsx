@@ -24,25 +24,56 @@ function Header() {
   const { user } = useContext(AuthContext);
 
   return (
-    <nav style={{ display: 'flex', gap: '1rem' }}>
-      <Link to="/">Home</Link>
-      <Link to="/charities">Charities</Link>
-
-      {user ? (
-        <>
-          {/* Example if we store user.username in AuthContext */}
-          <span>Hello, {user.username || 'User'}!</span>
-          <Link to="/logout">Logout</Link>
-        </>
-      ) : (
-        <Link to="/login">Login</Link>
-      )}
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div className="container">
+        <Link className="navbar-brand" to="/">Love That Gives Back</Link>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon" />
+        </button>
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <Link className="nav-link" to="/">Home</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/charities">Charities</Link>
+            </li>
+            {user ? (
+              <>
+                <li className="nav-item">
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/logout">Logout</Link>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <Link className="nav-link" to="/login">Login</Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
     </nav>
   );
 }
 
 function Footer() {
-  return <footer> Love © 2025 by Anna & Alan</footer>;
+  return (
+    <footer className="bg-dark text-light text-center py-3 mt-4">
+      <div className="container">
+        <p className="mb-0">Love © 2025 by Anna & Alan</p>
+      </div>
+    </footer>
+  );
 }
 
 function App() {
