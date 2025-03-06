@@ -41,6 +41,29 @@ html, body, #root {
   color: #A67B5B !important; /* Warm Coffee */
 }
 
+/* 🎨 Main Content */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  padding-bottom: 60px; /* Add extra padding-bottom equal to the footer's height */
+}
+
+/* 🎨 Footer */
+/* Fixed footer at bottom */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #3D2C1E; /* Dark Brown */
+  color: #EAD7BB;
+  text-align: center;
+  padding: 15px 0;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
 
 /* 🎨 Buttons */
 .btn-primary {
