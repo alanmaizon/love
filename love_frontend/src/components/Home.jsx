@@ -1,5 +1,5 @@
 // src/components/Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import CountdownTimer from './CountdownTimer';
 import { Link } from 'react-router-dom';
@@ -7,40 +7,33 @@ import { Link } from 'react-router-dom';
 function Home() {
   const [analytics, setAnalytics] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+  const [profileError, setProfileError] = useState('');
+  const [analyticsError, setAnalyticsError] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [analyticsRes, profileRes] = await Promise.all([
-          axiosInstance.get('/analytics/', { withCredentials: true }),
-          axiosInstance.get('/public_profile/')
-        ]);
-        setAnalytics(analyticsRes.data);
-        setProfile(profileRes.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch data.');
-        setLoading(false);
-      }
-    };
-    fetchData();
+    // Fetch profile and analytics in parallel
+    axiosInstance.get('/public_profile/')
+      .then((res) => setProfile(res.data))
+      .catch(() => setProfileError('Failed to load profile.'))
+      .finally(() => setLoadingProfile(false));
+
+    axiosInstance.get('/analytics/', { withCredentials: true })
+      .then((res) => setAnalytics(res.data))
+      .catch(() => setAnalyticsError('Failed to load charity statistics.'))
+      .finally(() => setLoadingAnalytics(false));
   }, []);
 
-  // Use the wedding_date from profile; if not available, use a fallback.
-  const weddingDate = profile ? profile.wedding_date : "2025-04-25T12:30:00";
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // Memoize wedding date to prevent unnecessary recalculations
+  const weddingDate = useMemo(() => profile?.wedding_date || "2025-04-25T12:30:00", [profile]);
 
   return (
     <div className="container mt-5">
       {/* Hero Section */}
       <section className="hero-section text-center">
-        <h1>Love That Gives Back</h1>
-        <p>
+        <h1 className="fw-bold">Love That Gives Back</h1>
+        <p className="lead">
           Celebrating love by inspiring generosity. Join us in supporting charities that reflect our values.
         </p>
         <div className="hero-buttons mt-3">
@@ -50,16 +43,19 @@ function Home() {
       </section>
 
       {/* About the Couple Section */}
-      {profile && (
+      {loadingProfile ? (
+        <div className="text-center mt-4">
+          <div className="spinner-border text-light" role="status"></div>
+          <p>Loading profile...</p>
+        </div>
+      ) : profileError ? (
+        <div className="alert alert-warning text-center mt-4">{profileError}</div>
+      ) : profile && (
         <section className="about-section mt-5 text-center">
           <h2>About the Couple</h2>
-          <p>
-            <strong>{profile.bride_name} &amp; {profile.groom_name}</strong>
-          </p>
+          <p className="fw-bold">{profile.bride_name} &amp; {profile.groom_name}</p>
           <p>{profile.bio || "No bio available."}</p>
-          <p>
-            <strong>Location:</strong> {profile.location}
-          </p>
+          <p><strong>Location:</strong> {profile.location}</p>
         </section>
       )}
 
@@ -70,17 +66,20 @@ function Home() {
       </section>
 
       {/* Live Charity Stats Section */}
-      <section className="stats-section mt-5 text-center">
-        <h2>Live Charity Stats</h2>
-        {error ? (
-          <p>{error}</p>
-        ) : analytics ? (
-          <div>
-            <p><strong>Total Donations:</strong> ${analytics.total_amount}</p>
-            <p><strong>Donations Count:</strong> {analytics.donations_count}</p>
-          </div>
-        ) : null}
-      </section>
+      {loadingAnalytics ? (
+        <div className="text-center mt-4">
+          <div className="spinner-border text-light" role="status"></div>
+          <p>Loading statistics...</p>
+        </div>
+      ) : analyticsError ? (
+        <div className="alert alert-danger text-center mt-4">{analyticsError}</div>
+      ) : (
+        <section className="stats-section mt-5 text-center">
+          <h2>Live Charity Stats</h2>
+          <p><strong>Total Donations:</strong> ${analytics.total_amount.toLocaleString()}</p>
+          <p><strong>Donations Count:</strong> {analytics.donations_count.toLocaleString()}</p>
+        </section>
+      )}
     </div>
   );
 }
