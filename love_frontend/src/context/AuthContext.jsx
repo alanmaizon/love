@@ -7,13 +7,15 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    axiosInstance.get('/profile/')
+    // Fetch public profile info instead of the protected one.
+    axiosInstance.get('/public_profile/')
       .then((res) => {
-        // Compute display name from the profile data.
+        // Compute a display name based on public profile info
         const displayName = `${res.data.bride_name} & ${res.data.groom_name}`;
         setUser({ username: displayName, ...res.data });
       })
-      .catch(() => {
+      .catch((err) => {
+        // 403 is expected for non-authenticated users on /profile/
         setUser(null);
       });
   }, []);
