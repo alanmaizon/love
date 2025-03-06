@@ -45,14 +45,7 @@ html, body, #root {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  height: 100vh;
-  scrollbar-width: none; /* For Firefox */
-  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
-}
-
-.main-content::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
-
+  min-height: 100vh;
 }
 
 /* 🎨 Footer */
