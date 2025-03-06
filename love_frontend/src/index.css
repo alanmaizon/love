@@ -41,22 +41,6 @@ html, body, #root {
   color: #A67B5B !important; /* Warm Coffee */
 }
 
-/* 🎨 Footer */
-
-/* Footer default state: hidden until content loads */
-.footer {
-  display: none;
-  background-color: #3D2C1E; /* Brown color */
-  color: #EAD7BB;
-  text-align: center;
-  padding: 10px 0;
-  width: 100%;
-}
-
-/* Show footer when page content is ready */
-.footer.visible {
-  display: block;
-}
 
 /* 🎨 Buttons */
 .btn-primary {
