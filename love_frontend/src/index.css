@@ -56,11 +56,10 @@ html, body, #root {
 }
 
 /* 🎨 Footer */
-/* Fixed footer at bottom */
 .footer {
-  position: sticky;
-  bottom: 0;
-  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   background: #3D2C1E; /* Dark Brown */
   color: #EAD7BB;
