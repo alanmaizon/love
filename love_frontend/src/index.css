@@ -46,7 +46,7 @@ html, body, #root {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  padding-bottom: 60px; /* Add extra padding-bottom equal to the footer's height */
+  padding-bottom: 100px; /* Add extra padding-bottom equal to the footer's height */
 }
 
 /* 🎨 Footer */
