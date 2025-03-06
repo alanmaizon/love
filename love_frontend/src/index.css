@@ -67,12 +67,14 @@ html, body, #root {
 .btn-primary {
   background-color: #8B5E3B !important; /* Accent Brown */
   border-color: #8B5E3B !important;
+  margin-right: 10px; /* Add space between buttons */
 }
 
 .btn-primary:hover {
   background-color: #A67B5B !important; /* Warm Coffee */
   border-color: #A67B5B !important;
 }
+
 
 /* 🎨 Links */
 a {
@@ -97,6 +99,17 @@ input, textarea {
 input:focus, textarea:focus {
   border-color: #8B5E3B;
   outline: none;
+}
+
+/* Center the form container and limit its width */
+form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Optional: Add some spacing between form elements */
+form .form-group {
+  margin-bottom: 1rem;
 }
 
 /* 🎨 Cards & Containers */
