@@ -1,6 +1,5 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from './context/AuthContext';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -16,7 +15,6 @@ import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PaymentInstructions from './components/PaymentInstructions';
 import PrivateRoute from './components/PrivateRoute';
-
 
 function Header() {
   const { user } = useContext(AuthContext);
@@ -47,8 +45,6 @@ function Header() {
             {user ? (
               <>
                 <li className="nav-item">
-                </li>
-                <li className="nav-item">
                   <Link className="nav-link" to="/logout">Logout</Link>
                 </li>
               </>
@@ -64,9 +60,9 @@ function Header() {
   );
 }
 
-function Footer() {
+function Footer({ isContentLoaded }) {
   return (
-    <footer className="bg-dark text-light text-center py-3 mt-4">
+    <footer className={`footer ${isContentLoaded ? 'visible' : ''}`}>
       <div className="container">
         <p className="mb-0">Love © 2025 by Anna & Alan</p>
       </div>
@@ -75,25 +71,37 @@ function Footer() {
 }
 
 function App() {
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
+
+  // Simulate content loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsContentLoaded(true), 1000); // Simulates loading delay
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/logout" element={<Logout />} />
-        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-        <Route path="/charities" element={<ExploreCharities />} />
-        <Route path="/donate" element={<DonationForm />} />
-        <Route path="/confirmation" element={<DonationConfirmation />} />
-        <Route path="/dashboard" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
-        <Route path="/dashboard/add-charity" element={<PrivateRoute><AddCharity /></PrivateRoute>} />
-        <Route path="/dashboard/charities" element={<PrivateRoute><ManageCharities /></PrivateRoute>} />
-        <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
-        <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
-        <Route path="/payment-instructions" element={<PaymentInstructions />} />
-      </Routes>
-      <Footer />
+      <div className="app-container">
+        <Header />
+        <div className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/charities" element={<ExploreCharities />} />
+            <Route path="/donate" element={<DonationForm />} />
+            <Route path="/confirmation" element={<DonationConfirmation />} />
+            <Route path="/dashboard" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
+            <Route path="/dashboard/add-charity" element={<PrivateRoute><AddCharity /></PrivateRoute>} />
+            <Route path="/dashboard/charities" element={<PrivateRoute><ManageCharities /></PrivateRoute>} />
+            <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
+            <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+            <Route path="/payment-instructions" element={<PaymentInstructions />} />
+          </Routes>
+        </div>
+        <Footer isContentLoaded={isContentLoaded} />
+      </div>
     </Router>
   );
 }
