@@ -13,8 +13,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 # Debug setting
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
+ALLOWED_HOSTS = [
+    'love-backend-8wbj.onrender.com',
+    'api.lovethatgivesback.com',
+    'localhost',
+    '127.0.0.1',
+]
 
 # Application definition
 INSTALLED_APPS = [
