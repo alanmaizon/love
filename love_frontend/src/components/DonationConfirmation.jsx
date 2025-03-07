@@ -11,11 +11,11 @@ function DonationConfirmation() {
 
   return (
     <div className="container mt-5">
-      <h2>Donation Confirmation</h2>
+      <h2>Gift Confirmation</h2>
       {donation ? (
         <div>
-          <p>Thank you, your donation has been submitted successfully!</p>
-          <p><strong>Donation Details:</strong></p>
+          <p>Thank you, your gift has been submitted!</p>
+          <p><strong>Contribution Details:</strong></p>
           <ul>
             <li>Name: {donation.donor_name}</li>
             <li>Email: {donation.donor_email}</li>
@@ -27,7 +27,7 @@ function DonationConfirmation() {
           </Link>
         </div>
       ) : (
-        <p>Your donation was submitted successfully!</p>
+        <p>Your contribution was submitted successfully!</p>
       )}
       <button className="btn btn-primary" onClick={() => navigate('/')}>
         Return Home
