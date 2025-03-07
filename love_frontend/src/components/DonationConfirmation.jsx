@@ -35,7 +35,6 @@ function DonationConfirmation() {
       <Link to="/explore-charities" className="btn btn-secondary">
         Explore More Charities
       </Link>
-      <br />
       <button className="btn btn-primary" onClick={() => navigate('/')}>
         Return Home
       </button>
