@@ -175,7 +175,7 @@ function DonationForm() {
         )}
         {/* Charity Dropdown */}
         <div className="mb-3">
-          <label htmlFor="charity" className="form-label">Select Charity</label>
+          <label htmlFor="charity" className="form-label">Support (Funds go directly to the couple)</label>
           <select
             id="charity"
             className="form-select"
