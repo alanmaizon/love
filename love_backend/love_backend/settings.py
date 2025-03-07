@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 # Debug setting
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,love-backend-8wbj.onrender.com').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
