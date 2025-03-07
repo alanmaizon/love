@@ -64,7 +64,7 @@ function DonationForm() {
     <div className="container mt-5">
       {feedback && <div role="alert" className="alert alert-info">{feedback}</div>}
       <form onSubmit={handleSubmit} noValidate>
-        <h2>Make a Donation</h2>
+        <h2>Make a Gift</h2>
         {/* Donor Name */}
         <div className="mb-3">
           <label htmlFor="donorName" className="form-label">Name</label>
@@ -89,9 +89,9 @@ function DonationForm() {
             required
           />
         </div>
-        {/* Donation Amount Options */}
+        {/* Contribution Amount Options */}
         <div className="mb-3">
-          <label className="form-label">Donation Amount</label>
+          <label className="form-label">Contribution Amount</label>
           <div>
             <div className="form-check form-check-inline">
               <input
@@ -202,7 +202,7 @@ function DonationForm() {
             onChange={(e) => setMessage(e.target.value)}
           />
         </div>
-        <button type="submit" className="btn btn-primary">Donate</button>
+        <button type="submit" className="btn btn-primary">Send Gift</button>
       </form>
     </div>
   );
