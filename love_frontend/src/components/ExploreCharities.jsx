@@ -62,7 +62,7 @@ function ExploreCharities() {
                     state={{ selectedCharity: charity.id }}
                     className="btn btn-primary"
                   >
-                    Donate to {charity.name}
+                    Support {charity.name}
                   </Link>
                 </div>
               </div>
