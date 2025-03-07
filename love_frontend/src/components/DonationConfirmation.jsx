@@ -32,7 +32,7 @@ function DonationConfirmation() {
       <Link to="/payment-instructions" className="btn btn-primary mr-2">
         View Payment Instructions
       </Link>
-      <Link to="/explore-charities" className="btn btn-secondary">
+      <Link to="/charities" className="btn btn-secondary">
         Explore More Charities
       </Link>
       <button className="btn btn-primary" onClick={() => navigate('/')}>
