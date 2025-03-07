@@ -22,13 +22,20 @@ function DonationConfirmation() {
             <li>Amount: ${donation.amount}</li>
             <li>Message: {donation.message || 'No message provided'}</li>
           </ul>
-          <Link to="/payment-instructions" className="btn btn-info">
-            View Payment Instructions
-          </Link>
         </div>
       ) : (
         <p>Your contribution was submitted successfully!</p>
       )}
+      <p>
+        You will receive a confirmation email shortly. If you have any questions, please contact us.
+      </p>
+      <Link to="/payment-instructions" className="btn btn-primary mr-2">
+        View Payment Instructions
+      </Link>
+      <Link to="/explore-charities" className="btn btn-secondary">
+        Explore More Charities
+      </Link>
+      <br />
       <button className="btn btn-primary" onClick={() => navigate('/')}>
         Return Home
       </button>
