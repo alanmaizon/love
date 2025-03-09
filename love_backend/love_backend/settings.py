@@ -31,22 +31,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'donations',
-    'storages',
 ]
-
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'lovethatgivesback-images'
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-1')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
-AWS_DEFAULT_ACL = 'None'
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -161,3 +146,9 @@ LOGGING = {
 SECURE_HSTS_SECONDS = 3600  # or 31536000 for 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
+
+TRUELAYER_CLIENT_ID = env("TRUELAYER_CLIENT_ID")
+TRUELAYER_CLIENT_SECRET = env("TRUELAYER_CLIENT_SECRET")
+TRUELAYER_API_URL = "https://auth.truelayer-sandbox.com"
+TRUELAYER_REDIRECT_URI = "https://lovethatgivesback.com/payment-success"
+TRUELAYER_KID = env("TRUELAYER_KID")

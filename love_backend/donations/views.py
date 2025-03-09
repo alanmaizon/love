@@ -12,7 +12,10 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
 from decimal import Decimal
-
+from django.utils.crypto import get_random_string
+from django.shortcuts import render
+import requests
+from django.conf import settings
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([CsrfExemptSessionAuthentication])
@@ -120,3 +123,101 @@ def donation_analytics(request):
         "donations_count": donations_count,
         "count_per_charity": list(count_per_charity),
     })
+
+def confirm_donation(request):
+    if request.method == "POST":
+        amount = request.POST.get("amount")
+        donor_name = request.POST.get("donor_name")
+        donor_email = request.POST.get("donor_email")
+        selected_charity_ids = request.POST.getlist("charities")
+        selected_charities = Charity.objects.filter(id__in=selected_charity_ids)
+        
+        # Generate a unique reference ID
+        reference_id = f"GIFT-{get_random_string(8).upper()}"
+        
+        # Save the donation (unverified until manually confirmed)
+        donation = Donation.objects.create(
+            donor_name=donor_name,
+            donor_email=donor_email,
+            amount=amount,
+            reference_id=reference_id,
+        )
+        donation.charities.set(selected_charities)
+
+        return render(request, "confirm_donation.html", {
+            "donation": donation,
+            "reference_id": reference_id,
+            "bank_name": "Bank XYZ",
+            "account_number": "12345678",
+            "bank_identifier": "987654"
+        })
+    return render(request, "donation_form.html")
+
+
+def mark_as_paid(request):
+    reference_id = request.POST.get("reference_id")
+
+    donation = Donation.objects.filter(reference_id=reference_id).first()
+    if donation:
+        donation.status = "Pending Confirmation"
+        donation.save()
+        return JsonResponse({"message": "Your payment is being verified."})
+    return JsonResponse({"error": "Invalid Reference ID"}, status=400)
+
+# Load private key from file (or set in ENV variables)
+PRIVATE_KEY_PATH = "private_key.pem"
+with open(PRIVATE_KEY_PATH, "rb") as f:
+    PRIVATE_KEY = f.read()
+
+KID = settings.TRUELAYER_KID  # Your Key ID from TrueLayer Dashboard
+TRUELAYER_API_URL = "https://api.truelayer.com"
+
+def create_truelayer_payment(request):
+    if request.method == "POST":
+        amount = request.POST.get("amount")
+        reference_id = request.POST.get("reference_id")
+
+        if not amount or float(amount) <= 0:
+            return JsonResponse({"error": "Invalid amount"}, status=400)
+
+        idempotency_key = str(uuid.uuid4())  # Ensure unique request ID
+
+        path = "/v3/payments"  # Everything after `truelayer.com`
+        url = f"{TRUELAYER_API_URL}{path}"
+
+        payload = {
+            "amount_in_minor": int(float(amount) * 100),  # Convert to cents
+            "currency": "EUR",
+            "beneficiary": {
+                "type": "merchant_account",
+                "merchant_account_id": settings.TRUELAYER_MERCHANT_ACCOUNT_ID,
+            },
+            "reference": reference_id,
+            "remitter": {"name": "Guest Donor"}
+        }
+
+        # Generate the `Tl-Signature` header
+        tl_signature = truelayer_signing.sign_with_pem(KID, PRIVATE_KEY) \
+            .set_method("POST") \
+            .set_path(path) \
+            .add_header("Idempotency-Key", idempotency_key) \
+            .set_body(json.dumps(payload)) \
+            .sign()
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {settings.TRUELAYER_CLIENT_ID}:{settings.TRUELAYER_CLIENT_SECRET}",
+            "Idempotency-Key": idempotency_key,
+            "Tl-Signature": tl_signature
+        }
+
+        # Make the request to TrueLayer
+        response = requests.post(url, json=payload, headers=headers)
+
+        if response.status_code == 201:
+            payment_link = response.json()["redirect_uri"]
+            return JsonResponse({"payment_link": payment_link})
+        else:
+            return JsonResponse({"error": response.json()}, status=response.status_code)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
