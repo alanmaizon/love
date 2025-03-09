@@ -1,10 +1,10 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 import dj_database_url
+import environ
 
-load_dotenv()  # Load .env variables
-
+env = environ.Env()
+environ.Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -61,7 +61,10 @@ MIDDLEWARE = [
 ]
 
 # For local development, allow all origins or specify from .env
-CORS_ALLOW_ALL_ORIGINS = True
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -135,12 +138,9 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_DOMAIN = "api.lovethatgivesback.com"
 CSRF_COOKIE_DOMAIN = "api.lovethatgivesback.com"
 
-
 # Enable cross-site cookies
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
-
-
 
 LOGGING = {
     'version': 1,
