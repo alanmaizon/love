@@ -71,7 +71,7 @@ else:
         'https://lovethatgivesback.com',
         'https://www.lovethatgivesback.com',
         'https://love-backend-8wbj.onrender.com',
-        'https://love-frontend.onrender.com'
+        'https://love-frontend.onrender.com',
         'https://api.lovethatgivesback.com',
     ]
 
