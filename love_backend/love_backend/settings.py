@@ -16,6 +16,9 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'love-backend-8wbj.onrender.com',
     'api.lovethatgivesback.com',
+    'lovethatgivesback.com',
+    'www.lovethatgivesback.com',
+    'love-frontend.onrender.com',
     'localhost',
     '127.0.0.1',
 ]
