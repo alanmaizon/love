@@ -64,7 +64,13 @@ MIDDLEWARE = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+    CORS_ALLOWED_ORIGINS = [
+        'https://lovethatgivesback.com',
+        'https://www.lovethatgivesback.com',
+        'https://love-backend-8wbj.onrender.com',
+        'https://love-frontend.onrender.com'
+        'https://api.lovethatgivesback.com',
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
 
