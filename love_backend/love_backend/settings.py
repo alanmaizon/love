@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
 # Cloudinary settings
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-MEDIA_URL = 'https://res.cloudinary.com/dnkrfdjzl/'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
