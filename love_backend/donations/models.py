@@ -16,9 +16,6 @@ class Profile(models.Model):
     account_number = models.CharField(max_length=100)
     bank_identifier = models.CharField(max_length=100)
 
-    def __str__(self):
-        return f"{self.user.username}'s Profile"
-
     def get_profile_picture_url(self):
         if self.profile_picture:
             url, options = cloudinary_url(
@@ -27,7 +24,10 @@ class Profile(models.Model):
             )
             return url
         return None
-
+    
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+    
 class Charity(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)

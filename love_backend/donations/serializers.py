@@ -3,6 +3,8 @@ from .models import Profile, Charity, Donation
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    profile_picture_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = [
@@ -12,11 +14,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             'wedding_date', 
             'bio', 
             'location', 
-            'profile_picture', 
+            'profile_picture_url',
             'bank_name', 
             'account_number', 
             'bank_identifier'
         ]
+
+    def get_profile_picture_url(self, obj):
+        return obj.get_profile_picture_url() or ""
 
 
 class CharitySerializer(serializers.ModelSerializer):

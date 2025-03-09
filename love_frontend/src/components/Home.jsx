@@ -53,7 +53,7 @@ function Home() {
         ) : profile && (
           <section className="about-section mt-5 text-center">
             <h2>About the Couple</h2>
-            <img src={profile.profile_picture} alt="Profile" className="img-fluid rounded-circle mb-3" style={{ maxWidth: '150px' }} />
+            <img src={profile.profile_picture_url} alt="Profile" className="img-fluid rounded-circle mb-3" style={{ maxWidth: '150px' }} />
             <p className="fw-bold">{profile.bride_name} &amp; {profile.groom_name}</p>
             <p>{profile.bio || "No bio available."}</p>
             <p><strong>Location:</strong> {profile.location}</p>
