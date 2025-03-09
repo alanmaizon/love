@@ -42,24 +42,25 @@ function Home() {
         </div>
       </section>
 
-      {/* About the Couple Section */}
-      {loadingProfile ? (
-        <div className="text-center mt-4">
-          <div className="spinner-border text-light" role="status"></div>
-          <p>Loading profile...</p>
-        </div>
-      ) : profileError ? (
-        <div className="alert alert-warning text-center mt-4">{profileError}</div>
-      ) : profile && (
-        <section className="about-section mt-5 text-center">
-          <h2>About the Couple</h2>
-          <p className="fw-bold">{profile.bride_name} &amp; {profile.groom_name}</p>
-          <p>{profile.bio || "No bio available."}</p>
-          <p><strong>Location:</strong> {profile.location}</p>
-        </section>
-      )}
+        {/* About the Couple Section */}
+        {loadingProfile ? (
+          <div className="text-center mt-4">
+            <div className="spinner-border text-light" role="status"></div>
+            <p>Loading profile...</p>
+          </div>
+        ) : profileError ? (
+          <div className="alert alert-warning text-center mt-4">{profileError}</div>
+        ) : profile && (
+          <section className="about-section mt-5 text-center">
+            <h2>About the Couple</h2>
+            <img src={profile.profile_picture} alt="Profile" className="img-fluid rounded-circle mb-3" style={{ maxWidth: '150px' }} />
+            <p className="fw-bold">{profile.bride_name} &amp; {profile.groom_name}</p>
+            <p>{profile.bio || "No bio available."}</p>
+            <p><strong>Location:</strong> {profile.location}</p>
+          </section>
+        )}
 
-      {/* Countdown Timer Section */}
+        {/* Countdown Timer Section */}
       <section className="countdown-section mt-5 text-center">
         <h2>Countdown to Our Wedding</h2>
         <CountdownTimer targetDate={weddingDate} />
