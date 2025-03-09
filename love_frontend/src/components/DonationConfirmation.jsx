@@ -1,24 +1,15 @@
+// src/components/DonationConfirmation.jsx
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance';
-import { useState } from 'react';
 
 function DonationConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
   const donation = location.state?.donation;
-  const [truelayerLink, setTruelayerLink] = useState(null);
 
-  const handleTrueLayerPayment = async () => {
-    try {
-      const response = await axiosInstance.post('/create-truelayer-payment/', {
-        amount: donation.amount,
-        reference_id: `GIFT-${donation.id}`
-      });
-      setTruelayerLink(response.data.payment_link);
-    } catch (error) {
-      console.error('Error creating TrueLayer payment:', error);
-    }
-  };
+  // Generate Revolut payment link dynamically
+  const revolutUsername = "alanmaizon"; // Replace with your Revolut handle
+  const revolutPaymentLink = `https://revolut.me/${revolutUsername}?amount=${donation?.amount}&currency=EUR`;
 
   return (
     <div className="container mt-5">
@@ -33,27 +24,14 @@ function DonationConfirmation() {
             <li><strong>Message:</strong> {donation.message || 'No message provided'}</li>
             <li><strong>Reference ID:</strong> GIFT-{donation.id}</li>
           </ul>
+          <p>To complete your gift, click below to pay via Revolut:</p>
 
-          <p><strong>Choose your payment method:</strong></p>
-
-          {truelayerLink ? (
-            <a href={truelayerLink} className="btn btn-success" target="_blank" rel="noopener noreferrer">
-              Pay via Instant Bank Transfer (No Fees)
-            </a>
-          ) : (
-            <button className="btn btn-success" onClick={handleTrueLayerPayment}>
-              Generate Bank Transfer Link
-            </button>
-          )}
-
-          <p className="mt-3">Or</p>
-
-          <a href={`https://revolut.me/alanmaizon?amount=${donation.amount}&currency=EUR`} 
-             className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+          {/* Button linking to Revolut payment */}
+          <a href={revolutPaymentLink} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
             Pay with Revolut
           </a>
 
-          <p className="mt-3">Alternatively, you can manually transfer the amount using the following details:</p>
+          <p>Alternatively, you can manually transfer the amount using the following details:</p>
           <ul>
             <li><strong>Bank:</strong> Bank XYZ</li>
             <li><strong>Account Number:</strong> 12345678</li>
