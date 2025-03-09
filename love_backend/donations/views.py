@@ -16,6 +16,8 @@ from django.utils.crypto import get_random_string
 from django.shortcuts import render
 import requests
 from django.conf import settings
+import truelayer_signing
+import uuid
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([CsrfExemptSessionAuthentication])
@@ -165,7 +167,7 @@ def mark_as_paid(request):
     return JsonResponse({"error": "Invalid Reference ID"}, status=400)
 
 # Load private key from file (or set in ENV variables)
-PRIVATE_KEY_PATH = "private_key.pem"
+PRIVATE_KEY_PATH = settings.TRUELAYER_PRIVATE_KEY_PATH
 with open(PRIVATE_KEY_PATH, "rb") as f:
     PRIVATE_KEY = f.read()
 

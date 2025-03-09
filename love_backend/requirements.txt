@@ -24,3 +24,6 @@ gunicorn==20.1.0
 whitenoise==6.0.0
 cloudinary 
 django-cloudinary-storage
+boto3
+django-storages
+truelayer_signing

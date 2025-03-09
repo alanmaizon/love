@@ -152,3 +152,4 @@ TRUELAYER_CLIENT_SECRET = env("TRUELAYER_CLIENT_SECRET")
 TRUELAYER_API_URL = "https://auth.truelayer-sandbox.com"
 TRUELAYER_REDIRECT_URI = "https://lovethatgivesback.com/payment-success"
 TRUELAYER_KID = env("TRUELAYER_KID")
+TRUELAYER_PRIVATE_KEY_PATH = env("TRUELAYER_PRIVATE_KEY_PATH").replace("\\n", "\n")

@@ -26,3 +26,4 @@ cloudinary
 django-cloudinary-storage
 boto3
 django-storages
+truelayer_signing
