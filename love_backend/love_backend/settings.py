@@ -14,10 +14,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    'https://love-backend-8wbj.onrender.com',
-    'https://api.lovethatgivesback.com',
-    'https://love-frontend.onrender.com',
-    'https://lovethatgivesback.com',
+    'love-backend-8wbj.onrender.com',
+    'api.lovethatgivesback.com',
+    'love-frontend.onrender.com',
+    'lovethatgivesback.com',
 ]
 
 # Application definition
