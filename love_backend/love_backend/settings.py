@@ -1,10 +1,10 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 import dj_database_url
-import environ
 
-env = environ.Env()
-environ.Env.read_env()
+load_dotenv()  # Load .env variables
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -16,8 +16,8 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'love-backend-8wbj.onrender.com',
     'api.lovethatgivesback.com',
-    'love-frontend.onrender.com',
-    'lovethatgivesback.com',
+    'localhost',
+    '127.0.0.1',
 ]
 
 # Application definition
@@ -31,7 +31,22 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'donations',
+    'storages',
 ]
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'lovethatgivesback-images'
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-1')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_DEFAULT_ACL = 'None'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -49,12 +64,7 @@ MIDDLEWARE = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = [
-        'https://love-backend-8wbj.onrender.com',
-        'https://api.lovethatgivesback.com',
-        'https://love-frontend.onrender.com',
-        'https://lovethatgivesback.com',
-    ]
+    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -128,9 +138,12 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_DOMAIN = "api.lovethatgivesback.com"
 CSRF_COOKIE_DOMAIN = "api.lovethatgivesback.com"
 
+
 # Enable cross-site cookies
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
+
+
 
 LOGGING = {
     'version': 1,
@@ -151,11 +164,3 @@ LOGGING = {
 SECURE_HSTS_SECONDS = 3600  # or 31536000 for 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')  
-AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
