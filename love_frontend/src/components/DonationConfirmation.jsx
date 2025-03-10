@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance'; // Make sure to import this
+import axiosInstance from '../api/axiosInstance';
 
 function DonationConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
   const donation = location.state?.donation;
-
-  // State for bank info and loading state
+  const isCustomAmount = location.state?.isCustomAmount || false;
   const [bankInfo, setBankInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,17 +22,24 @@ function DonationConfirmation() {
       });
   }, []);
 
-  // If data is still loading, show a placeholder
   if (loading) {
     return <div>Loading payment instructions...</div>;
   }
-  // Revolut Checkout Payment Link (Replace with your actual link)
-  const revolutBaseURL = "https://checkout.revolut.com/pay/b4b564f7-56ab-4a96-bfde-35277a0a7d7b";
 
-  // Generate payment link dynamically with amount and Gift ID
-  const revolutPaymentLink = donation
-    ? `${revolutBaseURL}?amount=${donation.amount}&currency=EUR&description=GIFT-${donation.id}`
-    : "#";
+  // Preset Revolut links
+  const revolutLinks = {
+    "10": "https://checkout.revolut.com/pay/91fe7cf9-ca92-41fd-9a52-00ed6c7e5a97",
+    "20": "https://checkout.revolut.com/pay/0be0f6d5-9ded-4b17-b303-04070476dc55",
+    "50": "https://checkout.revolut.com/pay/0b8c3ee5-7e4e-4fda-80f3-73a6c87c2ea5",
+    "100": "https://checkout.revolut.com/pay/8761b44b-a67d-4b73-a153-ba33e36ceeff",
+  };
+
+  // Link for custom amounts
+  const customRevolutPaymentLink = "https://checkout.revolut.com/pay/custom-amount-link";
+
+  const revolutPaymentLink = donation && !isCustomAmount
+    ? revolutLinks[donation.amount] || customRevolutPaymentLink
+    : customRevolutPaymentLink;
 
   return (
     <div className="container mt-5">
@@ -48,20 +54,50 @@ function DonationConfirmation() {
             <li><strong>Message:</strong> {donation.message || 'No message provided'}</li>
             <li><strong>Reference ID:</strong> GIFT-{donation.id}</li>
           </ul>
-          <a
-            href={revolutPaymentLink}
-            className="btn btn-primary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Pay with Revolut
-          </a>
+
+          {donation.skipCharity ? (
+            <>
+              <p>Your donation will be allocated as follows:</p>
+              <ul>
+                <li><strong>50% (€{(donation.amount * 0.5).toFixed(2)})</strong> evenly split among all supported charities.</li>
+                <li><strong>50% (€{(donation.amount * 0.5).toFixed(2)})</strong> directly supports the wedding couple.</li>
+              </ul>
+            </>
+          ) : (
+            <>
+              <p>Your donation will fully support the selected charity.</p>
+              <p><strong>Charity Name:</strong> {donation.charity_name || 'Selected Charity'}</p>
+            </>
+          )}
+
+          <p><strong>To complete your gift, click below to pay via Revolut:</strong></p>
+          {isCustomAmount ? (
+            <>
+              <p>Please manually enter the amount (€{donation.amount}) and the reference below:</p>
+              <a href={customRevolutPaymentLink} className="btn btn-warning" target="_blank" rel="noopener noreferrer">
+                Pay Custom Amount via Revolut
+              </a>
+            </>
+          ) : (
+            <a href={revolutPaymentLink} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+              Pay with Revolut (€{donation.amount})
+            </a>
+          )}
+
+          <div className="alert alert-info mt-3">
+            <strong>Important:</strong> Use the reference ID below in your Revolut payment notes.<br />
+            <strong>Reference ID:</strong> GIFT-{donation.id}
+            <button onClick={() => navigator.clipboard.writeText(`GIFT-${donation.id}`)} className="btn btn-sm btn-outline-secondary ms-2">
+              Copy
+            </button>
+          </div>
+
           <hr />
-          <p>Don't have Revolut? No problem!</p>
-          <p>Alternatively, you can manually transfer the amount using the following details:</p>
+          <p>Alternatively, manually transfer the amount using these details:</p>
           <ul>
-            <li><strong>Bank:</strong> {bankInfo ? bankInfo.bank_name : 'N/A'}</li>
-            <li><strong>Account Number:</strong> {bankInfo ? bankInfo.account_number : 'N/A'}</li>
+            <li><strong>Bank:</strong> {bankInfo.bank_name || 'N/A'}</li>
+            <li><strong>Account Number:</strong> {bankInfo.account_number || 'N/A'}</li>
+            <li><strong>Routing Number:</strong> {bankInfo.bank_identifier || 'N/A'}</li>
             <li><strong>Reference:</strong> GIFT-{donation.id}</li>
           </ul>
         </>
@@ -71,8 +107,7 @@ function DonationConfirmation() {
       <button className="btn btn-secondary mt-3" onClick={() => navigate('/')}>
         Return Home
       </button>
-
-      </div>
+    </div>
   );
 }
 
