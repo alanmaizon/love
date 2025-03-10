@@ -46,14 +46,7 @@ function DonationConfirmation() {
           </ul>
           <p>To complete your gift, click below to pay via Revolut:</p>
 
-          <a
-            href={revolutPaymentLink}
-            className="btn btn-primary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Pay with Revolut
-          </a>
+
 
           <br />
           <p>Alternatively, you can manually transfer the amount using the following details:</p>
@@ -70,7 +63,15 @@ function DonationConfirmation() {
       <button className="btn btn-secondary mt-3" onClick={() => navigate('/')}>
         Return Home
       </button>
-    </div>
+      <a
+        href={revolutPaymentLink}
+        className="btn btn-primary"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Pay with Revolut
+      </a>
+      </div>
   );
 }
 
