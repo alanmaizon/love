@@ -11,20 +11,25 @@ class Profile(models.Model):
     wedding_date = models.DateField()
     bio = models.TextField(blank=True)
     location = models.CharField(max_length=255)
-    profile_picture = CloudinaryField('image', blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures',
+        storage=MediaCloudinaryStorage(),
+        blank=True,
+        null=True
+    )
     bank_name = models.CharField(max_length=255)
     account_number = models.CharField(max_length=100)
-    revolut_username = models.CharField(max_length=255, blank=True, null=True)
+    revolut_username = models.CharField(max_length=255, default="alanmaizon")
 
     def get_profile_picture_url(self):
         if self.profile_picture:
             url, options = cloudinary_url(
-                self.profile_picture.public_id,
+                self.profile_picture.name,
                 width=300, height=300, crop="fill"
             )
             return url
         return None
-    
+
     def __str__(self):
         return f"{self.user.username}'s Profile"
     
