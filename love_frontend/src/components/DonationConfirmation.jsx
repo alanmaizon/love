@@ -27,10 +27,13 @@ function DonationConfirmation() {
   if (loading) {
     return <div>Loading payment instructions...</div>;
   }
+  // Revolut Checkout Payment Link (Replace with your actual link)
+  const revolutBaseURL = "https://checkout.revolut.com/pay/b4b564f7-56ab-4a96-bfde-35277a0a7d7b";
 
-  // Generate Revolut payment link dynamically
-  const revolutUsername = "alanmaizon"; 
-  const revolutPaymentLink = `https://revolut.me/${revolutUsername}?amount=${donation?.amount}&currency=EUR`;
+  // Generate payment link dynamically with amount and Gift ID
+  const revolutPaymentLink = donation
+    ? `${revolutBaseURL}?amount=${donation.amount}&currency=EUR&description=GIFT-${donation.id}`
+    : "#";
 
   return (
     <div className="container mt-5">
@@ -43,8 +46,8 @@ function DonationConfirmation() {
             <li><strong>Email:</strong> {donation.donor_email}</li>
             <li><strong>Amount:</strong> €{donation.amount}</li>
             <li><strong>Message:</strong> {donation.message || 'No message provided'}</li>
+            <li><strong>Reference ID:</strong> GIFT-{donation.id}</li>
           </ul>
-          <p>To complete your gift, click below to pay via Revolut:</p>
           <a
             href={revolutPaymentLink}
             className="btn btn-primary"
