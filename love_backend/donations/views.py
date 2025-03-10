@@ -178,11 +178,17 @@ def create_donation(request):
         data = request.data.copy()
         amount = float(data.get("amount", 0))
         skip_charity = data.get("skipCharity") in ["true", True, "1"]
+        selected_charity_id = data.get("charity")
 
         # Validate amount
         if amount <= 0:
             return JsonResponse({"error": "Invalid donation amount"}, status=400)
 
+        # Ensure a charity is assigned (if skipCharity = true, assign all charities)
+        if not selected_charity_id and not skip_charity:
+            return JsonResponse({"error": "A charity must be selected unless you choose to skip."}, status=400)
+
+        # Create the donation entry
         serializer = DonationSerializer(data=data, context={'request': request})
 
         if serializer.is_valid():
@@ -195,6 +201,15 @@ def create_donation(request):
                     per_charity_amount = (donation.amount * 0.5) / all_charities.count()
                     for charity in all_charities:
                         donation.charities.add(charity, through_defaults={"amount": per_charity_amount})
+                else:
+                    return JsonResponse({"error": "No available charities to allocate funds."}, status=400)
+            else:
+                # Assign the selected charity
+                try:
+                    selected_charity = Charity.objects.get(id=selected_charity_id)
+                    donation.charities.add(selected_charity)
+                except Charity.DoesNotExist:
+                    return JsonResponse({"error": "Selected charity not found"}, status=400)
 
             return JsonResponse({"message": "Donation successful!", "donation_id": donation.id}, status=201)
 
