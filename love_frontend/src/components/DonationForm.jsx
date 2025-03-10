@@ -104,7 +104,7 @@ function DonationForm() {
                 checked={selectedAmount === "10"}
                 onChange={(e) => setSelectedAmount(e.target.value)}
               />
-              <label className="form-check-label" htmlFor="amount-10">$10</label>
+              <label className="form-check-label" htmlFor="amount-10">€10</label>
             </div>
             <div className="form-check form-check-inline">
               <input
@@ -117,7 +117,7 @@ function DonationForm() {
                 checked={selectedAmount === "20"}
                 onChange={(e) => setSelectedAmount(e.target.value)}
               />
-              <label className="form-check-label" htmlFor="amount-20">$20</label>
+              <label className="form-check-label" htmlFor="amount-20">€20</label>
             </div>
             <div className="form-check form-check-inline">
               <input
@@ -130,7 +130,7 @@ function DonationForm() {
                 checked={selectedAmount === "50"}
                 onChange={(e) => setSelectedAmount(e.target.value)}
               />
-              <label className="form-check-label" htmlFor="amount-50">$50</label>
+              <label className="form-check-label" htmlFor="amount-50">€50</label>
             </div>
             <div className="form-check form-check-inline">
               <input
@@ -143,7 +143,7 @@ function DonationForm() {
                 checked={selectedAmount === "100"}
                 onChange={(e) => setSelectedAmount(e.target.value)}
               />
-              <label className="form-check-label" htmlFor="amount-100">$100</label>
+              <label className="form-check-label" htmlFor="amount-100">€100</label>
             </div>
             <div className="form-check form-check-inline">
               <input
@@ -175,7 +175,7 @@ function DonationForm() {
         )}
         {/* Charity Dropdown */}
         <div className="mb-3">
-          <label htmlFor="charity" className="form-label">Support (Funds go directly to the couple)</label>
+          <label htmlFor="charity" className="form-label">Select one charity</label>
           <select
             id="charity"
             className="form-select"
