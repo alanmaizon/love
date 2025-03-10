@@ -6,11 +6,10 @@ html, body, #root {
   width: 100%;
   overflow-x: hidden; /* Prevents horizontal scrolling */
   background-color: #5A3E2B; /* Medium Brown */
-  background-image: url('../public/vertical-flower.svg'), url('../public/horizontal-flower.svg');
-  background-repeat: no-repeat, no-repeat;
-  background-position: bottom left, top right;
-  opacity: 0.3;
-  background-size: contain, contain;
+  background-image: url('../public/background.jpg'), url('../public/vertical-flower.svg'), url('../public/horizontal-flower.svg');
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center center, bottom left, top right;
+  background-size: cover, contain, contain;
   color: #EAD7BB; /* Soft Beige */
   font-family: 'Poppins', sans-serif;
 }
