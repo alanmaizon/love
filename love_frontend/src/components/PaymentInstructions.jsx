@@ -35,7 +35,7 @@ function PaymentInstructions() {
         <li><strong>Bank:</strong> {bankInfo ? bankInfo.bank_name : 'N/A'}</li>
         <li><strong>Account Number:</strong> {bankInfo ? bankInfo.account_number : 'N/A'}</li>
         <li><strong>Routing Number:</strong> {bankInfo ? bankInfo.bank_identifier : 'N/A'}</li>
-        <li><strong>Reference:</strong> Your Gift ID (provided in your confirmation email)</li>
+        <li><strong>Reference:</strong> GIFT-{donation.id}</li>
       </ul>
       <p>
         Once your payment is received, your message will be posted. If you have any questions, please contact us.

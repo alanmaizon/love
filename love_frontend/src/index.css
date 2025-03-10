@@ -6,6 +6,10 @@ html, body, #root {
   width: 100%;
   overflow-x: hidden; /* Prevents horizontal scrolling */
   background-color: #5A3E2B; /* Medium Brown */
+  background-image: url('../public/horizontal-flower.svg'), url('../public/vertical-flower.svg');
+  background-repeat: no-repeat, no-repeat;
+  background-position: bottom left, top right;
+  background-size: contain, contain;
   color: #EAD7BB; /* Soft Beige */
   font-family: 'Poppins', sans-serif;
 }
