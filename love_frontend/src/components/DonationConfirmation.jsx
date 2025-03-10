@@ -53,7 +53,8 @@ function DonationConfirmation() {
           >
             Pay with Revolut
           </a>
-          <br></br>
+          <hr />
+          <p>Don't have Revolut? No problem!</p>
           <p>Alternatively, you can manually transfer the amount using the following details:</p>
           <ul>
             <li><strong>Bank:</strong> {bankInfo ? bankInfo.bank_name : 'N/A'}</li>
