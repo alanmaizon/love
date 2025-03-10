@@ -14,7 +14,7 @@ class Profile(models.Model):
     profile_picture = CloudinaryField('image', blank=True, null=True)
     bank_name = models.CharField(max_length=255)
     account_number = models.CharField(max_length=100)
-    bank_identifier = models.CharField(max_length=100)
+    revolut_username = models.CharField(max_length=255, blank=True, null=True)
 
     def get_profile_picture_url(self):
         if self.profile_picture:

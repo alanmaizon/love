@@ -17,7 +17,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'profile_picture_url',
             'bank_name', 
             'account_number', 
-            'bank_identifier'
+            'revolut_username',
         ]
 
     def get_profile_picture_url(self, obj):
