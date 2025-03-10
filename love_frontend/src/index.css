@@ -176,6 +176,7 @@ form .form-group {
   background-repeat: no-repeat;
   background-position: center top;
   background-size: contain;
+  padding: 50px 0; /* Adjust padding as needed */
 }
 
 /* 🎨 Responsive Fixes */

@@ -31,8 +31,8 @@ function Home() {
   return (
     <div className="container mt-5">
         {/* Hero Section */}
-        <div className="hero-image"></div>
-        <div className="hero-overlay"></div>
+        <section className="hero-image">
+        </section>
         <section className="hero-section text-center">
           <h1 className="display-4">Welcome to Our Wedding</h1>
           <p className="lead">
