@@ -32,8 +32,8 @@ function Home() {
     <div className="container mt-5">
       {/* Hero Section */}
       <section className="hero-section text-center">
-        <h1 className="fw-bold">LOVE</h1>
-        <h5 className="lead">THAT GIVES BACK</h5>
+        <img src="../public/hero.png" alt="Wedding" className="img-fluid rounded mb-3" />
+        <h1 className="display-4">Welcome to Our Wedding</h1>
         <p className="lead">
           Contribute to our wedding gift fund supporting meaningful causes we love.
         </p>
