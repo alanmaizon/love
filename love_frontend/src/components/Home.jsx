@@ -31,7 +31,7 @@ function Home() {
   return (
     <div className="container mt-5">
         {/* Hero Section */}
-        <div className="hero-image mb-3"></div>
+        <section className="hero-image"></section>
         <section className="hero-section text-center">
         <p className="lead">
             Contribute to our wedding gift fund supporting meaningful causes we love.
