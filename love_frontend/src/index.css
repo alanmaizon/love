@@ -167,12 +167,12 @@ form .form-group {
 .hero-section {
   padding: 50px 0; /* Adjust padding as needed */
   color: #EAD7BB; /* Soft Beige */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .hero-image {
-  width: 100%;
+  padding: 50px 0; /* Adjust padding as needed */
   background-image: url('../public/hero.png');
+  background-color: #EAD7BB; /* Soft Beige */
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
