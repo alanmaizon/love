@@ -164,6 +164,17 @@ form .form-group {
   padding-bottom: 50px !important;
 }
 
+/* 🎨 Hero Section */
+.hero-section {
+  background-color: #56443f; /* Dark Brown */
+  background-image: url('../public/hero.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  padding: 50px 0; /* Adjust padding as needed */
+  color: #EAD7BB; /* Soft Beige */
+}
+
 /* 🎨 Responsive Fixes */
 @media (max-width: 768px) {
   .navbar {

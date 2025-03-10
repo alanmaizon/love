@@ -30,19 +30,17 @@ function Home() {
 
   return (
     <div className="container mt-5">
-      {/* Hero Section */}
-      <section className="hero-section text-center">
-        <img src="../public/hero.png" alt="Wedding" className="img-fluid rounded mb-3" />
-        <h1 className="display-4">Welcome to Our Wedding</h1>
-        <p className="lead">
-          Contribute to our wedding gift fund supporting meaningful causes we love.
-        </p>
-        <div className="hero-buttons mt-3">
-          <Link to="/donate" className="btn btn-primary me-2">Gift Contribution</Link>
-          <Link to="/charities" className="btn btn-secondary">Explore Charities</Link>
-        </div>
-      </section>
-
+        {/* Hero Section */}
+        <section className="hero-section text-center">
+          <h1 className="display-4">Welcome to Our Wedding</h1>
+          <p className="lead">
+            Contribute to our wedding gift fund supporting meaningful causes we love.
+          </p>
+          <div className="hero-buttons mt-3">
+            <Link to="/donate" className="btn btn-primary me-2">Gift Contribution</Link>
+            <Link to="/charities" className="btn btn-secondary">Explore Charities</Link>
+          </div>
+        </section>
         {/* About the Couple Section */}
         {loadingProfile ? (
           <div className="text-center mt-4">
@@ -62,26 +60,26 @@ function Home() {
         )}
 
         {/* Countdown Timer Section */}
-      <section className="countdown-section mt-5 text-center">
-        <h2>Countdown to Our Wedding</h2>
-        <CountdownTimer targetDate={weddingDate} />
-      </section>
-
-      {/* Live Charity Stats Section */}
-      {loadingAnalytics ? (
-        <div className="text-center mt-4">
-          <div className="spinner-border text-light" role="status"></div>
-          <p>Loading statistics...</p>
-        </div>
-      ) : analyticsError ? (
-        <div className="alert alert-danger text-center mt-4">{analyticsError}</div>
-      ) : (
-        <section className="stats-section mt-5 text-center">
-          <h2>Live Contribution</h2>
-          <p><strong>Total Contributions:</strong> €{analytics.total_amount.toLocaleString()}</p>
-          <p><strong>Participation Count:</strong> {analytics.donations_count.toLocaleString()}</p>
+        <section className="countdown-section mt-5 text-center">
+          <h2>Countdown to Our Wedding</h2>
+          <CountdownTimer targetDate={weddingDate} />
         </section>
-      )}
+
+        {/* Live Charity Stats Section */}
+        {loadingAnalytics ? (
+          <div className="text-center mt-4">
+            <div className="spinner-border text-light" role="status"></div>
+            <p>Loading statistics...</p>
+          </div>
+        ) : analyticsError ? (
+          <div className="alert alert-danger text-center mt-4">{analyticsError}</div>
+        ) : (
+          <section className="stats-section mt-5 text-center">
+            <h2>Live Contribution</h2>
+            <p><strong>Total Contributions:</strong> €{analytics.total_amount.toLocaleString()}</p>
+            <p><strong>Participation Count:</strong> {analytics.donations_count.toLocaleString()}</p>
+          </section>
+        )}
     </div>
   );
 }
