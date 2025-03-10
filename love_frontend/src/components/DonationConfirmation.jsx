@@ -1,13 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance'; // Make sure to import this
+import axiosInstance from '../api/axiosInstance';
 
 function DonationConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
   const donation = location.state?.donation;
 
-  // State for bank info and loading state
+  // State for fetching bank details from the public profile
   const [bankInfo, setBankInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,18 +24,19 @@ function DonationConfirmation() {
       });
   }, []);
 
-  // If data is still loading, show a placeholder
   if (loading) {
     return <div>Loading payment instructions...</div>;
   }
 
-  // Allowed preset amounts
-  const allowedAmounts = ["10", "20", "50", "100"];
+  // Define preset allowed amounts and check if the donation matches one of them
+  const allowedAmounts = [10, 20, 50, 100];
+  const donationAmount = parseFloat(donation.amount);
+  const isPreset = allowedAmounts.includes(donationAmount);
 
-  // Determine the payment link only if a preset is selected
-  const revolutUsername = "alanmaizon"; // Ideally, fetch this dynamically from the profile data.
-  const paymentLink = allowedAmounts.includes(selectedAmount)
-    ? `https://revolut.me/${revolutUsername}?amount=${selectedAmount}&currency=EUR`
+  // Use the Revolut username (ideally fetched dynamically, here hardcoded for demonstration)
+  const revolutUsername = "alanmaizon";
+  const revolutPaymentLink = isPreset 
+    ? `https://revolut.me/${revolutUsername}?amount=${donationAmount}&currency=EUR` 
     : null;
 
   return (
@@ -49,25 +51,24 @@ function DonationConfirmation() {
             <li><strong>Amount:</strong> €{donation.amount}</li>
             <li><strong>Message:</strong> {donation.message || 'No message provided'}</li>
           </ul>
-          <p>To complete your gift, click below to pay via Revolut:</p>
-          {paymentLink ? (
-            <div className="mt-2">
+          {isPreset ? (
+            <>
+              <p>To complete your gift, click below to pay via Revolut:</p>
               <a
-                href={paymentLink}
+                href={revolutPaymentLink}
+                className="btn btn-primary"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-info"
               >
-                Pay €{selectedAmount} with Revolut
+                Pay with Revolut
               </a>
+            </>
+          ) : (
+            <div className="alert alert-warning mt-3">
+              Your donation amount is not pre-configured for automatic payment. Please complete the payment manually in your Revolut app.
             </div>
-          ) : selectedAmount === "custom" ? (
-            <div className="mt-2 alert alert-warning">
-              For custom amounts, please complete the payment manually in your Revolut app.
-            </div>
-          ) : null}
+          )}
           <hr />
-          <p>Don't have Revolut? No problem!</p>
           <p>Alternatively, you can manually transfer the amount using the following details:</p>
           <ul>
             <li><strong>Bank:</strong> {bankInfo ? bankInfo.bank_name : 'N/A'}</li>
@@ -81,8 +82,7 @@ function DonationConfirmation() {
       <button className="btn btn-secondary mt-3" onClick={() => navigate('/')}>
         Return Home
       </button>
-
-      </div>
+    </div>
   );
 }
 
