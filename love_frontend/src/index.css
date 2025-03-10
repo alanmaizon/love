@@ -175,6 +175,7 @@ form .form-group {
   background-repeat: no-repeat, no-repeat;
   background-position: center center, center center;
   background-size: cover, contain;
+  background-blend-mode: overlay; /* Ensure hero image is on a higher layer */
   border-radius: 5px;
 }
 
