@@ -50,7 +50,7 @@ function DonationConfirmation() {
           <p>Thank you, your gift has been submitted!</p>
           <p>Your donation will be allocated as follows:</p>
           <ul>
-            <li><strong>50% (€{(donation.amount * 0.5).toFixed(2)})</strong> evenly split among all supported charities.</li>
+            <li><strong>50% (€{(donation.amount * 0.5).toFixed(2)})</strong> supports {donation.charity_name}</li>
             <li><strong>50% (€{(donation.amount * 0.5).toFixed(2)})</strong> directly supports the wedding couple.</li>
           </ul>
           <p>Your generosity is greatly appreciated!</p>
