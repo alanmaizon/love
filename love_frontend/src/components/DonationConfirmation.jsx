@@ -28,9 +28,14 @@ function DonationConfirmation() {
     return <div>Loading payment instructions...</div>;
   }
 
-  // Generate Revolut payment link dynamically
-  const revolutUsername = "alanmaizon"; 
-  const revolutPaymentLink = `https://revolut.me/${revolutUsername}?amount=${donation?.amount}&currency=EUR`;
+  // Allowed preset amounts
+  const allowedAmounts = ["10", "20", "50", "100"];
+
+  // Determine the payment link only if a preset is selected
+  const revolutUsername = "alanmaizon"; // Ideally, fetch this dynamically from the profile data.
+  const paymentLink = allowedAmounts.includes(selectedAmount)
+    ? `https://revolut.me/${revolutUsername}?amount=${selectedAmount}&currency=EUR`
+    : null;
 
   return (
     <div className="container mt-5">
@@ -45,14 +50,22 @@ function DonationConfirmation() {
             <li><strong>Message:</strong> {donation.message || 'No message provided'}</li>
           </ul>
           <p>To complete your gift, click below to pay via Revolut:</p>
-          <a
-            href={revolutPaymentLink}
-            className="btn btn-primary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Pay with Revolut
-          </a>
+          {paymentLink ? (
+            <div className="mt-2">
+              <a
+                href={paymentLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-info"
+              >
+                Pay €{selectedAmount} with Revolut
+              </a>
+            </div>
+          ) : selectedAmount === "custom" ? (
+            <div className="mt-2 alert alert-warning">
+              For custom amounts, please complete the payment manually in your Revolut app.
+            </div>
+          ) : null}
           <hr />
           <p>Don't have Revolut? No problem!</p>
           <p>Alternatively, you can manually transfer the amount using the following details:</p>
