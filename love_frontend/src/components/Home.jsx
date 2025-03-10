@@ -32,7 +32,8 @@ function Home() {
     <div className="container mt-5">
       {/* Hero Section */}
       <section className="hero-section text-center">
-        <h1 className="fw-bold">Love That Gives Back</h1>
+        <h1 className="fw-bold">LOVE</h1>
+        <h5 className="lead">THAT GIVES BACK</h5>
         <p className="lead">
           Contribute to our wedding gift fund supporting meaningful causes we love.
         </p>
