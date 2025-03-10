@@ -13,7 +13,6 @@ import AddCharity from './components/AddCharity';
 import ManageCharities from './components/ManageCharities';
 import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
-import PaymentInstructions from './components/PaymentInstructions';
 import PrivateRoute from './components/PrivateRoute';
 
 function Header() {
@@ -108,7 +107,6 @@ function App() {
             <Route path="/dashboard/charities" element={<PrivateRoute><ManageCharities /></PrivateRoute>} />
             <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
-            <Route path="/payment-instructions" element={<PaymentInstructions />} />
           </Routes>
         </main>
         <Footer />
