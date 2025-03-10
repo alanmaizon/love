@@ -19,7 +19,7 @@ class Profile(models.Model):
     def get_profile_picture_url(self):
         if self.profile_picture:
             url, options = cloudinary_url(
-                self.profile_picture.name,
+                self.profile_picture.public_id,
                 width=300, height=300, crop="fill"
             )
             return url
