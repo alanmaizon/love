@@ -1,45 +1,39 @@
-/* 🎨 General Reset */
-html, body, #root {
+html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   overflow-x: hidden;
-  background-color: #5A3E2B;
-  /* Keep only the horizontal flower as a background image on the main element */
-  background-image: url('../public/horizontal-flower.svg');
-  background-repeat: no-repeat;
-  background-position: bottom left;
-  background-size: contain;
-  color: #EAD7BB;
-  font-family: 'Poppins', sans-serif;
-  position: relative; /* Needed for positioning the pseudo-element */
 }
-
-/* Use a pseudo-element for the vertical flower that will be rotated */
-html, body, #root::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  /* Adjust width and height to control the size of the image */
-  width: 200px;
-  height: 200px;
-  background-image: url('../public/vertical-flower.svg');
-  background-repeat: no-repeat;
-  background-size: contain;
-  /* Rotate the image 45 degrees clockwise */
-  transform: rotate(45deg);
-  transform-origin: center;
-  /* Optional: adjust positioning if needed */
-}
-
 
 /* 🎨 Root Container */
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative; /* Required for absolute positioning of the pseudo-element */
+  background-color: #5A3E2B;
+  /* Optional: If you also want a second background image for the horizontal flower */
+  background-image: url('../public/horizontal-flower.svg');
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  background-size: contain;
+}
+
+/* Pseudo-element for the rotated vertical flower */
+#root::before {
+  content: "";
+  position: absolute;
+  top: 0;      /* Adjust as needed */
+  right: 0;    /* Adjust as needed */
+  width: 200px;  /* Adjust size as needed */
+  height: 200px; /* Adjust size as needed */
+  background-image: url('../public/vertical-flower.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: rotate(45deg); /* Rotate 45° clockwise */
+  transform-origin: center;
+  pointer-events: none; /* So it doesn't block clicks on underlying elements */
 }
 
 /* 🎨 Header */
