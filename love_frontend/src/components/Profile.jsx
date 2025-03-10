@@ -1,4 +1,3 @@
-// src/components/Profile.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
@@ -13,7 +12,7 @@ function Profile() {
     profile_picture: '',
     bank_name: '',
     account_number: '',
-    bank_identifier: '',
+    revolut_username: '', // Updated key
   });
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(true);
@@ -28,7 +27,6 @@ function Profile() {
       })
       .catch(error => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            // Not authenticated, redirect to home
             navigate('/');
         } else {
           setFeedback('Error fetching profile data.');
@@ -47,7 +45,6 @@ function Profile() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Use FormData to support file upload
     const formData = new FormData();
     formData.append('bride_name', profile.bride_name);
     formData.append('groom_name', profile.groom_name);
@@ -56,19 +53,16 @@ function Profile() {
     formData.append('location', profile.location);
     formData.append('bank_name', profile.bank_name);
     formData.append('account_number', profile.account_number);
-    formData.append('bank_identifier', profile.bank_identifier);
+    formData.append('revolut_username', profile.revolut_username);
     if (profile.profile_picture instanceof File) {
       formData.append('profile_picture', profile.profile_picture);
     }
     axiosInstance.put('/profile/', formData, {
       withCredentials: true,
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
       .then(response => {
         setFeedback('Profile updated successfully!');
-        // After a short delay, redirect back to the home page
         setTimeout(() => navigate('/'), 1500);
       })
       .catch(error => {
@@ -83,6 +77,15 @@ function Profile() {
   return (
     <div className="container mt-5">
       {feedback && <div className="alert alert-info">{feedback}</div>}
+      {/* Display current profile picture */}
+      {profile.profile_picture_url && (
+        <img
+          src={profile.profile_picture_url}
+          alt="Profile"
+          className="img-fluid rounded-circle mb-3"
+          style={{ maxWidth: '150px' }}
+        />
+      )}
       <form onSubmit={handleSubmit}>
         <h2>Edit Profile</h2>
         <div className="mb-3">
@@ -178,13 +181,13 @@ function Profile() {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="bank_identifier" className="form-label">Bank Identifier</label>
+          <label htmlFor="revolut_username" className="form-label">Revolut Username</label>
           <input 
             type="text" 
-            id="bank_identifier" 
-            name="bank_identifier" 
+            id="revolut_username" 
+            name="revolut_username" 
             className="form-control" 
-            value={profile.bank_identifier} 
+            value={profile.revolut_username} 
             onChange={handleChange} 
             required 
           />
