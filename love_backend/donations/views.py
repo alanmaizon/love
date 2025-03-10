@@ -13,8 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
 from decimal import Decimal
 from django.utils.crypto import get_random_string
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 
 
 @api_view(['GET', 'PUT'])
@@ -163,68 +162,3 @@ def mark_as_paid(request):
         donation.save()
         return JsonResponse({"message": "Your payment is being verified."})
     return JsonResponse({"error": "Invalid Reference ID"}, status=400)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])  # Allows guest donations without authentication
-def create_donation(request):
-    """
-    Handle donation creation.
-    - If a user selects a charity, 100% goes to that charity.
-    - If no charity is selected (`skipCharity = true`), 50% is evenly split among all charities.
-    - The remaining 50% goes to the couple.
-    """
-    try:
-        data = request.data.copy()
-        amount = float(data.get("amount", 0))
-        skip_charity = data.get("skipCharity") in ["true", True, "1"]
-        selected_charity_id = data.get("charity")
-
-        # Validate amount
-        if amount <= 0:
-            return JsonResponse({"error": "Invalid donation amount"}, status=400)
-
-        # Ensure a charity is assigned (if skipCharity = true, assign all charities)
-        if not selected_charity_id and not skip_charity:
-            return JsonResponse({"error": "A charity must be selected unless you choose to skip."}, status=400)
-
-        # Create the donation entry
-        serializer = DonationSerializer(data=data, context={'request': request})
-
-        if serializer.is_valid():
-            donation = serializer.save()
-
-            if skip_charity:
-                # Evenly distribute 50% of the amount across all charities
-                all_charities = Charity.objects.all()
-                if all_charities.exists():
-                    per_charity_amount = (donation.amount * 0.5) / all_charities.count()
-                    for charity in all_charities:
-                        donation.charities.add(charity, through_defaults={"amount": per_charity_amount})
-                else:
-                    return JsonResponse({"error": "No available charities to allocate funds."}, status=400)
-            else:
-                # Assign the selected charity
-                try:
-                    selected_charity = Charity.objects.get(id=selected_charity_id)
-                    donation.charities.add(selected_charity)
-                except Charity.DoesNotExist:
-                    return JsonResponse({"error": "Selected charity not found"}, status=400)
-
-            return JsonResponse({"message": "Donation successful!", "donation_id": donation.id}, status=201)
-
-        return JsonResponse({"error": serializer.errors}, status=400)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])  # Anyone can view donation details
-def get_donation_details(request, donation_id):
-    """
-    Fetch details of a specific donation.
-    """
-    donation = get_object_or_404(Donation, id=donation_id)
-    serializer = DonationSerializer(donation)
-    return JsonResponse(serializer.data, safe=False)

@@ -1,3 +1,4 @@
+// src/components/DonationForm.jsx
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -14,7 +15,6 @@ function DonationForm() {
   const [customAmount, setCustomAmount] = useState('');
   const [message, setMessage] = useState('');
   const [selectedCharity, setSelectedCharity] = useState(preselectedCharity);
-  const [skipCharity, setSkipCharity] = useState(false);
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
@@ -42,23 +42,18 @@ function DonationForm() {
       return;
     }
 
-    if (!skipCharity && !selectedCharity) {
-      setFeedback('Please select a charity or choose to skip.');
-      return;
-    }
-
     const donationData = {
       donor_name: donorName,
       donor_email: donorEmail,
       amount: amountValue,
       message: message,
-      charity: skipCharity ? null : selectedCharity,
-      skipCharity: skipCharity,
+      charity: selectedCharity,
     };
 
     try {
       const response = await axiosInstance.post('/donations/', donationData);
-      navigate('/confirmation', { state: { donation: response.data, isCustomAmount: selectedAmount === 'custom' } });
+      // Navigate to confirmation page, passing donation details if needed
+      navigate('/confirmation', { state: { donation: response.data } });
     } catch (error) {
       console.error('Error submitting donation:', error);
       setFeedback('Error submitting donation. Please try again.');
@@ -98,25 +93,62 @@ function DonationForm() {
         <div className="mb-3">
           <label className="form-label">Contribution Amount</label>
           <div>
-            {/* Predefined Amounts */}
-            {["10", "20", "50", "100"].map((value) => (
-              <div className="form-check form-check-inline" key={value}>
-                <input
-                  id={`amount-${value}`}
-                  className="form-check-input"
-                  type="radio"
-                  name="amountOptions"
-                  value={value}
-                  checked={selectedAmount === value}
-                  onChange={(e) => setSelectedAmount(e.target.value)}
-                />
-                <label className="form-check-label" htmlFor={`amount-${value}`}>€{value}</label>
-              </div>
-            ))}
-            {/* Custom Amount */}
+            <div className="form-check form-check-inline">
+              <input
+                id="amount-10"
+                data-testid="radio-amount-10"
+                className="form-check-input"
+                type="radio"
+                name="amountOptions"
+                value="10"
+                checked={selectedAmount === "10"}
+                onChange={(e) => setSelectedAmount(e.target.value)}
+              />
+              <label className="form-check-label" htmlFor="amount-10">€10</label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                id="amount-20"
+                data-testid="radio-amount-20"
+                className="form-check-input"
+                type="radio"
+                name="amountOptions"
+                value="20"
+                checked={selectedAmount === "20"}
+                onChange={(e) => setSelectedAmount(e.target.value)}
+              />
+              <label className="form-check-label" htmlFor="amount-20">€20</label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                id="amount-50"
+                data-testid="radio-amount-50"
+                className="form-check-input"
+                type="radio"
+                name="amountOptions"
+                value="50"
+                checked={selectedAmount === "50"}
+                onChange={(e) => setSelectedAmount(e.target.value)}
+              />
+              <label className="form-check-label" htmlFor="amount-50">€50</label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                id="amount-100"
+                data-testid="radio-amount-100"
+                className="form-check-input"
+                type="radio"
+                name="amountOptions"
+                value="100"
+                checked={selectedAmount === "100"}
+                onChange={(e) => setSelectedAmount(e.target.value)}
+              />
+              <label className="form-check-label" htmlFor="amount-100">€100</label>
+            </div>
             <div className="form-check form-check-inline">
               <input
                 id="amount-custom"
+                data-testid="radio-amount-custom"
                 className="form-check-input"
                 type="radio"
                 name="amountOptions"
@@ -141,16 +173,15 @@ function DonationForm() {
             />
           </div>
         )}
-        {/* Charity Dropdown or Skip Option */}
+        {/* Charity Dropdown */}
         <div className="mb-3">
-          <label htmlFor="charity" className="form-label">Select a Charity</label>
+          <label htmlFor="charity" className="form-label">Select one charity</label>
           <select
             id="charity"
             className="form-select"
             value={selectedCharity}
             onChange={(e) => setSelectedCharity(e.target.value)}
-            disabled={skipCharity}
-            required={!skipCharity}
+            required
           >
             <option value="">-- Select a Charity --</option>
             {charities.map((charity) => (
@@ -159,21 +190,6 @@ function DonationForm() {
               </option>
             ))}
           </select>
-        </div>
-        {/* Checkbox to Skip Charity Selection */}
-        <div className="mb-3">
-          <div className="form-check">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="skipCharity"
-              checked={skipCharity}
-              onChange={() => setSkipCharity(!skipCharity)}
-            />
-            <label className="form-check-label" htmlFor="skipCharity">
-              I prefer not to select a specific charity. 50% of my donation will be evenly split among all charities.
-            </label>
-          </div>
         </div>
         {/* Personal Message */}
         <div className="mb-3">
