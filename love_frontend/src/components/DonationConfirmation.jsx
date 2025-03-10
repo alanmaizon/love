@@ -1,14 +1,35 @@
-// src/components/DonationConfirmation.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance'; // Make sure to import this
 
 function DonationConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
   const donation = location.state?.donation;
 
+  // State for bank info and loading state
+  const [bankInfo, setBankInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axiosInstance.get('/public_profile/')
+      .then(response => {
+        setBankInfo(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching public profile:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  // If data is still loading, show a placeholder
+  if (loading) {
+    return <div>Loading payment instructions...</div>;
+  }
+
   // Generate Revolut payment link dynamically
-  const revolutUsername = "alanmaizon"; // Replace with your Revolut handle
+  const revolutUsername = "alanmaizon"; 
   const revolutPaymentLink = `https://revolut.me/${revolutUsername}?amount=${donation?.amount}&currency=EUR`;
 
   return (
@@ -25,17 +46,21 @@ function DonationConfirmation() {
           </ul>
           <p>To complete your gift, click below to pay via Revolut:</p>
 
-          {/* Button linking to Revolut payment */}
-          <a href={revolutPaymentLink} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+          <a
+            href={revolutPaymentLink}
+            className="btn btn-primary"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Pay with Revolut
           </a>
 
-          <br></br>
+          <br />
           <p>Alternatively, you can manually transfer the amount using the following details:</p>
           <ul>
-            <li>Transfer the gift amount to the following bank account:</li>
             <li><strong>Bank:</strong> {bankInfo ? bankInfo.bank_name : 'N/A'}</li>
             <li><strong>Account Number:</strong> {bankInfo ? bankInfo.account_number : 'N/A'}</li>
+            <li><strong>Routing Number:</strong> {bankInfo ? bankInfo.bank_identifier : 'N/A'}</li>
             <li><strong>Reference:</strong> GIFT-{donation.id}</li>
           </ul>
         </>
