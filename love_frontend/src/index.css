@@ -9,7 +9,11 @@
   src: url('../public/Montserrat.ttf') format('truetype');
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, link {
+  font-family: 'Cormorant', serif;
+}
+
+.navbar-brand {
   font-family: 'Cormorant', serif;
 }
 
@@ -171,7 +175,7 @@ form .form-group {
   color: #EAD7BB; /* Soft Beige */
 }
 
-.hero-image {
+.logo {
   background-image: url('../public/hero.png');
   background-repeat: no-repeat;
   background-position: center top;

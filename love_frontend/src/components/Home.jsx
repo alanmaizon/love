@@ -31,8 +31,6 @@ function Home() {
   return (
     <div className="container mt-5">
         {/* Hero Section */}
-        <section className="hero-image">
-        </section>
         <section className="hero-section text-center">
           <h1 className="display-4">Welcome to Our Wedding</h1>
           <p className="lead">
