@@ -171,11 +171,10 @@ form .form-group {
 
 .hero-image {
   height: 300px; /* Adjust height as needed */
-  background-image: url('../public/hero.png');
-  background-color: #EAD7BB; /* Soft Beige */
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size:contain;
+  background-image: url('../public/texture.jpg'), url('../public/hero.png');
+  background-repeat: no-repeat, no-repeat;
+  background-position: center center, center center;
+  background-size: cover, contain;
   border-radius: 5px;
 }
 
