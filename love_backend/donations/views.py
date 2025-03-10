@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
 from decimal import Decimal
 from django.utils.crypto import get_random_string
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 
 
@@ -122,6 +123,56 @@ def donation_analytics(request):
         "donations_count": donations_count,
         "count_per_charity": list(count_per_charity),
     })
+
+@csrf_exempt
+def create_donation(request):
+    """
+    Handle donation creation.
+    - If a user selects a charity, 100% goes to that charity.
+    - If no charity is selected (`skipCharity = true`), 50% is evenly split among all charities.
+    - The remaining 50% goes to the couple.
+    """
+    if request.method == "POST":
+        try:
+            amount = float(request.POST.get("amount"))
+            donor_name = request.POST.get("donor_name")
+            donor_email = request.POST.get("donor_email")
+            selected_charity_id = request.POST.get("charity")
+            skip_charity = request.POST.get("skipCharity") == "true"
+            message = request.POST.get("message", "")
+
+            # Validate the donation amount
+            if amount <= 0:
+                return JsonResponse({"error": "Invalid donation amount"}, status=400)
+
+            # Create the donation entry
+            donation = Donation.objects.create(
+                donor_name=donor_name,
+                donor_email=donor_email,
+                amount=amount,
+                message=message,
+                skip_charity=skip_charity,
+            )
+
+            if not skip_charity:
+                # Assign 100% of the donation to the selected charity
+                try:
+                    selected_charity = Charity.objects.get(id=selected_charity_id)
+                    donation.charities.add(selected_charity)
+                except ObjectDoesNotExist:
+                    return JsonResponse({"error": "Selected charity not found"}, status=400)
+            else:
+                # Evenly distribute 50% of the amount across all charities
+                all_charities = Charity.objects.all()
+                if all_charities.exists():
+                    per_charity_amount = (amount * 0.5) / all_charities.count()
+                    for charity in all_charities:
+                        donation.charities.add(charity, through_defaults={"amount": per_charity_amount})
+
+            return JsonResponse({"message": "Donation successful!", "donation_id": donation.id})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
 def confirm_donation(request):
     if request.method == "POST":
