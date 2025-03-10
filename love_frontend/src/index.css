@@ -62,7 +62,7 @@ html, body, #root {
   background: #3D2C1E; /* Dark Brown */
   background-image: url('../public/1.svg'), url('../public/2.svg');
   background-repeat: no-repeat, no-repeat;
-  background-position: bottom left, top right;
+  background-position: bottom 20px left 20px, bottom 20px right 20px; /* Add margin */
   background-size: contain, contain;
   color: #EAD7BB;
   text-align: center;
