@@ -1,9 +1,20 @@
-html, body {
+* {
+  background-color: #5A3E2B; /* Medium Brown */
+  background-image: url('../public/horizontal-flower.svg'), url('../public/vertical-flower.svg');
+  background-repeat: no-repeat, no-repeat;
+  background-position: bottom left, top right;
+  background-size: contain, contain;
+}
+
+/* 🎨 General Reset */
+html, body, #root {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+  color: #EAD7BB; /* Soft Beige */
+  font-family: 'Poppins', sans-serif;
 }
 
 /* 🎨 Root Container */
@@ -11,29 +22,6 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  position: relative; /* Required for absolute positioning of the pseudo-element */
-  background-color: #5A3E2B;
-  /* Optional: If you also want a second background image for the horizontal flower */
-  background-image: url('../public/horizontal-flower.svg');
-  background-repeat: no-repeat;
-  background-position: bottom left;
-  background-size: contain;
-}
-
-/* Pseudo-element for the rotated vertical flower */
-#root::before {
-  content: "";
-  position: absolute;
-  top: 0;      /* Adjust as needed */
-  right: 0;    /* Adjust as needed */
-  width: 200px;  /* Adjust size as needed */
-  height: 200px; /* Adjust size as needed */
-  background-image: url('../public/vertical-flower.svg');
-  background-repeat: no-repeat;
-  background-size: contain;
-  transform: rotate(45deg); /* Rotate 45° clockwise */
-  transform-origin: center;
-  pointer-events: none; /* So it doesn't block clicks on underlying elements */
 }
 
 /* 🎨 Header */
