@@ -60,7 +60,7 @@ function DonationConfirmation() {
           <ul>
             <li><strong>Bank:</strong> {bankInfo ? bankInfo.bank_name : 'N/A'}</li>
             <li><strong>Account Number:</strong> {bankInfo ? bankInfo.account_number : 'N/A'}</li>
-            <li><strong>Routing Number:</strong> {bankInfo ? bankInfo.bank_identifier : 'N/A'}</li>
+            <li><strong>Routing Number:</strong> {bankInfo ? bankInfo.bank_identifier : 'REVOIE23'}</li>
             <li><strong>Reference:</strong> GIFT-{donation.id}</li>
           </ul>
         </>
