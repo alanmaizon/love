@@ -1,9 +1,6 @@
 * {
-  background-color: #5A3E2B; /* Medium Brown */
-  background-image: url('../public/horizontal-flower.svg'), url('../public/vertical-flower.svg');
-  background-repeat: no-repeat, no-repeat;
-  background-position: bottom left, top right;
-  background-size: contain, contain;
+  
+
 }
 
 /* 🎨 General Reset */
@@ -12,6 +9,7 @@ html, body, #root {
   padding: 0;
   height: 100%;
   width: 100%;
+  background-color: #5A3E2B; /* Medium Brown */
   overflow-x: hidden; /* Prevents horizontal scrolling */
   color: #EAD7BB; /* Soft Beige */
   font-family: 'Poppins', sans-serif;
@@ -62,6 +60,10 @@ html, body, #root {
   align-items: center;
   width: 100%;
   background: #3D2C1E; /* Dark Brown */
+  background-image: url('../public/horizontal-flower.svg'), url('../public/vertical-flower.svg');
+  background-repeat: no-repeat, no-repeat;
+  background-position: bottom left, top right;
+  background-size: contain, contain;
   color: #EAD7BB;
   text-align: center;
   padding: 15px 0;
