@@ -26,14 +26,14 @@ function Home() {
   }, []);
 
   // Memoize wedding date to prevent unnecessary recalculations
-  const weddingDate = useMemo(() => profile?.wedding_date || "2025-04-25T12:30:00", [profile]);
+  const weddingDate = useMemo(() => profile?.wedding_date || "2025-04-26T12:30:00", [profile]);
 
   return (
     <div className="container mt-5">
         {/* Hero Section */}
+        <div className="hero-image mb-3"></div>
         <section className="hero-section text-center">
-          <h1 className="display-4">LOVE THAT GIVES BACK</h1>
-          <p className="lead">
+        <p className="lead">
             Contribute to our wedding gift fund supporting meaningful causes we love.
           </p>
           <div className="hero-buttons mt-3">

@@ -9,11 +9,7 @@
   src: url('../public/Montserrat.ttf') format('truetype');
 }
 
-h1, h2, h3, h4, h5, h6, link {
-  font-family: 'Cormorant', serif;
-}
-
-.navbar-brand {
+h1, h2, h3, h4, h5, h6 {
   font-family: 'Cormorant', serif;
 }
 
@@ -168,20 +164,22 @@ form .form-group {
   padding-bottom: 50px !important;
 }
 
-/* 🎨 Hero Section */
 .hero-section {
-  background-color: #56443f; /* Dark Brown */
   padding: 50px 0; /* Adjust padding as needed */
   color: #EAD7BB; /* Soft Beige */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.logo {
+.hero-image {
+  width: 100%;
   background-image: url('../public/hero.png');
   background-repeat: no-repeat;
-  background-position: center top;
-  background-size: contain;
-  padding: 50px 0; /* Adjust padding as needed */
+  background-position: center center;
+  background-size: cover;
+  border-radius: 5px;
 }
+
+
 
 /* 🎨 Responsive Fixes */
 @media (max-width: 768px) {
