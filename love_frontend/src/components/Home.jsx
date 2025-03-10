@@ -76,7 +76,7 @@ function Home() {
         <div className="alert alert-danger text-center mt-4">{analyticsError}</div>
       ) : (
         <section className="stats-section mt-5 text-center">
-          <h2>Live Contribution Stats</h2>
+          <h2>Live Contribution</h2>
           <p><strong>Total Contributions:</strong> €{analytics.total_amount.toLocaleString()}</p>
           <p><strong>Participation Count:</strong> {analytics.donations_count.toLocaleString()}</p>
         </section>
