@@ -10,10 +10,6 @@ html, body, #root {
   height: 100%;
   width: 100%;
   background-color: #5A3E2B; /* Medium Brown */
-  background-image: url('../public/3.svg'), url('../public/4.svg');
-  background-repeat: no-repeat, no-repeat;
-  background-position: bottom 0 left 20px, bottom 0 right 20px; /* Add margin */
-  background-size: contain, contain;
   overflow-x: hidden; /* Prevents horizontal scrolling */
   color: #EAD7BB; /* Soft Beige */
   font-family: 'Poppins', sans-serif;
@@ -33,6 +29,10 @@ html, body, #root {
   z-index: 1000;
   width: 100%;
   background: linear-gradient(90deg, #3D2C1E, #5A3E2B); /* Dark Brown Gradient */
+  background-image: url('../public/3.svg'), url('../public/4.svg');
+  background-repeat: no-repeat, no-repeat;
+  background-position: bottom 0 left 20px, bottom 0 right 20px; /* Add margin */
+  background-size: contain, contain;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
