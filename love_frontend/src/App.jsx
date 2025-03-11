@@ -19,8 +19,6 @@ import GuestMessages from './components/GuestMessages';
 import Bio from './components/About';
 
 function Header() {
-  const { user } = useContext(AuthContext);
-
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
@@ -38,51 +36,14 @@ function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#!"
-                id="userDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Main Menu
-              </a>
-              <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                <li className="nav-item">
-                  <Link className="nav-link" to="/messages">Guestbook</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/charities">Charities</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/bio">About Us</Link>
-                </li>
-                <li><hr className="dropdown-divider" /></li>
-                {user ? (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/dashboard">Dashboard</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/profile">Profile</Link>
-                    </li>
-                    {user.isAdmin && (
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/admin">Admin</Link>
-                      </li>
-                    )}
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/logout">Logout</Link>
-                    </li>
-                  </>
-                ) : (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/login">Login</Link>
-                  </li>
-                )}
-              </ul>
+            <li className="nav-item">
+              <Link className="nav-link" to="/messages">Guests</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/charities">Charities</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/bio">About Us</Link>
             </li>
           </ul>
         </div>
@@ -91,12 +52,11 @@ function Header() {
   );
 }
 
-
 function Footer() {
   return (
     <footer className="footer">
       <div className="container text-center">
-        <p className="mb-0">LOVE THAT GIVES BACK © 2025</p>
+        <p className="mb-0">LOVE THAT GIVES BACK © 2025 </p>
       </div>
     </footer>
   );
