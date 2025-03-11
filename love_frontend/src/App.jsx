@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
-import logo from '../public/logo.svg';
+import logo from '../public/brand-logo.png';
 
 import ScrollToTop from "./components/ScrollToTop";
 import Home from './components/Home';
@@ -32,7 +32,6 @@ return (
           alt="Logo" 
           style={{ height: '30px', marginRight: '8px' }} 
         />
-        LOVE
       </Link>
       <button
         className="navbar-toggler"
