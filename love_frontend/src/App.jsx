@@ -69,7 +69,7 @@ function Header() {
               </li>
             ) : (
               <li className="nav-item">
-                <Link className="nav-link" to="/login">Login</Link>
+                <Link className="nav-link" to="/bio">Bio</Link>
               </li>
             )}
           </ul>

@@ -38,7 +38,7 @@ function Home() {
       <section className="hero-image"></section>
       <section className="hero-section text-center">
         <p className="lead">
-          Contribute to our wedding gift fund supporting meaningful causes we love.
+          Contribute to our wedding gift and support causes we love
         </p>
         <div className="hero-buttons mt-3">
           <Link to="/donate" className="btn btn-primary me-2">Gift Contribution</Link>
@@ -71,7 +71,7 @@ function Home() {
 
       {/* Countdown Timer Section */}
       <section className="countdown-section mt-5 text-center">
-        <h2>Countdown to Our Wedding</h2>
+        <h2>Wedding Countdown</h2>
         <CountdownTimer targetDate={weddingDate} />
       </section>
 
@@ -91,7 +91,7 @@ function Home() {
           
           {/* Donation Goal Progress Bar Section */}
           <div className="mt-4">
-            <h4>Donation Goal: €{donationGoal.toLocaleString()}</h4>
+            <h4>Our Goal: €{donationGoal.toLocaleString()}</h4>
             <div 
               style={{ position: 'relative', width: '30vw', margin: '0 auto' }}
             >
