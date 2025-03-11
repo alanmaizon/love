@@ -92,16 +92,27 @@ function Home() {
           {/* Donation Goal Progress Bar */}
           <div className="mt-4">
             <h4>Donation Goal: €{donationGoal.toLocaleString()}</h4>
-            <div className="progress" style={{ height: '25px', width: '30vw', margin: '0 auto' }}>
-              <div
-                className="progress-bar"
-                role="progressbar"
-                style={{ width: `${progressPercentage}%`, backgroundColor: '#56443F' }}
-                aria-valuenow={progressPercentage}
-                aria-valuemin="0"
-                aria-valuemax="100"
+            <div 
+              className="d-flex align-items-center" 
+              style={{ width: '30vw', margin: '0 auto' }}
+            >
+              {/* Left side: progress calculation */}
+              <div 
+                style={{ marginRight: '10px', minWidth: '50px', textAlign: 'right' }}
               >
                 {progressPercentage.toFixed(0)}%
+              </div>
+              {/* Right side: progress bar */}
+              <div className="progress" style={{ flex: 1, height: '25px' }}>
+                <div
+                  className="progress-bar"
+                  role="progressbar"
+                  style={{ width: `${progressPercentage}%`, backgroundColor: '#FFFDD0' }}
+                  aria-valuenow={progressPercentage}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                </div>
               </div>
             </div>
           </div>
