@@ -5,7 +5,9 @@ function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 10); // Small delay to ensure content is loaded
   }, [pathname]);
 
   return null;
