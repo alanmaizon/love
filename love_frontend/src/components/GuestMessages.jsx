@@ -33,7 +33,7 @@ function GuestMessages() {
 
   return (
     <div className="container py-5">
-      <h2 className="text-center mb-4">Messages from Our Guests</h2>
+      <h2 className="text-center mb-4">Guest book</h2>
       {donations.length === 0 ? (
         <p className="text-center">
           No messages yet. Be the first to <Link to="/donate">contribute!</Link>
