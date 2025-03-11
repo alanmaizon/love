@@ -6,67 +6,57 @@ function Bio() {
   return (
     <div
       style={{
-        position: 'relative',
-        width: '1200px',
-        height: '1600px',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        maxWidth: '1200px',
         margin: '0 auto',
-        padding: '20px'
+        padding: '50px',
+        gap: '2rem'
       }}
     >
-      {/* About Us section as the background card */}
-      <section
+      {/* Images Section */}
+      <div
         style={{
-          position: 'absolute',
-          width: '875px',
-          height: '542px',
-          left: '250px',
-          top: '761px',
-          backgroundColor: '#fff',
-          padding: '20px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-          borderRadius: '8px',
-          zIndex: 1
+          position: 'relative',
+          width: '480px',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <h1 style={{ color: '#3D2C1E' }}>About Us</h1>
-        <p style={{ color: '#3D2C1E' }}>
-          Welcome to our story. Here you'll learn about our journey, our love, and our dreams. We hope our story inspires you as much as your support inspires us.
+        <img
+          src={image1}
+          alt="Our Journey"
+          style={{
+            width: '100%',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+            borderRadius: '8px',
+            transform: 'rotate(-10deg)'
+          }}
+        />
+        <img
+          src={image2}
+          alt="Our Love"
+          style={{
+            width: '80%',
+            alignSelf: 'flex-end',
+            marginTop: '-150px', // negative margin to overlap image1
+            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+            borderRadius: '8px',
+            transform: 'rotate(10deg)'
+          }}
+        />
+      </div>
+
+      {/* Text Section */}
+      <div style={{ flex: 1 }}>
+        <h1 style={{ color: '#EAD7BB' }}>About Us</h1>
+        <p style={{ color: '#EAD7BB' }}>
+          Welcome to our story. Here you'll learn about our journey, our love, and our dreams.
+          We hope our story inspires you as much as your support inspires us.
         </p>
-      </section>
-
-      {/* Image 1 card */}
-      <img
-        src={image1}
-        alt="Our Journey"
-        style={{
-          position: 'absolute',
-          width: '384px',
-          height: '392px',
-          left: '250px',
-          top: '761px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-          borderRadius: '8px',
-          transform: 'rotate(-10deg)',
-          zIndex: 2
-        }}
-      />
-
-      {/* Image 2 card */}
-      <img
-        src={image2}
-        alt="Our Love"
-        style={{
-          position: 'absolute',
-          width: '288px',
-          height: '302px',
-          left: '442px',
-          top: '1001px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-          borderRadius: '8px',
-          transform: 'rotate(10deg)',
-          zIndex: 3
-        }}
-      />
+      </div>
     </div>
   );
 }
