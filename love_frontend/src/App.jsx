@@ -15,7 +15,7 @@ import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import GuestMessages from './components/GuestMessages';
-import Bio from './components/Bio';
+import Bio from './components/About';
 
 function Header() {
   const { user } = useContext(AuthContext);
@@ -42,6 +42,9 @@ function Header() {
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/charities">Charities</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/bio">Bio</Link>
             </li>
             {user ? (
               <li className="nav-item dropdown">
@@ -70,7 +73,7 @@ function Header() {
               </li>
             ) : (
               <li className="nav-item">
-                <Link className="nav-link" to="/bio">Bio</Link>
+                <Link className="nav-link" to="/login">Login</Link>
               </li>
             )}
           </ul>

@@ -1,7 +1,7 @@
 import React from 'react';
 // Replace these imports with your actual image paths
-import image1 from '../assets/image1.jpg';
-import image2 from '../assets/image2.jpg';
+import image1 from '../../public/image1.png';
+import image2 from '../../public/image2.png';
 
 function Bio() {
   return (
