@@ -1,6 +1,6 @@
 # Love Frontend
 
-This repository contains the front-end portion of the **Love That Gives Back** platform—a React SPA built with Vite that lets guests explore charities, donate, and view live donation stats, while couples can manage their profile and supported charities.
+This repository contains the front-end portion of the **Love That Gives Back** platform—a React SPA (Single-page application) built with Vite that lets guests explore charities, donate, and view live donation stats, while couples can manage their profile and supported charities.
 
 ---
 
