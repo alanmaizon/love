@@ -92,11 +92,11 @@ function Home() {
           {/* Donation Goal Progress Bar */}
           <div className="mt-4">
             <h4>Donation Goal: €{donationGoal.toLocaleString()}</h4>
-            <div className="progress" style={{ height: '25px' }}>
+            <div className="progress" style={{ height: '25px', width: '30vw', margin: '0 auto' }}>
               <div
                 className="progress-bar"
                 role="progressbar"
-                style={{ width: `${progressPercentage}%` }}
+                style={{ width: `${progressPercentage}%`, backgroundColor: '#FFFDD0' }}
                 aria-valuenow={progressPercentage}
                 aria-valuemin="0"
                 aria-valuemax="100"
