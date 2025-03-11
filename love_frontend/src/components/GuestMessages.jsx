@@ -48,7 +48,7 @@ function GuestMessages() {
                   <p className="card-text">
                     {donation.message || "No message provided."}
                   </p>
-                  <small className="text-muted" style={{ color: '#EAD7BB' }}>
+                  <small>
                     Gifted on {new Date(donation.created_at).toLocaleDateString()}
                   </small>
                   {donation.amount && (
