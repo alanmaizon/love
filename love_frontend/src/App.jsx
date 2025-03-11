@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
 import logo from '../public/brand-logo.png';
-
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTopButton from "./components/ScrollToTopButton";
 import Home from './components/Home';
 import Login from './components/Login';
 import Logout from './components/Logout';
@@ -135,6 +135,7 @@ function App() {
         </main>
         <Footer />
       </div>
+      <ScrollToTopButton />
     </Router>
   );
 }
