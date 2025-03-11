@@ -15,6 +15,7 @@ import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import GuestMessages from './components/GuestMessages';
+import Bio from './components/Bio';
 
 function Header() {
   const { user } = useContext(AuthContext);
@@ -109,6 +110,7 @@ function App() {
             <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
             <Route path="/messages" element={<GuestMessages />} />
+            <Route path="/bio" element={<Bio />} />
           </Routes>
         </main>
         <Footer />
