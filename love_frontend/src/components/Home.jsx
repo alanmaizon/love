@@ -38,7 +38,7 @@ function Home() {
       <section className="hero-image"></section>
       <section className="hero-section text-center">
         <p className="lead">
-          Contribute to our wedding gift and support causes we love
+          Send your gift and write a message in our digital guestbook!
         </p>
         <div className="hero-buttons mt-3">
           <Link to="/donate" className="btn btn-primary me-2">Gift Contribution</Link>
