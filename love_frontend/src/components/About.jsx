@@ -1,27 +1,35 @@
 import React from 'react';
-// Replace these imports with your actual image paths
 import image1 from '../../public/image1.png';
 import image2 from '../../public/image2.png';
 
 function Bio() {
   return (
-    <div style={{ position: 'relative', width: '1500px', height: '2200px', margin: '0 auto' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: '1200px',
+        height: '1600px',
+        margin: '0 auto',
+        padding: '20px'
+      }}
+    >
       {/* About Us section as the background card */}
       <section
         style={{
           position: 'absolute',
-          width: '1093px',
-          height: '678px',
-          left: '312px',
-          top: '951px',
+          width: '875px',
+          height: '542px',
+          left: '250px',
+          top: '761px',
           backgroundColor: '#fff',
           padding: '20px',
           boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-          borderRadius: '8px'
+          borderRadius: '8px',
+          zIndex: 1
         }}
       >
-        <h1>About Us</h1>
-        <p>
+        <h1 style={{ color: '#3D2C1E' }}>About Us</h1>
+        <p style={{ color: '#3D2C1E' }}>
           Welcome to our story. Here you'll learn about our journey, our love, and our dreams. We hope our story inspires you as much as your support inspires us.
         </p>
       </section>
@@ -32,13 +40,14 @@ function Bio() {
         alt="Our Journey"
         style={{
           position: 'absolute',
-          width: '480px',
-          height: '490px',
-          left: '312px',
-          top: '951px',
+          width: '384px',
+          height: '392px',
+          left: '250px',
+          top: '761px',
           boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
           borderRadius: '8px',
-          transform: 'rotate(-10deg)'
+          transform: 'rotate(-10deg)',
+          zIndex: 2
         }}
       />
 
@@ -48,13 +57,14 @@ function Bio() {
         alt="Our Love"
         style={{
           position: 'absolute',
-          width: '360px',
-          height: '378px',
-          left: '552px',
-          top: '1251px',
+          width: '288px',
+          height: '302px',
+          left: '442px',
+          top: '1001px',
           boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
           borderRadius: '8px',
-          transform: 'rotate(10deg)'
+          transform: 'rotate(10deg)',
+          zIndex: 3
         }}
       />
     </div>
