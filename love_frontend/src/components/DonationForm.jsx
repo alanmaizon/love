@@ -193,7 +193,7 @@ function DonationForm() {
         </div>
         {/* Personal Message */}
         <div className="mb-3">
-          <label htmlFor="message" className="form-label">Personal Message (Optional)</label>
+          <label htmlFor="message" className="form-label">Write a heartfelt message for us</label>
           <textarea
             id="message"
             className="form-control"
