@@ -45,8 +45,7 @@
 - Display the wedding date with a countdown.  
 - Highlight charity statistics (e.g., total donations).  
 
-### 2. **User Authentication**  
-- Registration: Name, email, password.  
+### 2. **User Authentication**   
 - Login/Logout: Use Django Rest Framework for token-based authentication.  
 
 ### 3. **Dashboard**  
@@ -64,7 +63,7 @@
 - Ensure compatibility across devices.  
 
 ### 6. **API Integration**  
-- **External API:** Display live progress using an external API, e.g. Stripe for secure payments.  
+- **External API:** Display live progress using an external API for secure payments.  
 
 ---
 
