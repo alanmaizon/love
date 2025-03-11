@@ -121,9 +121,9 @@ erDiagram
       string bio
       string location
       string profile_picture
-      json social_media_links
-      string contact_email
-      string contact_phone
+      string bank
+      string bank_account
+      string revolut_username
     }
     CHARITY {
       int id PK
@@ -142,7 +142,6 @@ erDiagram
       string status "pending/confirmed/failed"
       datetime created_at
       datetime updated_at
-      string stripe_payment_id "optional"
     }
     
     USER ||--|| PROFILE : "has"
