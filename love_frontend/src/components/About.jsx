@@ -56,7 +56,7 @@ function Bio() {
           lineHeight: '1.6'
         }}
       >
-        <h2 style={{ textAlign: 'center', marginBottom: '1rem', marginTop: '1rem' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '1rem', marginTop: '2rem' }}>
           The Greatest Gift is Your Love and Presence
         </h2>
         <p>
