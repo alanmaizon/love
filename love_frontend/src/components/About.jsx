@@ -5,31 +5,16 @@ import image2 from '../../public/image2.png';
 function Bio() {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '50px 20px' }}>
-      {/* Flex Container for Images and "About Us" Text */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '2rem',
-          marginBottom: '3rem'
-        }}
-      >
+      {/* Flex Container for Top Section */}
+      <div className="bio-top-section">
         {/* Images Section */}
-        <div
-          style={{
-            position: 'relative',
-            width: '480px',
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
+        <div className="bio-images" style={{ position: 'relative' }}>
           <img
             src={image1}
             alt="Our Journey"
             style={{
               width: '100%',
+              maxWidth: '480px',
               boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
               borderRadius: '8px',
               transform: 'rotate(-10deg)'
@@ -40,8 +25,10 @@ function Bio() {
             alt="Our Love"
             style={{
               width: '80%',
-              alignSelf: 'flex-end',
-              marginTop: '-150px', // Overlap Image 1
+              maxWidth: '360px',
+              position: 'absolute',
+              top: '150px',
+              right: 0,
               boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
               borderRadius: '8px',
               transform: 'rotate(10deg)'
@@ -50,7 +37,7 @@ function Bio() {
         </div>
 
         {/* Text Section */}
-        <div style={{ flex: 1, color: '#EAD7BB' }}>
+        <div className="bio-text" style={{ color: '#EAD7BB' }}>
           <h1 style={{ color: '#EAD7BB' }}>About Us</h1>
           <p style={{ color: '#EAD7BB' }}>
             Welcome to our story. Here you'll learn about our journey, our love, and our dreams.
@@ -81,7 +68,7 @@ function Bio() {
         <p>
           Your love, support, and presence on our wedding day are the greatest gifts we could ever receive.
           However, if you wish to contribute in another way, we have created this space with meaningful options.
-          Instead of traditional gifts, we want our marriage to be an opportunity to give back. That's why we
+          Instead of traditional gifts, we want our marriage to be an opportunity to give back. That’s why we
           have chosen three charitable organizations that inspire us and reflect the values we share. Any donation,
           big or small, will be a beautiful way to celebrate our union.
         </p>
