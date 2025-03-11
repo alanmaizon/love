@@ -68,7 +68,7 @@ function Bio() {
         <p>
           Your love, support, and presence on our wedding day are the greatest gifts we could ever receive.
           However, if you wish to contribute in another way, we have created this space with meaningful options.
-          Instead of traditional gifts, we want our marriage to be an opportunity to give back. That’s why we
+          Instead of traditional gifts, we want our marriage to be an opportunity to give back. That's why we
           have chosen three charitable organizations that inspire us and reflect the values we share. Any donation,
           big or small, will be a beautiful way to celebrate our union.
         </p>
