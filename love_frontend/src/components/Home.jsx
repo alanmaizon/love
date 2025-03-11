@@ -96,7 +96,7 @@ function Home() {
               <div
                 className="progress-bar"
                 role="progressbar"
-                style={{ width: `${progressPercentage}%`, backgroundColor: '#FFFDD0' }}
+                style={{ width: `${progressPercentage}%`, backgroundColor: '#56443F' }}
                 aria-valuenow={progressPercentage}
                 aria-valuemin="0"
                 aria-valuemax="100"
