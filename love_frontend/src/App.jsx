@@ -38,45 +38,52 @@ function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/messages">Guests</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/charities">Charities</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/bio">About Us</Link>
-            </li>
-            {user ? (
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#!"
-                  id="userDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {user.username || 'Profile'}
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                  <li>
-                    <Link className="dropdown-item" to="/profile">View Profile</Link>
+            <li className="nav-item dropdown">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#!"
+                id="userDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Main Menu
+              </a>
+              <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/messages">Guestbook</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/charities">Charities</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/bio">About Us</Link>
+                </li>
+                <li><hr className="dropdown-divider" /></li>
+                {user ? (
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/dashboard">Dashboard</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/profile">Profile</Link>
+                    </li>
+                    {user.isAdmin && (
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/admin">Admin</Link>
+                      </li>
+                    )}
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/logout">Logout</Link>
+                    </li>
+                  </>
+                ) : (
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/login">Login</Link>
                   </li>
-                  <li>
-                    <Link className="dropdown-item" to="/dashboard">Dashboard</Link>
-                  </li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li>
-                    <Link className="dropdown-item" to="/logout">Logout</Link>
-                  </li>
-                </ul>
-              </li>
-            ) : (
-              <li className="nav-item">
-                <Link className="nav-link" to="/login">Login</Link>
-              </li>
-            )}
+                )}
+              </ul>
+            </li>
           </ul>
         </div>
       </div>
@@ -84,11 +91,12 @@ function Header() {
   );
 }
 
+
 function Footer() {
   return (
     <footer className="footer">
       <div className="container text-center">
-        <p className="mb-0">Love © 2025 by Anna & Alan</p>
+        <p className="mb-0">LOVE THAT GIVES BACK © 2025</p>
       </div>
     </footer>
   );
