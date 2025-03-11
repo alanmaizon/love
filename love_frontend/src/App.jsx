@@ -14,6 +14,7 @@ import ManageCharities from './components/ManageCharities';
 import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
+import GuestMessages from './components/GuestMessages';
 
 function Header() {
   const { user } = useContext(AuthContext);
@@ -36,7 +37,7 @@ function Header() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link" to="/">Home</Link>
+              <Link className="nav-link" to="/messages">Guests</Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/charities">Charities</Link>
@@ -107,6 +108,7 @@ function App() {
             <Route path="/dashboard/charities" element={<PrivateRoute><ManageCharities /></PrivateRoute>} />
             <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+            <Route path="/messages" element={<GuestMessages />} />
           </Routes>
         </main>
         <Footer />
