@@ -75,3 +75,63 @@ This is the **Django backend** for **Love That Gives Back**, a wedding gift plat
 ```sh
 git clone https://github.com/alanmaizon/love/love_backend.git
 cd love_backend
+```
+
+### **2️⃣ Create a Virtual Environment**
+```sh
+python -m venv venv
+source venv/bin/activate   # macOS/Linux
+venv\Scripts\activate      # Windows
+```
+
+### **3️⃣ Install Dependencies**
+```sh
+pip install -r requirements.txt
+```
+
+### **4️⃣ Configure `.env` File**
+Create a `.env` file in the root directory, you will need:
+```
+SECRET_KEY
+DEBUG=True
+ALLOWED_HOSTS
+DATABASE_URL
+REVOLUT_CHECKOUT_URL
+```
+
+### **5️⃣ Apply Database Migrations**
+```sh
+python manage.py migrate
+```
+
+### **6️⃣ Create a Superuser**
+```sh
+python manage.py createsuperuser
+```
+Follow the prompts to set up your admin credentials.
+
+### **7️⃣ Run the Development Server**
+```sh
+python manage.py runserver
+```
+Access the API at `http://127.0.0.1:8000/api/`
+
+---
+
+## **🛠 Testing**
+Run unit tests using:
+```sh
+python manage.py test
+```
+
+---
+
+## **🚀 Deployment**
+For production, use **Gunicorn & Nginx** with **PostgreSQL**.
+```sh
+pip install gunicorn
+gunicorn love_backend.wsgi:application --bind 0.0.0.0:8000
+```
+For **Render**, configure `DATABASE_URL` in `.env`.
+```
+
