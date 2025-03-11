@@ -30,7 +30,7 @@ return (
         <img 
           src={logo}
           alt="Logo" 
-          style={{ height: '30px', marginRight: '8px' }} 
+          style={{ height: '60px', marginRight: '8px' }} 
         />
       </Link>
       <button
