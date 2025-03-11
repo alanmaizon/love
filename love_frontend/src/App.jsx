@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from './context/AuthContext';
 import logo from '../public/logo.svg';
 
 import ScrollToTop from "./components/ScrollToTop";
