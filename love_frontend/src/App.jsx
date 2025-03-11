@@ -56,7 +56,7 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="container text-center">
-        <p className="mb-0">LOVE THAT GIVES BACK © 2025 </p>
+        <p className="mb-0">Anna & Alan © 2025 </p>
       </div>
     </footer>
   );
