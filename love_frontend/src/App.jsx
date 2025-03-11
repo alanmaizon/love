@@ -21,7 +21,7 @@ function Header() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
-        <Link className="navbar-brand" to="/">LOVE THAT GIVES BACK</Link>
+        <Link className="navbar-brand" to="/">LOVE</Link>
         <button
           className="navbar-toggler"
           type="button"
