@@ -179,11 +179,29 @@ form .form-group {
   border-radius: 5px;
 }
 
+.bio-top-section {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.bio-images,
+.bio-text {
+  flex: 1;
+}
+
+
 /* 🎨 Responsive Fixes */
 @media (max-width: 768px) {
   .navbar {
     padding: 10px;
   }
+
+  .bio-top-section {
+    flex-direction: column-reverse;
+  }
+
 
   footer {
     font-size: 12px;
