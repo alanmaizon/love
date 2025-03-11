@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from './context/AuthContext';
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import logo from '../public/logo.svg';
+
 import ScrollToTop from "./components/ScrollToTop";
 import Home from './components/Home';
 import Login from './components/Login';
@@ -19,37 +22,83 @@ import GuestMessages from './components/GuestMessages';
 import Bio from './components/About';
 
 function Header() {
-  return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container">
-        <Link className="navbar-brand" to="/">LOVE</Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon" />
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/messages">Guests</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/charities">Charities</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/bio">About Us</Link>
-            </li>
-          </ul>
-        </div>
+  const { user } = useContext(AuthContext);
+
+return (
+  <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div className="container">
+      <Link className="navbar-brand d-flex align-items-center" to="/">
+        <img 
+          src={logo}
+          alt="Logo" 
+          style={{ height: '30px', marginRight: '8px' }} 
+        />
+        LOVE
+      </Link>
+      <button
+        className="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span className="navbar-toggler-icon" />
+      </button>
+      <div className="collapse navbar-collapse" id="navbarNav">
+        <ul className="navbar-nav ms-auto">
+          <li className="nav-item">
+            <Link className="nav-link" to="/messages">Guestbook</Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/charities">Charities</Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/bio">About Us</Link>
+          </li>
+          <li className="nav-item dropdown">
+            <a
+              className="nav-link dropdown-toggle"
+              href="#!"
+              id="userDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {user ? user.username : "Account"}
+            </a>
+            <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              {user ? (
+                <>
+                  <li>
+                    <Link className="dropdown-item" to="/dashboard">Dashboard</Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/profile">Profile</Link>
+                  </li>
+                  {user.isAdmin && (
+                    <li>
+                      <Link className="dropdown-item" to="/admin">Admin</Link>
+                    </li>
+                  )}
+                  <li><hr className="dropdown-divider" /></li>
+                  <li>
+                    <Link className="dropdown-item" to="/logout">Logout</Link>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <Link className="dropdown-item" to="/login">Login</Link>
+                </li>
+              )}
+            </ul>
+          </li>
+        </ul>
       </div>
-    </nav>
-  );
+    </div>
+  </nav>
+);
 }
 
 function Footer() {
