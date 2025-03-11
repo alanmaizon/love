@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
+import ScrollToTop from "./components/ScrollToTop";
 import Home from './components/Home';
 import Login from './components/Login';
 import Logout from './components/Logout';
@@ -96,6 +97,7 @@ function Footer() {
 function App() {
   return (
     <Router>
+      <ScrollToTop /> 
       <div className="app-container">
         <Header />
         <main className="main-content">
