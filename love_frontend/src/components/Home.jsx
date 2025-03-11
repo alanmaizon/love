@@ -89,21 +89,28 @@ function Home() {
           <p><strong>Total Contributions:</strong> €{currentTotal.toLocaleString()}</p>
           <p><strong>Participation Count:</strong> {analytics.donations_count.toLocaleString()}</p>
           
-          {/* Donation Goal Progress Bar */}
+          {/* Donation Goal Progress Bar Section */}
           <div className="mt-4">
             <h4>Donation Goal: €{donationGoal.toLocaleString()}</h4>
             <div 
-              className="d-flex align-items-center" 
-              style={{ width: '30vw', margin: '0 auto' }}
+              style={{ position: 'relative', width: '30vw', margin: '0 auto' }}
             >
-              {/* Left side: progress calculation */}
-              <div 
-                style={{ marginRight: '10px', minWidth: '50px', textAlign: 'right' }}
+              {/* Percentage label positioned just to the left of the progress bar */}
+              <span 
+                style={{
+                  position: 'absolute',
+                  right: '100%',       // Position the right edge of the label at the left edge of the container
+                  marginRight: '5px',  // A small gap between the label and the bar
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  minWidth: '40px',
+                  textAlign: 'right'
+                }}
               >
                 {progressPercentage.toFixed(0)}%
-              </div>
-              {/* Right side: progress bar */}
-              <div className="progress" style={{ flex: 1, height: '25px' }}>
+              </span>
+              {/* Progress bar */}
+              <div className="progress" style={{ height: '25px' }}>
                 <div
                   className="progress-bar"
                   role="progressbar"
@@ -116,6 +123,7 @@ function Home() {
               </div>
             </div>
           </div>
+              
         </section>
       )}
     </div>
