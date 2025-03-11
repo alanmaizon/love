@@ -45,7 +45,7 @@ function Header() {
               <Link className="nav-link" to="/charities">Charities</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/bio">Bio</Link>
+              <Link className="nav-link" to="/bio">About Us</Link>
             </li>
             {user ? (
               <li className="nav-item dropdown">
