@@ -9,16 +9,28 @@ function Login() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext);
+  const { setAuthUser } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await axiosInstance.post('/login/', { username, password });
-      // Fetch user profile after login
+      // Remove logout flag
+      localStorage.removeItem('loggedOut');
+
+      // Get profile after login
       const profileRes = await axiosInstance.get('/profile/');
       const displayName = `${profileRes.data.bride_name} & ${profileRes.data.groom_name}`;
-      setUser({ username: displayName, ...profileRes.data });
+      const newAuthUser = { username: displayName, ...profileRes.data };
+
+      // Updates states
+      setAuthUser(newAuthUser);
+
+      // Send event between tabs
+      const channel = new BroadcastChannel('auth_channel');
+      channel.postMessage({ type: 'LOGIN', payload: newAuthUser });
+      channel.close();
+
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {

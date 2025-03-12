@@ -37,17 +37,19 @@ def profile_detail(request):
         return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([])  # No need auth
 @permission_classes([AllowAny])
 def public_profile(request):
     try:
-        # Assuming a single couple – return the first profile.
+        # Shown our profile by default
         profile = Profile.objects.first()
     except Profile.DoesNotExist:
         return Response({'error': 'Profile not found'}, status=404)
+    
     serializer = ProfileSerializer(profile)
-    return Response(serializer.data)
-
+    data = serializer.data
+    data['isPublic'] = True  # Add flag
+    return Response(data)
 
 @csrf_exempt
 def login_view(request):

@@ -6,7 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 
 function Logout() {
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext);
+  const { setAuthUser } = useContext(AuthContext);
 
   useEffect(() => {
     axiosInstance.post('/logout/', {})
@@ -14,10 +14,17 @@ function Logout() {
         console.error('Logout error:', error);
       })
       .finally(() => {
-        setUser(null);
+        // Clean user state
+        setAuthUser(null);
+        // Save localStorage when logout
+        localStorage.setItem('loggedOut', 'true');
+        // Sent message to all tabs to sync
+        const channel = new BroadcastChannel('auth_channel');
+        channel.postMessage({ type: 'LOGOUT' });
+        channel.close();
         navigate('/');
       });
-  }, [navigate, setUser]);
+  }, [navigate, setAuthUser]);
 
   return <div>Logging out...</div>;
 }

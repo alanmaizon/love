@@ -1,27 +1,46 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
+  const [publicProfile, setPublicProfile] = useState(null);
 
   useEffect(() => {
-    // Fetch public profile info instead of the protected one.
-    axiosInstance.get('/public_profile/')
-      .then((res) => {
-        // Compute a display name based on public profile info
-        const displayName = `${res.data.bride_name} & ${res.data.groom_name}`;
-        setUser({ username: displayName, ...res.data });
-      })
-      .catch((err) => {
-        // 403 is expected for non-authenticated users on /profile/
-        setUser(null);
-      });
+    const channel = new BroadcastChannel('auth_channel');
+    channel.onmessage = (e) => {
+      if (e.data.type === 'LOGOUT') {
+        setAuthUser(null);
+      } else if (e.data.type === 'LOGIN') {
+        // Updates the user states
+        setAuthUser(e.data.payload);
+      }
+    };
+    return () => {
+      channel.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    const loggedOut = localStorage.getItem('loggedOut');
+    if (!loggedOut) {
+      axiosInstance.get('/public_profile/')
+        .then((res) => {
+          const profileData = { ...res.data, isPublic: true };
+          setPublicProfile(profileData);
+        })
+        .catch(() => {
+          setPublicProfile(null);
+        });
+    } else {
+      setPublicProfile(null);
+    }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ authUser, setAuthUser, publicProfile }}>
       {children}
     </AuthContext.Provider>
   );

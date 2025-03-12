@@ -9,4 +9,14 @@ const axiosInstance = axios.create({
   },
 });
 
+// Interceptors
+axiosInstance.interceptors.request.use(request => {
+  console.log('Request:', request);
+  return request;
+});
+axiosInstance.interceptors.response.use(response => {
+  console.log('Response:', response);
+  return response;
+});
+
 export default axiosInstance;
