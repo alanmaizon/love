@@ -4,6 +4,7 @@ from .models import Profile, Charity, Donation
 
 class ProfileSerializer(serializers.ModelSerializer):
     profile_picture_url = serializers.SerializerMethodField()
+    isAdmin = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -18,11 +19,16 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bank_name', 
             'account_number', 
             'revolut_username',
+            'isAdmin',
         ]
 
     def get_profile_picture_url(self, obj):
         return obj.get_profile_picture_url() or ""
 
+    def get_isAdmin(self, obj):
+        # Assumes that the Profile is linked to a User instance.
+        return obj.user.is_staff  # or obj.user.is_superuser if you prefer
+    
 
 class CharitySerializer(serializers.ModelSerializer):
     """
