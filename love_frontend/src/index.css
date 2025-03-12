@@ -210,6 +210,13 @@ form .form-group {
   opacity: 0;
   transform: translateY(100px);
   transition: opacity 0.3s ease, transform 0.3s ease;
+
+  /* Center the icon perfectly */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
 }
 
 /* When visible */
@@ -241,5 +248,13 @@ form .form-group {
 
   .container {
     padding: 10px;
+  }
+
+  .scroll-to-top {
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+    bottom: 15px; /* Adjust position slightly */
+    right: 15px;
   }
 }
