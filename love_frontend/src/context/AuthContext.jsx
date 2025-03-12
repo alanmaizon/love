@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [authUser, setAuthUser] = useState(null);
   const [publicProfile, setPublicProfile] = useState(null);
 
+  // Listen for login/logout events between open tabs
   useEffect(() => {
     const channel = new BroadcastChannel('auth_channel');
     channel.onmessage = (e) => {
@@ -22,20 +23,33 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  // Check for an authenticated session on mount
   useEffect(() => {
     const loggedOut = localStorage.getItem('loggedOut');
     if (!loggedOut) {
-      axiosInstance.get('/public_profile/')
+      axiosInstance.get('/profile/')
         .then((res) => {
-          const profileData = { ...res.data, isPublic: true };
-          setPublicProfile(profileData);
+          const displayName = `${res.data.bride_name} & ${res.data.groom_name}`;
+          setAuthUser({ username: displayName, ...res.data });
         })
         .catch(() => {
-          setPublicProfile(null);
+          setAuthUser(null);
         });
     } else {
-      setPublicProfile(null);
+      setAuthUser(null);
     }
+  }, []);
+
+  // Optionally, still fetch public profile data
+  useEffect(() => {
+    axiosInstance.get('/public_profile/')
+      .then((res) => {
+        const profileData = { ...res.data, isPublic: true };
+        setPublicProfile(profileData);
+      })
+      .catch(() => {
+        setPublicProfile(null);
+      });
   }, []);
 
   return (
