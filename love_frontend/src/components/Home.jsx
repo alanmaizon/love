@@ -73,8 +73,8 @@ function Home() {
       <section className="hero-image"></section>
       <section className="hero-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
-          <h1>THANK YOU</h1>
-          <p>FOR YOUR SUPPORT</p>
+          <h1>Welcome to Our Wedding Celebration</h1>
+          <p>We're excited to share our special day with you!</p>
           <Link to="/donate" className="btn btn-primary mt-3">Send a Gift</Link>
         </div>
       </section>
@@ -84,7 +84,7 @@ function Home() {
       ================================ */}
       <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
-          <h2>We're excited to share our special day with you!</h2>
+          <h2>Thank you for your support</h2>
           <p>
             We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
             we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
@@ -117,7 +117,7 @@ function Home() {
       {/* ================================
           WEDDING COUNTDOWN
       ================================ */}
-      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#56443f' }}>
+      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Wedding Countdown</h2>
           <CountdownTimer targetDate={weddingDate} />
@@ -127,7 +127,7 @@ function Home() {
       {/* ================================
           GUESTBOOK
       ================================ */}
-      <section className="guestbook-section" style={{ padding: '4rem 1rem' }}>
+      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Leave us a heartfelt message!</h2>
           <GuestMessages />
