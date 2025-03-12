@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 
 // Import existing components
+import StatsSection from './StatsSection';
 import CountdownTimer from './CountdownTimer';
 import ExploreCharities from './ExploreCharities';
 import GuestMessages from './GuestMessages';
+import About from './About';
 
 function Home() {
   // -------------------------------
@@ -93,40 +95,8 @@ function Home() {
             that we believe in.
           </p>
         </div>
-      </section>
-
-      {/* ================================
-          ANALYTICS SECTION
-      ================================ */}
-      <section className="analytics-section" style={{ padding: '4rem 1rem' }}>
         <div className="container">
-          <h2>Donation Analytics</h2>
-          {analyticsLoading ? (
-            <p>Loading analytics...</p>
-          ) : analyticsError ? (
-            <p className="text-danger">{analyticsError}</p>
-          ) : analytics ? (
-            <>
-              <p><strong>Total Donation Amount:</strong> €{analytics.total_amount}</p>
-              <p><strong>Total Donations:</strong> {analytics.donations_count}</p>
-              <ul>
-                {analytics.count_per_charity && analytics.count_per_charity.map(item => (
-                  <li key={item.charity__name}>
-                    {item.charity__name}: {item.count} donations, Total: €{item.total_allocated}
-                  </li>
-                ))}
-              </ul>
-              {/* Combined analytics chart (as in AdminDashboard.jsx) */}
-              <div style={{ marginTop: '2rem' }}>
-                <h4>Combined Analytics Chart</h4>
-                <img
-                  src={`${axiosInstance.defaults.baseURL}/charts/`}
-                  alt="Analytics Charts"
-                  style={{ maxWidth: '100%', height: 'auto' }}
-                />
-              </div>
-            </>
-          ) : null}
+          <About />
         </div>
       </section>
 
@@ -192,6 +162,16 @@ function Home() {
           <GuestMessages />
         </div>
       </section>
+
+      {/* ================================
+          ANALYTICS SECTION
+      ================================ */}
+      <StatsSection
+        analytics={analytics}
+        donationGoal={1200}
+        analyticsLoading={analyticsLoading}
+        analyticsError={analyticsError}
+      />
     </div>
   );
 }
