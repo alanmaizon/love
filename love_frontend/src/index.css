@@ -75,13 +75,13 @@ html, body, #root {
   align-items: center;
   width: 100%;
   background: #3D2C1E; /* Dark Brown */
-  background-image: url('../public/1.svg'), url('../public/2.svg'), url('../public/3.svg'), url('../public/4.svg');
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-  background-position: bottom 0 left 80px, bottom 0 right 80px, bottom 0 left 160px, bottom 0 right 160px;
-  background-size: contain, contain, contain, contain;
+  background-image: url('../public/1.svg');
+  background-repeat: no-repeat;
+  background-position: bottom 0 left 20px;
+  background-size: contain;
   color: #EAD7BB;
   text-align: center;
-  padding: 15px 0;
+  padding: 15px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
   z-index: 1000;
 }
