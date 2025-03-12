@@ -51,6 +51,26 @@ def public_profile(request):
     data['isPublic'] = True  # Add flag
     return Response(data)
 
+@api_view(['GET'])
+def donation_analytics(request):
+    confirmed_donations = Donation.objects.filter(status='confirmed')
+    total_amount = confirmed_donations.aggregate(total=Sum('amount'))['total'] or 0
+    charity_amount = total_amount * Decimal('0.5')
+    couple_amount = total_amount * Decimal('0.5')
+    donations_count = confirmed_donations.count()
+    # Group by charity name and calculate both count and allocated total.
+    count_per_charity = confirmed_donations.values('charity__name').annotate(
+        count=Count('id'),
+        total_allocated=Sum(ExpressionWrapper(F('amount') * Decimal('0.5'), output_field=DecimalField()))
+    )
+    return Response({
+        "total_amount": total_amount,
+        "charity_amount": charity_amount,
+        "couple_amount": couple_amount,
+        "donations_count": donations_count,
+        "count_per_charity": list(count_per_charity),
+    })
+
 @csrf_exempt
 def login_view(request):
     if request.method == "POST":
@@ -104,63 +124,3 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     serializer_class = CharitySerializer
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [AllowAny]
-
-@api_view(['GET'])
-def donation_analytics(request):
-    confirmed_donations = Donation.objects.filter(status='confirmed')
-    total_amount = confirmed_donations.aggregate(total=Sum('amount'))['total'] or 0
-    charity_amount = total_amount * Decimal('0.5')
-    couple_amount = total_amount * Decimal('0.5')
-    donations_count = confirmed_donations.count()
-    # Group by charity name and calculate both count and allocated total.
-    count_per_charity = confirmed_donations.values('charity__name').annotate(
-        count=Count('id'),
-        total_allocated=Sum(ExpressionWrapper(F('amount') * Decimal('0.5'), output_field=DecimalField()))
-    )
-    return Response({
-        "total_amount": total_amount,
-        "charity_amount": charity_amount,
-        "couple_amount": couple_amount,
-        "donations_count": donations_count,
-        "count_per_charity": list(count_per_charity),
-    })
-
-def confirm_donation(request):
-    if request.method == "POST":
-        amount = request.POST.get("amount")
-        donor_name = request.POST.get("donor_name")
-        donor_email = request.POST.get("donor_email")
-        selected_charity_ids = request.POST.getlist("charities")
-        selected_charities = Charity.objects.filter(id__in=selected_charity_ids)
-        
-        # Generate a unique reference ID
-        reference_id = f"GIFT-{get_random_string(8).upper()}"
-        
-        # Save the donation (unverified until manually confirmed)
-        donation = Donation.objects.create(
-            donor_name=donor_name,
-            donor_email=donor_email,
-            amount=amount,
-            reference_id=reference_id,
-        )
-        donation.charities.set(selected_charities)
-
-        return render(request, "confirm_donation.html", {
-            "donation": donation,
-            "reference_id": reference_id,
-            "bank_name": "Bank XYZ",
-            "account_number": "12345678",
-            "bank_identifier": "987654"
-        })
-    return render(request, "donation_form.html")
-
-
-def mark_as_paid(request):
-    reference_id = request.POST.get("reference_id")
-
-    donation = Donation.objects.filter(reference_id=reference_id).first()
-    if donation:
-        donation.status = "Pending Confirmation"
-        donation.save()
-        return JsonResponse({"message": "Your payment is being verified."})
-    return JsonResponse({"error": "Invalid Reference ID"}, status=400)
