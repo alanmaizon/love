@@ -73,8 +73,8 @@ function Home() {
       <section className="hero-image"></section>
       <section className="hero-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
-          <h1>Welcome to Our Wedding Celebration</h1>
-          <p>We’re excited to share our special day with you!</p>
+          <h1>THANK YOU</h1>
+          <p>FOR YOUR SUPPORT</p>
           <Link to="/donate" className="btn btn-primary mt-3">Send a Gift</Link>
         </div>
       </section>
@@ -82,9 +82,9 @@ function Home() {
       {/* ================================
           ABOUT US (with 50% donation note)
       ================================ */}
-      <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#f8f8f8' }}>
+      <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
-          <h2>The Power Of Love</h2>
+          <h2>We're excited to share our special day with you!</h2>
           <p>
             We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
             we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
@@ -117,7 +117,7 @@ function Home() {
       {/* ================================
           WEDDING COUNTDOWN
       ================================ */}
-      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#f0efe9' }}>
+      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#56443f' }}>
         <div className="container">
           <h2>Wedding Countdown</h2>
           <CountdownTimer targetDate={weddingDate} />
@@ -129,7 +129,7 @@ function Home() {
       ================================ */}
       <section className="guestbook-section" style={{ padding: '4rem 1rem' }}>
         <div className="container">
-          <h2>Guestbook</h2>
+          <h2>Leave us a heartfelt message!</h2>
           <GuestMessages />
         </div>
       </section>
@@ -137,11 +137,11 @@ function Home() {
       {/* ================================
           ABOUT THE COUPLE (PUBLIC PROFILE)
       ================================ */}
-      <section className="couple-section" style={{ padding: '4rem 1rem', backgroundColor: '#f8f8f8' }}>
+      <section className="couple-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Meet the Couple</h2>
           {profileLoading ? (
-            <p>Loading profile...</p>
+            <p>All you need is love...</p>
           ) : profileError ? (
             <p className="text-danger">{profileError}</p>
           ) : profile ? (
@@ -155,7 +155,7 @@ function Home() {
               )}
               <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
               <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
-              <p><strong>Location:</strong> {profile.location}</p>
+              <p>You can find us in<strong> {profile.location}</strong></p>
             </>
           ) : (
             <p>No profile information available.</p>
