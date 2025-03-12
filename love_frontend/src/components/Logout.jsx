@@ -14,11 +14,8 @@ function Logout() {
         console.error('Logout error:', error);
       })
       .finally(() => {
-        // Clean user state
         setAuthUser(null);
-        // Save localStorage when logout
         localStorage.setItem('loggedOut', 'true');
-        // Sent message to all tabs to sync
         const channel = new BroadcastChannel('auth_channel');
         channel.postMessage({ type: 'LOGOUT' });
         channel.close();

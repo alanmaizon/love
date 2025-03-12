@@ -14,7 +14,6 @@ export function AuthProvider({ children }) {
       if (e.data.type === 'LOGOUT') {
         setAuthUser(null);
       } else if (e.data.type === 'LOGIN') {
-        // Updates the user states
         setAuthUser(e.data.payload);
       }
     };

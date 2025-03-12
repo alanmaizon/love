@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
@@ -21,82 +22,82 @@ import GuestMessages from './components/GuestMessages';
 import Bio from './components/About';
 
 function Header() {
-  const { user } = useContext(AuthContext);
+  const { authUser } = useContext(AuthContext);
 
-return (
-  <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div className="container">
-      <Link className="navbar-brand d-flex align-items-center" to="/">
-        <img 
-          src={logo}
-          alt="Logo" 
-          style={{ height: '50px', marginRight: '8px' }} 
-        />
-      </Link>
-      <button
-        className="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span className="navbar-toggler-icon" />
-      </button>
-      <div className="collapse navbar-collapse" id="navbarNav">
-        <ul className="navbar-nav ms-auto">
-          <li className="nav-item">
-            <Link className="nav-link" to="/messages">Guestbook</Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link" to="/charities">Charities</Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link" to="/bio">About Us</Link>
-          </li>
-          <li className="nav-item dropdown">
-            <a
-              className="nav-link dropdown-toggle"
-              href="#!"
-              id="userDropdown"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              {user ? user.username : "Account"}
-            </a>
-            <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-              {user ? (
-                <>
-                  <li>
-                    <Link className="dropdown-item" to="/dashboard">Dashboard</Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/profile">Profile</Link>
-                  </li>
-                  {user.isAdmin && (
+  return (
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div className="container">
+        <Link className="navbar-brand d-flex align-items-center" to="/">
+          <img 
+            src={logo}
+            alt="Logo" 
+            style={{ height: '50px', marginRight: '8px' }} 
+          />
+        </Link>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon" />
+        </button>
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <Link className="nav-link" to="/messages">Guestbook</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/charities">Charities</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/bio">About Us</Link>
+            </li>
+            <li className="nav-item dropdown">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#!"
+                id="userDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {authUser ? authUser.username : "Account"}
+              </a>
+              <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                {authUser ? (
+                  <>
                     <li>
-                      <Link className="dropdown-item" to="/admin">Admin</Link>
+                      <Link className="dropdown-item" to="/dashboard">Dashboard</Link>
                     </li>
-                  )}
-                  <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <Link className="dropdown-item" to="/profile">Profile</Link>
+                    </li>
+                    {authUser.isAdmin && (
+                      <li>
+                        <Link className="dropdown-item" to="/admin">Admin</Link>
+                      </li>
+                    )}
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <Link className="dropdown-item" to="/logout">Logout</Link>
+                    </li>
+                  </>
+                ) : (
                   <li>
-                    <Link className="dropdown-item" to="/logout">Logout</Link>
+                    <Link className="dropdown-item" to="/login">Login</Link>
                   </li>
-                </>
-              ) : (
-                <li>
-                  <Link className="dropdown-item" to="/login">Login</Link>
-                </li>
-              )}
-            </ul>
-          </li>
-        </ul>
+                )}
+              </ul>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
 }
 
 function Footer() {

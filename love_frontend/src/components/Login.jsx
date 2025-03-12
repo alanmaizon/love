@@ -1,5 +1,5 @@
 // src/components/Login.jsx
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -9,24 +9,27 @@ function Login() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
-  const { setAuthUser } = useContext(AuthContext);
+  const { authUser, setAuthUser } = useContext(AuthContext);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (authUser) {
+      navigate('/dashboard');
+    }
+  }, [authUser, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await axiosInstance.post('/login/', { username, password });
-      // Remove logout flag
       localStorage.removeItem('loggedOut');
 
-      // Get profile after login
       const profileRes = await axiosInstance.get('/profile/');
       const displayName = `${profileRes.data.bride_name} & ${profileRes.data.groom_name}`;
       const newAuthUser = { username: displayName, ...profileRes.data };
 
-      // Updates states
       setAuthUser(newAuthUser);
 
-      // Send event between tabs
       const channel = new BroadcastChannel('auth_channel');
       channel.postMessage({ type: 'LOGIN', payload: newAuthUser });
       channel.close();
@@ -43,7 +46,11 @@ function Login() {
 
   return (
     <div className="container mt-5">
-      {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+      {errorMsg && (
+        <div className="alert alert-danger" role="alert">
+          {errorMsg}
+        </div>
+      )}
       <form onSubmit={handleLogin}>
         <h2>Login</h2>
         <div className="mb-3">
@@ -55,6 +62,7 @@ function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            autoFocus
           />
         </div>
         <div className="mb-3">
