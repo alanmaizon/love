@@ -75,10 +75,10 @@ html, body, #root {
   align-items: center;
   width: 100%;
   background: #3D2C1E; /* Dark Brown */
-  background-image: url('../public/1.svg'), url('../public/2.svg');
-  background-repeat: no-repeat, no-repeat;
-  background-position: bottom 0 left 60px, bottom 0 right 60px; /* Add margin */
-  background-size: contain, contain;
+  background-image: url('../public/1.svg'), url('../public/2.svg') url('../public/3.svg'), url('../public/4.svg');
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: bottom 0 left 80px, bottom 0 right 80px, bottom 0 left 160px, bottom 0 right 160px;
+  background-size: contain, contain, contain, contain;
   color: #EAD7BB;
   text-align: center;
   padding: 15px 0;
