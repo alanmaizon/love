@@ -78,7 +78,7 @@ html, body, #root {
   background-image: url('../public/1.svg');
   background-repeat: no-repeat;
   background-position: bottom 0 left 20px;
-  background-size: auto;
+  background-size: contain;
   color: #EAD7BB;
   text-align: center;
   padding: 15px;
