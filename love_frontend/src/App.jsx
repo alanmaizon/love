@@ -19,7 +19,7 @@ import EditCharity from './components/EditCharity';
 import AdminDashboard from './components/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import GuestMessages from './components/GuestMessages';
-import Bio from './components/About';
+import About from './components/About';
 
 function Header() {
   const { authUser } = useContext(AuthContext);
@@ -54,7 +54,7 @@ function Header() {
               <Link className="nav-link" to="/charities">Charities</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/bio">About Us</Link>
+              <Link className="nav-link" to="/about">About Us</Link>
             </li>
             <li className="nav-item dropdown">
               <a
@@ -131,7 +131,7 @@ function App() {
             <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
             <Route path="/messages" element={<GuestMessages />} />
-            <Route path="/bio" element={<Bio />} />
+            <Route path="/about" element={<About />} />
           </Routes>
         </main>
         <Footer />

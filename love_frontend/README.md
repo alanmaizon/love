@@ -57,20 +57,11 @@ This repository contains the front-end portion of the **Love That Gives Back** p
 
 ```
 love_frontend/
-├── public/                 # Static assets (if any)
+├── public/                 # Static assets
 ├── src/
 │   ├── api/
 │   │   └── axiosInstance.js   # Custom axios instance using VITE_API_URL
 │   ├── components/
-│   │   ├── Home.jsx           # Home page with hero, countdown, and stats
-│   │   ├── Login.jsx          # Login form
-│   │   ├── Logout.jsx         # Logout process
-│   │   ├── Profile.jsx        # Edit/view couple profile
-│   │   ├── DonationForm.jsx   # Donation form for guests
-│   │   ├── ExploreCharities.jsx  # Browse charities page
-│   │   ├── ManageCharities.jsx   # Admin interface to manage charities
-│   │   ├── EditCharity.jsx         # Edit charity details
-│   │   └── PrivateRoute.jsx    # Protects authenticated routes
 │   ├── main.jsx              # App entry point
 │   └── index.css             # Global styles
 ├── index.html                # Main HTML file
