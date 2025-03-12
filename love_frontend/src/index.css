@@ -77,7 +77,7 @@ html, body, #root {
   background: #3D2C1E; /* Dark Brown */
   background-image: url('../public/1.svg'), url('../public/2.svg');
   background-repeat: no-repeat, no-repeat;
-  background-position: bottom 0 left 40px, bottom 0 right 40px; /* Add margin */
+  background-position: bottom 0 left 60px, bottom 0 right 60px; /* Add margin */
   background-size: contain, contain;
   color: #EAD7BB;
   text-align: center;
