@@ -25,12 +25,12 @@ function Header() {
   const { authUser } = useContext(AuthContext);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation" aria-label="Main Navigation">
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img 
             src={logo}
-            alt="Logo" 
+            alt="Love That Gives Back Logo" 
             style={{ height: '50px', marginRight: '8px' }} 
           />
         </Link>
@@ -102,7 +102,7 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="footer">
+    <footer className="footer" role="contentinfo">
       <div className="container text-center">
         <p className="mb-0">Love that gives back © 2025</p>
       </div>
@@ -116,7 +116,7 @@ function App() {
       <ScrollToTop /> 
       <div className="app-container">
         <Header />
-        <main className="main-content">
+        <main className="main-content" role="main">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />

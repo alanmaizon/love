@@ -1,3 +1,4 @@
+// src/components/Home.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import CountdownTimer from './CountdownTimer';
@@ -12,7 +13,6 @@ function Home() {
   const [analyticsError, setAnalyticsError] = useState('');
 
   useEffect(() => {
-    // Fetch profile and analytics in parallel
     axiosInstance.get('/public_profile/')
       .then((res) => setProfile(res.data))
       .catch(() => setProfileError('Failed to load profile.'))
@@ -24,19 +24,15 @@ function Home() {
       .finally(() => setLoadingAnalytics(false));
   }, []);
 
-  // Memoize wedding date to prevent unnecessary recalculations
   const weddingDate = useMemo(() => profile?.wedding_date || "2025-04-26T12:30:00", [profile]);
 
-  // Define donation goal and calculate progress percentage if analytics is loaded.
   const donationGoal = 1200;
   const currentTotal = analytics ? analytics.total_amount : 0;
   const progressPercentage = Math.min((currentTotal / donationGoal) * 100, 100);
 
   return (
     <div className="container mt-5">
-      {/* Hero Section */}
-      <section className="hero-image"></section>
-      <section className="hero-section text-center">
+      <section className="hero-section text-center" role="banner">
         <p className="lead">
           Send your gift and write a message in our digital guestbook!
         </p>
@@ -46,20 +42,21 @@ function Home() {
         </div>
       </section>
 
-      {/* About the Couple Section */}
       {loadingProfile ? (
-        <div className="text-center mt-4">
+        <div className="text-center mt-4" role="alert" aria-live="assertive">
           <div className="spinner-border text-light" role="status"></div>
           <p>Loading profile...</p>
         </div>
       ) : profileError ? (
-        <div className="alert alert-warning text-center mt-4">{profileError}</div>
+        <div className="alert alert-warning text-center mt-4" role="alert">
+          {profileError}
+        </div>
       ) : profile && (
         <section className="about-section mt-5 text-center">
           <h2>About the Couple</h2>
           <img 
             src={profile.profile_picture_url} 
-            alt="Profile" 
+            alt="Profile picture of the couple" 
             className="img-fluid rounded-circle mb-3" 
             style={{ maxWidth: '150px' }} 
           />
@@ -69,38 +66,33 @@ function Home() {
         </section>
       )}
 
-      {/* Countdown Timer Section */}
-      <section className="countdown-section mt-5 text-center">
+      <section className="countdown-section mt-5 text-center" aria-live="polite">
         <h2>Wedding Countdown</h2>
         <CountdownTimer targetDate={weddingDate} />
       </section>
 
-      {/* Live Charity Stats Section */}
       {loadingAnalytics ? (
-        <div className="text-center mt-4">
+        <div className="text-center mt-4" role="alert" aria-live="assertive">
           <div className="spinner-border text-light" role="status"></div>
           <p>Loading statistics...</p>
         </div>
       ) : analyticsError ? (
-        <div className="alert alert-danger text-center mt-4">{analyticsError}</div>
+        <div className="alert alert-danger text-center mt-4" role="alert">
+          {analyticsError}
+        </div>
       ) : (
-        <section className="stats-section mt-5 text-center">
+        <section className="stats-section mt-5 text-center" aria-live="polite">
           <h2>Live Contribution</h2>
           <p><strong>Total Contributions:</strong> €{currentTotal.toLocaleString()}</p>
           <p><strong>Participation Count:</strong> {analytics.donations_count.toLocaleString()}</p>
-          
-          {/* Donation Goal Progress Bar Section */}
           <div className="mt-4">
             <h4>Our Goal: €{donationGoal.toLocaleString()}</h4>
-            <div 
-              style={{ position: 'relative', width: '30vw', margin: '0 auto' }}
-            >
-              {/* Percentage label positioned just to the left of the progress bar */}
+            <div style={{ position: 'relative', width: '30vw', margin: '0 auto' }}>
               <span 
                 style={{
                   position: 'absolute',
-                  right: '100%',       // Position the right edge of the label at the left edge of the container
-                  marginRight: '5px',  // A small gap between the label and the bar
+                  right: '100%',
+                  marginRight: '5px',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   minWidth: '40px',
@@ -109,7 +101,6 @@ function Home() {
               >
                 {progressPercentage.toFixed(0)}%
               </span>
-              {/* Progress bar */}
               <div className="progress" style={{ height: '25px' }}>
                 <div
                   className="progress-bar"
@@ -122,8 +113,7 @@ function Home() {
                 </div>
               </div>
             </div>
-          </div>
-              
+          </div>     
         </section>
       )}
     </div>

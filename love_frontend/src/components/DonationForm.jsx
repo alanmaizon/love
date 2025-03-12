@@ -52,7 +52,6 @@ function DonationForm() {
 
     try {
       const response = await axiosInstance.post('/donations/', donationData);
-      // Navigate to confirmation page, passing donation details if needed
       navigate('/confirmation', { state: { donation: response.data } });
     } catch (error) {
       console.error('Error submitting donation:', error);
@@ -62,10 +61,13 @@ function DonationForm() {
 
   return (
     <div className="container mt-5">
-      {feedback && <div role="alert" className="alert alert-info">{feedback}</div>}
-      <form onSubmit={handleSubmit} noValidate>
+      {feedback && (
+        <div role="alert" className="alert alert-info">
+          {feedback}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} noValidate role="form">
         <h2>Make a Gift</h2>
-        {/* Donor Name */}
         <div className="mb-3">
           <label htmlFor="donorName" className="form-label">Name</label>
           <input
@@ -77,7 +79,6 @@ function DonationForm() {
             required
           />
         </div>
-        {/* Donor Email */}
         <div className="mb-3">
           <label htmlFor="donorEmail" className="form-label">Email</label>
           <input
@@ -89,78 +90,27 @@ function DonationForm() {
             required
           />
         </div>
-        {/* Contribution Amount Options */}
-        <div className="mb-3">
-          <label className="form-label">Contribution Amount</label>
+        <div className="mb-3" role="radiogroup" aria-labelledby="contributionAmountLabel">
+          <label id="contributionAmountLabel" className="form-label">Contribution Amount</label>
           <div>
-            <div className="form-check form-check-inline">
-              <input
-                id="amount-10"
-                data-testid="radio-amount-10"
-                className="form-check-input"
-                type="radio"
-                name="amountOptions"
-                value="10"
-                checked={selectedAmount === "10"}
-                onChange={(e) => setSelectedAmount(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="amount-10">€10</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                id="amount-20"
-                data-testid="radio-amount-20"
-                className="form-check-input"
-                type="radio"
-                name="amountOptions"
-                value="20"
-                checked={selectedAmount === "20"}
-                onChange={(e) => setSelectedAmount(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="amount-20">€20</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                id="amount-50"
-                data-testid="radio-amount-50"
-                className="form-check-input"
-                type="radio"
-                name="amountOptions"
-                value="50"
-                checked={selectedAmount === "50"}
-                onChange={(e) => setSelectedAmount(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="amount-50">€50</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                id="amount-100"
-                data-testid="radio-amount-100"
-                className="form-check-input"
-                type="radio"
-                name="amountOptions"
-                value="100"
-                checked={selectedAmount === "100"}
-                onChange={(e) => setSelectedAmount(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="amount-100">€100</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                id="amount-custom"
-                data-testid="radio-amount-custom"
-                className="form-check-input"
-                type="radio"
-                name="amountOptions"
-                value="custom"
-                checked={selectedAmount === "custom"}
-                onChange={(e) => setSelectedAmount(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="amount-custom">Custom</label>
-            </div>
+            {["10", "20", "50", "100", "custom"].map((value) => (
+              <div key={value} className="form-check form-check-inline">
+                <input
+                  id={`amount-${value}`}
+                  className="form-check-input"
+                  type="radio"
+                  name="amountOptions"
+                  value={value}
+                  checked={selectedAmount === value}
+                  onChange={(e) => setSelectedAmount(e.target.value)}
+                />
+                <label className="form-check-label" htmlFor={`amount-${value}`}>
+                  {value === "custom" ? "Custom" : `€${value}`}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
-        {/* Custom Amount Input */}
         {selectedAmount === "custom" && (
           <div className="mb-3">
             <label htmlFor="customAmount" className="form-label">Enter Custom Amount</label>
@@ -173,7 +123,6 @@ function DonationForm() {
             />
           </div>
         )}
-        {/* Charity Dropdown */}
         <div className="mb-3">
           <label htmlFor="charity" className="form-label">Select one charity</label>
           <select
@@ -191,7 +140,6 @@ function DonationForm() {
             ))}
           </select>
         </div>
-        {/* Personal Message */}
         <div className="mb-3">
           <label htmlFor="message" className="form-label">Write a heartfelt message for us</label>
           <textarea
