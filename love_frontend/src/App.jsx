@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
-import logo from '../public/brand-logo.png';
+import logo from '../public/brand-logo.svg';
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Home from './components/Home';
