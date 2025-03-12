@@ -84,10 +84,10 @@ function Home() {
       ================================ */}
       <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#f8f8f8' }}>
         <div className="container">
-          <h2>About Us</h2>
+          <h2>The Power Of Love</h2>
           <p>
-            We’re thrilled to be celebrating our wedding with you. To make it extra meaningful, 
-            we’ve decided that <strong>50% of every donation</strong> will help us as we start our new life 
+            We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
+            we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
             together, and the other <strong>50% will go directly to the charities</strong> we care about.
           </p>
           <p>
@@ -97,16 +97,6 @@ function Home() {
         </div>
         <div className="container">
           <About />
-        </div>
-      </section>
-
-      {/* ================================
-          WEDDING COUNTDOWN
-      ================================ */}
-      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#f0efe9' }}>
-        <div className="container">
-          <h2>Wedding Countdown</h2>
-          <CountdownTimer targetDate={weddingDate} />
         </div>
       </section>
 
@@ -121,6 +111,26 @@ function Home() {
             Thank you for helping us make the world a better place.
           </p>
           <ExploreCharities />
+        </div>
+      </section>
+
+      {/* ================================
+          WEDDING COUNTDOWN
+      ================================ */}
+      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#f0efe9' }}>
+        <div className="container">
+          <h2>Wedding Countdown</h2>
+          <CountdownTimer targetDate={weddingDate} />
+        </div>
+      </section>
+
+      {/* ================================
+          GUESTBOOK
+      ================================ */}
+      <section className="guestbook-section" style={{ padding: '4rem 1rem' }}>
+        <div className="container">
+          <h2>Guestbook</h2>
+          <GuestMessages />
         </div>
       </section>
 
@@ -150,16 +160,6 @@ function Home() {
           ) : (
             <p>No profile information available.</p>
           )}
-        </div>
-      </section>
-
-      {/* ================================
-          GUESTBOOK
-      ================================ */}
-      <section className="guestbook-section" style={{ padding: '4rem 1rem' }}>
-        <div className="container">
-          <h2>Guestbook</h2>
-          <GuestMessages />
         </div>
       </section>
 
