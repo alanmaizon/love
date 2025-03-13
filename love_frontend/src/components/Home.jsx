@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import poppy from '../../public/1.svg';
-import rose from '../../public/2.svg';
+import poppy from '../../public/poppy.svg';
+import rose from '../../public/rose.svg';
 
 // Import existing components
 import StatsSection from './StatsSection';
