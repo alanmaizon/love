@@ -84,18 +84,6 @@ function Home() {
       ================================ */}
       <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
-          <h2>Thank you for your support</h2>
-          <p>
-            We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
-            we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
-            together, and the other <strong>50% will go directly to the charities</strong> we care about.
-          </p>
-          <p>
-            This way, your love and generosity not only supports our future, but also helps important causes 
-            that we believe in.
-          </p>
-        </div>
-        <div className="container">
           <About />
         </div>
       </section>

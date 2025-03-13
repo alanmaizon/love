@@ -38,10 +38,15 @@ function Bio() {
 
         {/* Text Section */}
         <div className="bio-text" style={{ color: '#EAD7BB' }}>
-          <h1 style={{ color: '#EAD7BB' }}>Love Is All You Need</h1>
+          <h1 style={{ color: '#EAD7BB' }}>Thank you for your support</h1>
           <p style={{ color: '#EAD7BB' }}>
-            Here we are to share you more about our lives, our love, and our dreams.
-            We hope our story inspires you as much as your support inspires us.
+            We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
+            we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
+            together, and the other <strong>50% will go directly to the charities</strong> we care about.
+          </p>
+          <p style={{ color: '#EAD7BB' }}>
+            This way, your love and generosity not only supports our future, but also helps important causes 
+            that we believe in.
           </p>
         </div>
       </div>
