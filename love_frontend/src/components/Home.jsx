@@ -151,7 +151,7 @@ function Home() {
       {/* ================================
           GUESTBOOK
       ================================ */}
-      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
+      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem', minHeight: '400px' }}>
         <div className="container">
           <h2>Leave us a message in our guestbook!</h2>
           <HomeGuestbookSection />
@@ -161,11 +161,11 @@ function Home() {
       {/* ================================
           ABOUT THE COUPLE (PUBLIC PROFILE)
       ================================ */}
-      <section className="couple-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
+      <section className="couple-section text-center" style={{ backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Meet the Couple</h2>
           <div className="row" style={{ minHeight: '300px' }}>
-            <div className="col-md-6">
+            <div className="col-md-6" style={{ padding: '4rem 1rem' }}>
               {profileLoading ? (
                 <p>All you need is love...</p>
               ) : profileError ? (
