@@ -41,36 +41,34 @@ def combined_charts(request):
     colors = custom_colors[:len(labels)]  # Ensure we don't exceed the number of colors available
 
     # ------------------
-    # Create a composite figure with subplots
+    # Create a composite figure with subplots (VERTICAL LAYOUT for mobile)
     # ------------------
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5), facecolor='none')  # Transparent background
-    axs = axs.flatten()
+    fig, axs = plt.subplots(2, 1, figsize=(6, 10), facecolor='none')  # Adjusted for vertical layout
 
     # Chart 1: Donation Trend (Line Chart)
     axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color=custom_colors[0])  # Use custom color
+    axs[0].set_title('Donation Trend (Last 7 Days)', color='white', fontsize=14)
+    axs[0].set_xlabel('Date', color='white', fontsize=12)
     axs[0].set_xticks(dates)
-    axs[0].set_xticklabels([date.strftime('%d-%m') for date in dates], color='white')
-    axs[0].set_ylabel('Total Donations', color='white')
+    axs[0].set_xticklabels([date.strftime('%d-%m') for date in dates], color='white', fontsize=10)
+    axs[0].set_ylabel('Total Donations', color='white', fontsize=12)
     axs[0].grid(True, color='gray')
     axs[0].spines['top'].set_color('white')
     axs[0].spines['bottom'].set_color('white')
     axs[0].spines['left'].set_color('white')
     axs[0].spines['right'].set_color('white')
-    axs[0].tick_params(axis='x', colors='white')  # Make x-axis numbers white
-    axs[0].tick_params(axis='y', colors='white')  # Make y-axis numbers white
+    axs[0].tick_params(axis='x', colors='white')
+    axs[0].tick_params(axis='y', colors='white')
 
-    # Chart 2: Pie Chart for Donation Split by Charity
-    wedges, texts = axs[1].pie(
-        sizes, labels=labels, startangle=90, colors=colors
-    )
+    # Chart 2: Pie Chart for Donation Split by Charity (NO PERCENTAGES)
+    wedges, texts = axs[1].pie(sizes, labels=labels, startangle=90, colors=colors)
     axs[1].axis('equal')  # Ensure the pie is drawn as a circle.
+    axs[1].set_title('Donation Split by Charity (50% allocated)', color='white', fontsize=14)
 
     # Set labels (charity names) to white
     for text in texts:
         text.set_color('white')
 
-    # Leave the percentage values black (autotexts)
-    
     plt.tight_layout()
 
     buf = io.BytesIO()
