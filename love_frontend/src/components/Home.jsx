@@ -142,7 +142,7 @@ function Home() {
             opacity: 0.3,
           }}
         />
-        <div className="container" style={{ fontSize: '2.5rem', zIndex: 2, position: 'relative' }}>
+        <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
           <h2>Wedding Countdown</h2>
           <CountdownTimer targetDate={weddingDate} />
         </div>

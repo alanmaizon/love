@@ -31,7 +31,7 @@ def combined_charts(request):
         total=Sum(ExpressionWrapper(F('amount') * Decimal('0.5'), output_field=DecimalField()))
     )
     labels = [item['charity__name'] for item in charity_totals]
-    sizes = [float(item['total']) for item in charity_totals]  # convert Decimal to float
+    sizes = [float(item['total']) for item in charity_totals]  # Convert Decimal to float
     if not labels:
         labels = ['No Donations']
         sizes = [1]
@@ -44,6 +44,9 @@ def combined_charts(request):
     # Create a composite figure with subplots (VERTICAL LAYOUT for mobile)
     # ------------------
     fig, axs = plt.subplots(2, 1, figsize=(6, 10), facecolor='none')  # Adjusted for vertical layout
+
+    # Add some margin on the right
+    plt.subplots_adjust(right=0.85)  
 
     # Chart 1: Donation Trend (Line Chart)
     axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color=custom_colors[0])  # Use custom color
@@ -72,7 +75,7 @@ def combined_charts(request):
     plt.tight_layout()
 
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', transparent=True)  # Transparent background
+    plt.savefig(buf, format='png', transparent=True, bbox_inches='tight')  # Fix label cutting issue
     plt.close(fig)
     buf.seek(0)
 
