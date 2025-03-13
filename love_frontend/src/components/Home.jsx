@@ -166,7 +166,7 @@ function Home() {
           <h2>Meet the Couple</h2>
           <div className="row">
             <div className="col-md-6">
-              {loadingProfile ? (
+              {profileLoading ? (
                 <p>All you need is love...</p>
               ) : profileError ? (
                 <p className="text-danger">{profileError}</p>
