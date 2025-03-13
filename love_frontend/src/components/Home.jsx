@@ -170,7 +170,6 @@ function Home() {
           overflow: 'hidden'
         }}
       >
-        {/* Content Container */}
         <div className="container" style={{ position: 'relative', zIndex: 2 }}>
           <h2>Meet the Couple</h2>
           {profileLoading ? (
@@ -186,15 +185,23 @@ function Home() {
                   style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }}
                 />
               )}
-              <p>
-                <strong>{profile.bride_name} &amp; {profile.groom_name}</strong>
-              </p>
-              <p style={{ marginTop: '1rem' }}>
-                {profile.bio || "We're looking forward to celebrating with you!"}
-              </p>
+              <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
+              <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
               <p>
                 You can find us in <strong>{profile.location}</strong>
               </p>
+              {/* Social Media Icons */}
+              <div style={{ marginTop: '1rem' }}>
+                <a href="https://facebook.com/yourpage" target="_blank" rel="noopener noreferrer">
+                  <FaFacebookSquare style={{ fontSize: '2rem', marginRight: '1rem', color: '#EAD7BB' }} />
+                </a>
+                <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">
+                  <FaInstagram style={{ fontSize: '2rem', marginRight: '1rem', color: '#EAD7BB' }} />
+                </a>
+                <a href="https://twitter.com/yourprofile" target="_blank" rel="noopener noreferrer">
+                  <FaTwitterSquare style={{ fontSize: '2rem', marginRight: '1rem', color: '#EAD7BB' }} />
+                </a>
+              </div>
             </>
           ) : (
             <p>No profile information available.</p>
