@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import poppy from '../../public/poppy.svg';
 import rose from '../../public/rose.svg';
-
+import { FaFacebookSquare, FaInstagram, FaTwitterSquare } from 'react-icons/fa';
 // Import existing components
 import StatsSection from './StatsSection';
 import CountdownTimer from './CountdownTimer';
