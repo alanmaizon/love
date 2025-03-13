@@ -22,7 +22,7 @@ def combined_charts(request):
             status='confirmed', created_at__date=date
         ).aggregate(total=Sum('amount'))['total'] or 0
         trend_totals.append(total)
-    
+
     # ------------------
     # Chart 2: Donations by Charity (Bar Chart)
     # ------------------
@@ -35,34 +35,40 @@ def combined_charts(request):
     if not labels:
         labels = ['No Donations']
         sizes = [1]
-    colors = plt.cm.Paired(range(len(labels)))
-    
+
+    # Custom color palette
+    custom_colors = ['#BBAA91', '#F1F0E2', '#E4C7B7', '#D16F52', '#D8AE48', '#A47864']
+    colors = custom_colors[:len(labels)]  # Ensure we don't exceed the number of colors available
+
     # ------------------
     # Create a composite figure with subplots
     # ------------------
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))  # Adjusted to 1 row and 2 columns
-    # Flatten the axes array for easier indexing.
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5), facecolor='none')  # Transparent background
     axs = axs.flatten()
-    
+
     # Chart 1: Donation Trend (Line Chart)
-    axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color='blue')
-    axs[0].set_title('Donation Trend (Last 7 Days)')
-    axs[0].set_xlabel('Date')
+    axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color=custom_colors[0])  # Use custom color
+    axs[0].set_title('Donation Trend (Last 7 Days)', color='white')
+    axs[0].set_xlabel('Date', color='white')
     axs[0].set_xticks(dates)
-    axs[0].set_xticklabels([date.strftime('%d-%m') for date in dates])
-    axs[0].set_ylabel('Total Donations')
-    axs[0].grid(True)
-    
-    # Subplot 2: Pie Chart for Donation Split by Charity
+    axs[0].set_xticklabels([date.strftime('%d-%m') for date in dates], color='white')
+    axs[0].set_ylabel('Total Donations', color='white')
+    axs[0].grid(True, color='gray')
+    axs[0].spines['top'].set_color('white')
+    axs[0].spines['bottom'].set_color('white')
+    axs[0].spines['left'].set_color('white')
+    axs[0].spines['right'].set_color('white')
+
+    # Chart 2: Pie Chart for Donation Split by Charity
     axs[1].pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
-    axs[1].axis('equal')  # Ensure the pie is drawn as a circle.
-    axs[1].set_title('Donation Split by Charity (50% allocated)')
-    
+    axs[1].axis('equal')
+    axs[1].set_title('Donation Split by Charity (50% allocated)', color='white')
+
     plt.tight_layout()
-    
+
     buf = io.BytesIO()
-    plt.savefig(buf, format='png')
+    plt.savefig(buf, format='png', transparent=True)  # Transparent background
     plt.close(fig)
     buf.seek(0)
-    
+
     return HttpResponse(buf.getvalue(), content_type='image/png')
