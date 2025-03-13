@@ -124,6 +124,7 @@ function Home() {
             position: 'absolute',
             left: '40px',
             bottom: '0',
+            height: '90%',
             zIndex: 1,
             opacity: 0.7,
           }}
@@ -135,6 +136,7 @@ function Home() {
             position: 'absolute',
             right: '40px',
             bottom: '0',
+            height: '90%',
             zIndex: 1,
             opacity: 0.7,
           }}
