@@ -194,6 +194,7 @@ function Home() {
               {/* Social Media Icons */}
               <div
                 style={{
+                  margin: 0,
                   marginTop: '1rem',
                   display: 'flex',
                   justifyContent: 'center',
