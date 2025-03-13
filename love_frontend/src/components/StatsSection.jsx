@@ -65,7 +65,6 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
 
             {/* Combined Analytics Chart */}
             <div style={{ marginTop: '2rem' }}>
-              <h4>Combined Analytics Chart</h4>
               <img
                 src={`${axiosInstance.defaults.baseURL}/charts/`}
                 alt="Analytics Charts"
