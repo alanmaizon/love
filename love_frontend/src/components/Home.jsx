@@ -201,13 +201,13 @@ function Home() {
                   alignItems: 'center'
                 }}
               >
-                <a href="https://facebook.com/yourpage" target="_blank" rel="noopener noreferrer">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
                   <FaFacebookSquare style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
                   <FaInstagram style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="https://twitter.com/yourprofile" target="_blank" rel="noopener noreferrer">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
                   <FaTwitterSquare style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
               </div>
