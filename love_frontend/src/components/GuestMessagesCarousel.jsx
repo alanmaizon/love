@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import './GuestMessagesCarousel.css'; // Make sure this file is imported
 
-function GuestMessagesCarousel({ messages, autoScrollDelay = 1000 }) {
+function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
 
   // Set up auto-scrolling
@@ -57,18 +57,40 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 1000 }) {
         <div
           key={msg.id}
           style={{
+            position: 'relative',         // Enable absolute positioning for footer elements
             flex: '0 0 auto',
             marginRight: '1rem',
-            border: '1px solid #ccc',
-            padding: '1rem',
-            borderRadius: '4px',
+            backgroundColor: '#4b2e2e',     // Dark chocolate color
+            color: '#EAD7BB',              // Text color
+            padding: '1.5rem',
+            borderRadius: '8px',
             minWidth: '250px',
-            userSelect: 'none' // disable text selection inside card
+            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+            userSelect: 'none'             // Disable text selection
           }}
         >
-          <h5>{msg.donor_name}</h5>
-          <p>{msg.message || "No message provided."}</p>
-          <small>Gifted on {new Date(msg.created_at).toLocaleDateString()}</small>
+          {/* Main Message */}
+          <p style={{ fontSize: '1.5rem', margin: '0 0 2rem 0' }}>
+            {msg.message || "No message provided."}
+          </p>
+          {/* Date at bottom left */}
+          <small style={{
+            position: 'absolute',
+            bottom: '8px',
+            left: '8px',
+            fontSize: '0.8rem'
+          }}>
+            {new Date(msg.created_at).toLocaleDateString()}
+          </small>
+          {/* Donor Name at bottom right */}
+          <small style={{
+            position: 'absolute',
+            bottom: '8px',
+            right: '8px',
+            fontSize: '1rem'
+          }}>
+            {msg.donor_name}
+          </small>
         </div>
       ))}
     </div>
