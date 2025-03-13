@@ -27,6 +27,7 @@ function HomeGuestbookSection() {
   return (
     <section className="guestbook-section" style={{ padding: '4rem 1rem' }}>
       <div className="container">
+        <h2>Guestbook</h2>
         <GuestMessagesCarousel messages={messages} />
       </div>
     </section>
