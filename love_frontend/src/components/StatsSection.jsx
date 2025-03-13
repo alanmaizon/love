@@ -23,7 +23,7 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
             <p>
               <strong>Total Donations:</strong> {analytics.donations_count.toLocaleString()}
             </p>
-            <ul>
+            <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
               {analytics.count_per_charity &&
                 analytics.count_per_charity.map((item) => (
                   <li key={item.charity__name}>
@@ -31,6 +31,7 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
                   </li>
                 ))}
             </ul>
+
 
             {/* Progress Bar Section */}
             <div className="mt-4">

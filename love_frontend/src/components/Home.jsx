@@ -151,7 +151,7 @@ function Home() {
       {/* ================================
           GUESTBOOK
       ================================ */}
-      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
+      <section className="guestbook-section text-center" style={{ padding: '1rem', height: '4rem' }}>
         <div className="container">
           <h2>Leave us a message in our guestbook!</h2>
           <HomeGuestbookSection />
@@ -161,7 +161,7 @@ function Home() {
       {/* ================================
           ABOUT THE COUPLE (PUBLIC PROFILE)
       ================================ */}
-      <section className="couple-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
+      <section className="couple-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Meet the Couple</h2>
           <div className="row" style={{ minHeight: '300px' }}>
