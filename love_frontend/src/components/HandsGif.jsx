@@ -38,7 +38,7 @@ function HandsGif() {
         <img
           src={hands}
           alt="Hands Gif"
-          style={{ height: '100%'}}
+          style={{ width: '100%'}}
         />
       )}
     </div>

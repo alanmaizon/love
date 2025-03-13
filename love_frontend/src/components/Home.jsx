@@ -127,7 +127,7 @@ function Home() {
             bottom: '0',
             height: '90%',
             zIndex: 1,
-            opacity: 0.7,
+            opacity: 0.3,
           }}
         />
         <img
@@ -139,7 +139,7 @@ function Home() {
             bottom: '0',
             height: '90%',
             zIndex: 1,
-            opacity: 0.7,
+            opacity: 0.3,
           }}
         />
         <div className="container" style={{ fontSize: '2.5rem', zIndex: 2, position: 'relative' }}>
@@ -171,7 +171,7 @@ function Home() {
           overflow: 'hidden'
         }}
       >
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="container" style={{ position: 'relative'}}>
           <h2>Meet the Couple</h2>
           {profileLoading ? (
             <p>All you need is love...</p>
