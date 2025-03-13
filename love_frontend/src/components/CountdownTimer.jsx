@@ -7,7 +7,6 @@ function CountdownTimer({ targetDate }) {
     let timeLeft = {};
     if (difference > 0) {
       timeLeft = {
-        weeks: Math.floor(difference / (1000 * 60 * 60 * 24 * 7)),
         days: Math.floor((difference / (1000 * 60 * 60 * 24)) % 7),
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
         minutes: Math.floor((difference / (1000 * 60)) % 60),
@@ -30,7 +29,7 @@ function CountdownTimer({ targetDate }) {
     <div className="countdown-timer">
       {Object.keys(timeLeft).length > 0 ? (
         <span>
-          {timeLeft.weeks}w {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+          {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
         </span>
       ) : (
         <span>It's time!</span>
