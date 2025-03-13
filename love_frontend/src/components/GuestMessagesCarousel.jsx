@@ -72,18 +72,6 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
           <p style={{ fontSize: '1.2rem', marginBottom: '2.5rem' }}>
             {msg.message || "No message provided."}
           </p>
-          {/* Date at Bottom Left */}
-          <small
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              fontFamily: 'Cormorant, serif',
-              fontSize: '0.8rem'
-            }}
-          >
-            Gifted on {new Date(msg.created_at).toLocaleDateString()}
-          </small>
           {/* Donor Name as Signature at Bottom Right */}
           <small
             style={{

@@ -54,7 +54,7 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
                   <div
                     className="progress-bar"
                     role="progressbar"
-                    style={{ width: `${progressPercentage}%`, backgroundColor: '#56443F' }}
+                    style={{ width: `${progressPercentage}%`, backgroundColor: '#BBAA91' }}
                     aria-valuenow={progressPercentage}
                     aria-valuemin="0"
                     aria-valuemax="100"

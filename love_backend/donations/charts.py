@@ -43,10 +43,10 @@ def combined_charts(request):
     # ------------------
     # Create a composite figure with subplots (VERTICAL LAYOUT for mobile)
     # ------------------
-    fig, axs = plt.subplots(2, 1, figsize=(6, 10), facecolor='none')  # Adjusted for vertical layout
+    fig, axs = plt.subplots(2, 1, figsize=(6, 10), facecolor='none')
 
-    # Add some margin on the right
-    plt.subplots_adjust(right=0.85)  
+    # Add more space between the two graphs
+    plt.subplots_adjust(hspace=0.4, right=0.85)  
 
     # Chart 1: Donation Trend (Line Chart)
     axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color=custom_colors[0])  # Use custom color
@@ -65,7 +65,7 @@ def combined_charts(request):
 
     # Chart 2: Pie Chart for Donation Split by Charity (NO PERCENTAGES)
     wedges, texts = axs[1].pie(sizes, labels=labels, startangle=90, colors=colors)
-    axs[1].axis('equal')  # Ensure the pie is drawn as a circle.
+    axs[1].axis('equal')
     axs[1].set_title('Donation Split by Charity (50% allocated)', color='white', fontsize=14)
 
     # Set labels (charity names) to white
@@ -75,7 +75,7 @@ def combined_charts(request):
     plt.tight_layout()
 
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', transparent=True, bbox_inches='tight')  # Fix label cutting issue
+    plt.savefig(buf, format='png', transparent=True, bbox_inches='tight')  
     plt.close(fig)
     buf.seek(0)
 
