@@ -151,7 +151,7 @@ function Home() {
       {/* ================================
           GUESTBOOK
       ================================ */}
-      <section className="guestbook-section text-center" style={{ padding: '1rem', height: '4rem' }}>
+      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Leave us a message in our guestbook!</h2>
           <HomeGuestbookSection />
