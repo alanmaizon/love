@@ -1,36 +1,38 @@
 // src/components/GuestMessagesCarousel.jsx
 import React, { useRef, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import './GuestMessagesCarousel.css';
+import './GuestMessagesCarousel.css'; // Ensure this file is imported
 
 function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
 
-  // Set up auto-scrolling vertically
+  // Auto-scrolling setup
   useEffect(() => {
     const interval = setInterval(() => {
       if (carouselRef.current) {
-        const { scrollTop, clientHeight, scrollHeight } = carouselRef.current;
-        if (scrollTop + clientHeight >= scrollHeight) {
-          carouselRef.current.scrollTop = 0;
+        const { scrollLeft, clientWidth, scrollWidth } = carouselRef.current;
+        // Reset to beginning if reached end
+        if (scrollLeft + clientWidth >= scrollWidth) {
+          carouselRef.current.scrollLeft = 0;
         } else {
-          carouselRef.current.scrollTop += clientHeight;
+          carouselRef.current.scrollLeft += clientWidth;
         }
       }
     }, autoScrollDelay);
+
     return () => clearInterval(interval);
   }, [autoScrollDelay]);
 
-  // Set up vertical swipe handlers using react-swipeable
+  // Swipe handlers using react-swipeable
   const handlers = useSwipeable({
-    onSwipedUp: () => {
+    onSwipedLeft: () => {
       if (carouselRef.current) {
-        carouselRef.current.scrollTop += carouselRef.current.clientHeight;
+        carouselRef.current.scrollLeft += carouselRef.current.clientWidth;
       }
     },
-    onSwipedDown: () => {
+    onSwipedRight: () => {
       if (carouselRef.current) {
-        carouselRef.current.scrollTop -= carouselRef.current.clientHeight;
+        carouselRef.current.scrollLeft -= carouselRef.current.clientWidth;
       }
     },
     preventDefaultTouchmoveEvent: true,
@@ -44,56 +46,35 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
       className="guest-messages-carousel no-scrollbar"
       style={{
         display: 'flex',
-        flexDirection: 'column',
-        overflowY: 'auto',
+        overflowX: 'auto',
         scrollBehavior: 'smooth',
         padding: '1rem',
         cursor: 'grab',
-        userSelect: 'none'
+        userSelect: 'none' // disables text selection
       }}
     >
       {messages.map((msg) => (
         <div
           key={msg.id}
           style={{
-            position: 'relative',
             flex: '0 0 auto',
-            marginBottom: '1rem',
-            backgroundColor: '#3d2c1e',
-            fontFamily: "'Cormorant', serif",
-            color: '#EAD7BB',
-            padding: '1.5rem',
-            borderRadius: '8px',
-            minHeight: '150px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-            userSelect: 'none'
+            marginRight: '1rem',
+            border: '1px solid #ccc',
+            padding: '1rem',
+            borderRadius: '4px',
+            minWidth: '250px',
+            userSelect: 'none', // disable text selection inside card
+            backgroundColor: '#3d2c1e' // updated background color
           }}
         >
-          {/* Main Message */}
-          <p style={{ fontSize: '1.5rem', margin: '0 0 2rem 0' }}>
+          <h5 style={{ fontFamily: 'Cormorant, serif', margin: 0 }}>
+            {msg.donor_name}
+          </h5>
+          <p style={{ fontSize: '1.2rem' }}>
             {msg.message || "No message provided."}
           </p>
-          {/* Date at bottom left */}
-          <small
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              fontSize: '0.8rem'
-            }}
-          >
-            {new Date(msg.created_at).toLocaleDateString()}
-          </small>
-          {/* Donor Name at bottom right */}
-          <small
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              right: '8px',
-              fontSize: '1rem'
-            }}
-          >
-            {msg.donor_name}
+          <small style={{ fontFamily: 'Cormorant, serif' }}>
+            Gifted on {new Date(msg.created_at).toLocaleDateString()}
           </small>
         </div>
       ))}
