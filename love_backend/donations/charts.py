@@ -37,7 +37,7 @@ def combined_charts(request):
         sizes = [1]
 
     # Custom color palette
-    custom_colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFF2']
+    custom_colors = ['#BBAA91', '#F1F0E2', '#E4C7B7', '#D16F52', '#D8AE48', '#A47864']
     colors = custom_colors[:len(labels)]  # Ensure we don't exceed the number of colors available
 
     # ------------------
@@ -60,11 +60,10 @@ def combined_charts(request):
     axs[0].tick_params(axis='y', colors='white')  # Make y-axis numbers white
 
     # Chart 2: Pie Chart for Donation Split by Charity
-    wedges, texts, autotexts = axs[1].pie(
-        sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors
+    wedges, texts = axs[1].pie(
+        sizes, labels=labels, startangle=90, colors=colors
     )
     axs[1].axis('equal')  # Ensure the pie is drawn as a circle.
-    axs[1].set_title('Donation Split by Charity', color='white')
 
     # Set labels (charity names) to white
     for text in texts:
