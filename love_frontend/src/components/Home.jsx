@@ -9,7 +9,7 @@ import rose from '../../public/rose.svg';
 import StatsSection from './StatsSection';
 import CountdownTimer from './CountdownTimer';
 import ExploreCharities from './ExploreCharities';
-import HomeGuestbookSection from './HomeGuestbookSection';
+import GuestMessages from './GuestMessages';
 import About from './About';
 import HandsGif from './HandsGif';
 
@@ -32,7 +32,6 @@ function Home() {
   // 3) Fetch Data on Mount
   // -------------------------------
   useEffect(() => {
-    // Fetch analytics (like AdminDashboard but for public view)
     axiosInstance.get('/analytics/')
       .then((res) => {
         setAnalytics(res.data);
@@ -44,7 +43,6 @@ function Home() {
         setAnalyticsLoading(false);
       });
 
-    // Fetch public profile for bride/groom details
     axiosInstance.get('/public_profile/')
       .then((res) => {
         setProfile(res.data);
@@ -61,18 +59,12 @@ function Home() {
   // 4) Wedding Date (Memo)
   // -------------------------------
   const weddingDate = useMemo(() => {
-    // Fallback to a known date if profile is unavailable
     return profile?.wedding_date || '2025-04-26T12:30:00';
   }, [profile]);
 
-  // -------------------------------
-  // 5) Render
-  // -------------------------------
   return (
     <div className="home-page">
-      {/* ================================
-          HERO SECTION
-      ================================ */}
+      {/* HERO SECTION */}
       <section className="hero-image"></section>
       <section className="hero-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
@@ -82,18 +74,14 @@ function Home() {
         </div>
       </section>
 
-      {/* ================================
-          ABOUT US (with 50% donation note)
-      ================================ */}
+      {/* ABOUT US SECTION */}
       <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <About />
         </div>
       </section>
 
-      {/* ================================
-          CHARITIES
-      ================================ */}
+      {/* CHARITIES SECTION */}
       <section className="charities-section" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Charities We Support</h2>
@@ -105,28 +93,28 @@ function Home() {
         </div>
       </section>
 
-      {/* ================================
-          WEDDING COUNTDOWN
-      ================================ */}
+      {/* WEDDING COUNTDOWN SECTION */}
       <section
         className="countdown-section text-center"
         style={{
           padding: '4rem 1rem',
           backgroundColor: '#a47864',
           position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        {/* Wildflower images on the left and right */}
+        {/* Wildflower images with bottom alignment, side padding, and reduced opacity */}
         <img
           src={poppy}
           alt="Wildflower Poppy"
           style={{
             position: 'absolute',
             left: '10px',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            bottom: '0',
             zIndex: 1,
             maxWidth: '100px',
+            opacity: 0.7,
+            padding: '0 10px'
           }}
         />
         <img
@@ -135,10 +123,11 @@ function Home() {
           style={{
             position: 'absolute',
             right: '10px',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            bottom: '0',
             zIndex: 1,
             maxWidth: '100px',
+            opacity: 0.7,
+            padding: '0 10px'
           }}
         />
         <div className="container" style={{ fontSize: '2.5rem', zIndex: 2, position: 'relative' }}>
@@ -147,20 +136,15 @@ function Home() {
         </div>
       </section>
 
-
-      {/* ================================
-          GUESTBOOK
-      ================================ */}
+      {/* GUESTBOOK SECTION */}
       <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Leave us a message in our guestbook!</h2>
-          <HomeGuestbookSection />
+          <GuestMessages />
         </div>
       </section>
 
-      {/* ================================
-          ABOUT THE COUPLE (PUBLIC PROFILE)
-      ================================ */}
+      {/* ABOUT THE COUPLE SECTION */}
       <section className="couple-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Meet the Couple</h2>
@@ -187,16 +171,14 @@ function Home() {
                 <p>No profile information available.</p>
               )}
             </div>
-            <div className="col-md-6 d-flex align-items-center justify-content-center">
+            <div className="col-md-6 d-flex align-items-end justify-content-center">
               <HandsGif />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================================
-          ANALYTICS SECTION
-      ================================ */}
+      {/* ANALYTICS SECTION */}
       <StatsSection
         analytics={analytics}
         donationGoal={1200}
