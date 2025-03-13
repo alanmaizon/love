@@ -151,7 +151,7 @@ function Home() {
       {/* ================================
           GUESTBOOK
       ================================ */}
-      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem', minHeight: '400px' }}>
+      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Leave us a message in our guestbook!</h2>
           <HomeGuestbookSection />
@@ -161,38 +161,60 @@ function Home() {
       {/* ================================
           ABOUT THE COUPLE (PUBLIC PROFILE)
       ================================ */}
-      <section className="couple-section text-center" style={{ backgroundColor: '#a47864' }}>
-        <div className="container">
+      <section
+        className="couple-section text-center"
+        style={{
+          backgroundColor: '#a47864',
+          position: 'relative',
+          padding: '4rem 1rem',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Content Container */}
+        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
           <h2>Meet the Couple</h2>
-          <div className="row" style={{ minHeight: '300px' }}>
-            <div className="col-md-6" style={{ padding: '4rem 1rem' }}>
-              {profileLoading ? (
-                <p>All you need is love...</p>
-              ) : profileError ? (
-                <p className="text-danger">{profileError}</p>
-              ) : profile ? (
-                <>
-                  {profile.profile_picture_url && (
-                    <img
-                      src={profile.profile_picture_url}
-                      alt="Couple"
-                      style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }}
-                    />
-                  )}
-                  <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
-                  <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
-                  <p>You can find us in <strong>{profile.location}</strong></p>
-                </>
-              ) : (
-                <p>No profile information available.</p>
+          {profileLoading ? (
+            <p>All you need is love...</p>
+          ) : profileError ? (
+            <p className="text-danger">{profileError}</p>
+          ) : profile ? (
+            <>
+              {profile.profile_picture_url && (
+                <img
+                  src={profile.profile_picture_url}
+                  alt="Couple"
+                  style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }}
+                />
               )}
-            </div>
-            <div className="col-md-6 d-flex align-items-end justify-content-center">
-              <HandsGif />
-            </div>
-          </div>
+              <p>
+                <strong>{profile.bride_name} &amp; {profile.groom_name}</strong>
+              </p>
+              <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
+              <p>
+                You can find us in <strong>{profile.location}</strong>
+              </p>
+            </>
+          ) : (
+            <p>No profile information available.</p>
+          )}
+        </div>
+        
+        {/* HandsGif Background */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            opacity: 0.3,
+            pointerEvents: 'none'
+          }}
+        >
+          <HandsGif />
         </div>
       </section>
+
       {/* ================================
           ANALYTICS SECTION
       ================================ */}
