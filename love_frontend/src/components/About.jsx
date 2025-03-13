@@ -38,9 +38,9 @@ function Bio() {
 
         {/* Text Section */}
         <div className="bio-text" style={{ color: '#EAD7BB' }}>
-          <h1 style={{ color: '#EAD7BB' }}>About Us</h1>
+          <h1 style={{ color: '#EAD7BB' }}>Love Is All You Need</h1>
           <p style={{ color: '#EAD7BB' }}>
-            Welcome to our story. Here you'll learn about our journey, our love, and our dreams.
+            Here we are to share you more about our lives, our love, and our dreams.
             We hope our story inspires you as much as your support inspires us.
           </p>
         </div>
