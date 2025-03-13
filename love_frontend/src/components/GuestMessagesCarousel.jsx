@@ -57,24 +57,45 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
         <div
           key={msg.id}
           style={{
+            position: 'relative',         // Enable absolute positioning for bottom elements
             flex: '0 0 auto',
             marginRight: '1rem',
             border: '1px solid #ccc',
-            padding: '1rem',
-            borderRadius: '4px',
+            padding: '1.5rem',
+            borderRadius: '8px',
             minWidth: '250px',
-            userSelect: 'none', // disable text selection inside card
-            backgroundColor: '#3d2c1e' // updated background color
+            userSelect: 'none',           // Disable text selection
+            backgroundColor: '#3d2c1e'      // Dark chocolate background
           }}
         >
-          <h5 style={{ fontFamily: 'Cormorant, serif', margin: 0 }}>
-            {msg.donor_name}
-          </h5>
-          <p style={{ fontSize: '1.2rem' }}>
+          {/* Main Message on Top */}
+          <p style={{ fontSize: '1.2rem', marginBottom: '2.5rem' }}>
             {msg.message || "No message provided."}
           </p>
-          <small style={{ fontFamily: 'Cormorant, serif' }}>
+          {/* Date at Bottom Left */}
+          <small
+            style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '8px',
+              fontFamily: 'Cormorant, serif',
+              fontSize: '0.8rem'
+            }}
+          >
             Gifted on {new Date(msg.created_at).toLocaleDateString()}
+          </small>
+          {/* Donor Name as Signature at Bottom Right */}
+          <small
+            style={{
+              position: 'absolute',
+              bottom: '8px',
+              right: '8px',
+              fontFamily: 'Cormorant, serif',
+              fontSize: '1rem',
+              fontStyle: 'italic'
+            }}
+          >
+            {msg.donor_name}
           </small>
         </div>
       ))}
