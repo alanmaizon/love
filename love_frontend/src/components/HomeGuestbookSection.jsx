@@ -25,7 +25,7 @@ function HomeGuestbookSection() {
   if (error) return <p className="text-danger">{error}</p>;
 
   return (
-    <section className="guestbook-section" style={{ padding: '1rem 1rem' }}>
+    <section className="guestbook-section" style={{ padding: '4rem 1rem' }}>
       <div className="container">
         <GuestMessagesCarousel messages={messages} />
       </div>
