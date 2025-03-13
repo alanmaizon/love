@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import './GuestMessagesCarousel.css'; // Make sure this file is imported
 
-function GuestMessagesCarousel({ messages, autoScrollDelay = 3000 }) {
+function GuestMessagesCarousel({ messages, autoScrollDelay = 1000 }) {
   const carouselRef = useRef(null);
 
   // Set up auto-scrolling
