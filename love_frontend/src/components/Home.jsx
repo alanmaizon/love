@@ -226,7 +226,6 @@ function Home() {
             right: 0,
             zIndex: 1,
             opacity: 0.3,
-            height: '100%',
             pointerEvents: 'none'
           }}
         >
