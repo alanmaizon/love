@@ -122,7 +122,7 @@ function Home() {
           alt="Wildflower Poppy"
           style={{
             position: 'absolute',
-            left: '40px',
+            left: '20px',
             bottom: '0',
             height: '90%',
             zIndex: 1,
@@ -134,7 +134,7 @@ function Home() {
           alt="Wildflower Rose"
           style={{
             position: 'absolute',
-            right: '40px',
+            right: '20px',
             bottom: '0',
             height: '90%',
             zIndex: 1,
