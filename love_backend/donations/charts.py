@@ -48,8 +48,6 @@ def combined_charts(request):
 
     # Chart 1: Donation Trend (Line Chart)
     axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color=custom_colors[0])  # Use custom color
-    axs[0].set_title('Donation Trend', color='white')
-    axs[0].set_xlabel('Date', color='white')
     axs[0].set_xticks(dates)
     axs[0].set_xticklabels([date.strftime('%d-%m') for date in dates], color='white')
     axs[0].set_ylabel('Total Donations', color='white')
