@@ -189,7 +189,9 @@ function Home() {
               <p>
                 <strong>{profile.bride_name} &amp; {profile.groom_name}</strong>
               </p>
-              <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
+              <p style={{ marginTop: '1rem' }}>
+                {profile.bio || "We're looking forward to celebrating with you!"}
+              </p>
               <p>
                 You can find us in <strong>{profile.location}</strong>
               </p>
