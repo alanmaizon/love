@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
+import poppy from '../../public/1.svg';
+import rose from '../../public/2.svg';
 
 // Import existing components
 import StatsSection from './StatsSection';
@@ -9,6 +11,7 @@ import CountdownTimer from './CountdownTimer';
 import ExploreCharities from './ExploreCharities';
 import HomeGuestbookSection from './HomeGuestbookSection';
 import About from './About';
+import HandsGif from './HandsGif';
 
 function Home() {
   // -------------------------------
@@ -105,12 +108,45 @@ function Home() {
       {/* ================================
           WEDDING COUNTDOWN
       ================================ */}
-      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
-        <div className="container">
+      <section
+        className="countdown-section text-center"
+        style={{
+          padding: '4rem 1rem',
+          backgroundColor: '#a47864',
+          position: 'relative',
+        }}
+      >
+        {/* Wildflower images on the left and right */}
+        <img
+          src={poppy}
+          alt="Wildflower Poppy"
+          style={{
+            position: 'absolute',
+            left: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1,
+            maxWidth: '100px',
+          }}
+        />
+        <img
+          src={rose}
+          alt="Wildflower Rose"
+          style={{
+            position: 'absolute',
+            right: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1,
+            maxWidth: '100px',
+          }}
+        />
+        <div className="container" style={{ fontSize: '2.5rem', zIndex: 2, position: 'relative' }}>
           <h2>Wedding Countdown</h2>
           <CountdownTimer targetDate={weddingDate} />
         </div>
       </section>
+
 
       {/* ================================
           GUESTBOOK
@@ -128,26 +164,33 @@ function Home() {
       <section className="couple-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Meet the Couple</h2>
-          {profileLoading ? (
-            <p>All you need is love...</p>
-          ) : profileError ? (
-            <p className="text-danger">{profileError}</p>
-          ) : profile ? (
-            <>
-              {profile.profile_picture_url && (
-                <img
-                  src={profile.profile_picture_url}
-                  alt="Couple"
-                  style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }}
-                />
+          <div className="row">
+            <div className="col-md-6">
+              {loadingProfile ? (
+                <p>All you need is love...</p>
+              ) : profileError ? (
+                <p className="text-danger">{profileError}</p>
+              ) : profile ? (
+                <>
+                  {profile.profile_picture_url && (
+                    <img
+                      src={profile.profile_picture_url}
+                      alt="Couple"
+                      style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }}
+                    />
+                  )}
+                  <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
+                  <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
+                  <p>You can find us in <strong>{profile.location}</strong></p>
+                </>
+              ) : (
+                <p>No profile information available.</p>
               )}
-              <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
-              <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
-              <p>You can find us in<strong> {profile.location}</strong></p>
-            </>
-          ) : (
-            <p>No profile information available.</p>
-          )}
+            </div>
+            <div className="col-md-6 d-flex align-items-center justify-content-center">
+              <HandsGif />
+            </div>
+          </div>
         </div>
       </section>
 

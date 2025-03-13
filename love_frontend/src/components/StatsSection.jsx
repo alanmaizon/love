@@ -8,7 +8,7 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
   const progressPercentage = Math.min((currentTotal / donationGoal) * 100, 100);
 
   return (
-    <section className="analytics-section" style={{ padding: '4rem 1rem' }}>
+    <section className="analytics-section text-center" style={{ padding: '4rem 1rem' }}>
       <div className="container">
         <h2>Donation Analytics</h2>
         {analyticsLoading ? (
