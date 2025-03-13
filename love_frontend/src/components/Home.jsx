@@ -164,7 +164,7 @@ function Home() {
       <section className="couple-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <h2>Meet the Couple</h2>
-          <div className="row">
+          <div className="row" style={{ minHeight: '300px' }}>
             <div className="col-md-6">
               {profileLoading ? (
                 <p>All you need is love...</p>
@@ -187,13 +187,12 @@ function Home() {
                 <p>No profile information available.</p>
               )}
             </div>
-            <div className="col-md-6 d-flex align-items-center justify-content-center">
+            <div className="col-md-6 d-flex align-items-end justify-content-center">
               <HandsGif />
             </div>
           </div>
         </div>
       </section>
-
       {/* ================================
           ANALYTICS SECTION
       ================================ */}
