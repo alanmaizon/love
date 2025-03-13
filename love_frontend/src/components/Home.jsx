@@ -192,7 +192,14 @@ function Home() {
                 You can find us in <strong>{profile.location}</strong>
               </p>
               {/* Social Media Icons */}
-              <div style={{ marginTop: '1rem' }}>
+              <div
+                style={{
+                  marginTop: '1rem',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
                 <a href="https://facebook.com/yourpage" target="_blank" rel="noopener noreferrer">
                   <FaFacebookSquare style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
