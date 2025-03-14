@@ -13,8 +13,8 @@ def send_donation_confirmation_email(donation):
     recipient_list = [donation.donor_email]
 
     # Get URLs for SVG files
-    flower_top_url = settings.SITE_URL + static("images/flower_top.svg")
-    flower_bottom_url = settings.SITE_URL + static("images/flower_bottom.svg")
+    flower_top_url = static("images/flower_top.svg")
+    flower_bottom_url = static("images/flower_bottom.svg")
 
     # Email context
     context = {

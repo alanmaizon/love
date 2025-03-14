@@ -142,8 +142,6 @@ CSRF_COOKIE_DOMAIN = "api.lovethatgivesback.com"
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
 
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
