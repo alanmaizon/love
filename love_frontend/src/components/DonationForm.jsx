@@ -141,7 +141,7 @@ function DonationForm() {
           </select>
         </div>
         <div className="mb-3">
-          <label htmlFor="message" className="form-label">Write a heartfelt message for us</label>
+          <label htmlFor="message" className="form-label">Write a message (Optional)</label>
           <textarea
             id="message"
             className="form-control"
@@ -149,6 +149,7 @@ function DonationForm() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
+          <small>This will be visible to others</small>
         </div>
         <button type="submit" className="btn btn-primary">Send Gift</button>
       </form>
