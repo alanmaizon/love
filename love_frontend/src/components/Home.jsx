@@ -79,7 +79,7 @@ function Home() {
         <div className="container">
           <h1>Welcome to Our Wedding Celebration</h1>
           <p>We're excited to share our special day with you!</p>
-          <Link to="/donate" className="btn btn-primary mt-3">Send a Gift</Link>
+          <Link to="/donate" className="btn btn-primary mt-3">Send a Gift & Leave a Message</Link>
         </div>
       </section>
 
