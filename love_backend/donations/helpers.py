@@ -13,7 +13,7 @@ def send_donation_confirmation_email(donation):
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [donation.donor_email]
     flower_top_url = "https://res.cloudinary.com/dnkrfdjzl/image/upload/v1741944607/vector-flower_zaahev.svg"
-    flower_bottom_url = "https://res.cloudinary.com/dnkrfdjzl/image/upload/v1741944656/horizontal-flower_ocky9t.svg"
+    flower_bottom_url = "https://res.cloudinary.com/dnkrfdjzl/image/upload/v1741944656/vertical-flower_h6dq3f.svg"
 
     context = {
         "donor_name": donation.donor_name,
