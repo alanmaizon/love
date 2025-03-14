@@ -82,12 +82,16 @@ function Bio() {
           The first is 'Mary's Meals'. Anna had a wonderful experience visiting the beautiful place in the Scottish 
           Highlands where it all began. She is also currently reading and enjoying the founder's book "The Shed That Fed Two Million Children",
           which she'd recommend to anyone who needs to reignite their faith in humanity, and also in God.
+        </p>
+        <p>
           Secondly we chose 'Operation Smile', who provides life-changing surgeries to babies and children born with cleft palates, 
-          especially in developing countries. Someone close to Alan was born with a cleft palate and for whom surgery made all the difference. 
-          It felt like a worthwhile cause to support and an especially personal one. 
+          especially in developing countries. Alan's brother was born with a cleft palate and for surgery made all the difference in his life. 
+          So, it felt like a worthwhile cause to support and an especially personal one.
+        </p>
+        <p>
           The final one needs a small story to explain it. Anna's brother Ben gifted Alan with the perfect wedding ring (for him!), 
-          and we of course wanted to pay him something for it. As he wouldn't accpet anything, we asked him if there was anything we could do,
-          and he suggested that we might like to make a donation to 'Xingu Vivo', a grassroots movement based in the Amazonian region of Brazil. 
+          and we of course wanted to pay him something for it. As he wouldn't accept anything, we asked him if there was anything we could do,
+          and he suggested that we might like to make a donation to 'Xingu Vivo', a grassroots movement based in the Amazon region of Brazil. 
           Ben lives in Brazil and works as a conservation biologist with critically endangered bird species, and is more aware than most of the 
           impact that industry and development has on the environment and the natural world, including the indigenous people of the Amazon Basin. 
           This organisation challenges human and environmental rights violations and works with populations threatened by the Belo Monte dam project.
