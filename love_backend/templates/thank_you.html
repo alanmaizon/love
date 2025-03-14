@@ -20,6 +20,10 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             position: relative;
             text-align: center;
+            background-image: url('{{ flower_top_url }}'), url('{{ flower_bottom_url }}');
+            background-position: top left, bottom right;
+            background-repeat: no-repeat, no-repeat;
+            background-size: 120px, 120px; /* Adjust size as needed */
         }
         .header {
             font-size: 36px;
@@ -49,23 +53,10 @@
             font-size: 22px;
             color: #6b705c;
         }
-        .flower-top-left {
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            width: 100px;
-        }
-        .flower-bottom-right {
-            position: absolute;
-            bottom: -20px;
-            right: -20px;
-            width: 100px;
-        }
     </style>
 </head>
 <body>
-    <img src="{{ flower_top_url }}" class="flower-top-left" alt="Floral decoration">
-    <img src="{{ flower_bottom_url }}" class="flower-bottom-right" alt="Floral decoration">
+
     <div class="container">
         <div class="header">Thank You</div>
         <div class="line"></div>
@@ -73,10 +64,10 @@
             <p><em>Dear {{ donor_name }},</em></p>
             <p>
                 Your generosity means the world to us! You have donated 
-                <strong>€{{ amount }}</strong>, and it has been allocated as follows:
+                <strong>{{ amount }}</strong>, and it has been allocated as follows:
             </p>
-            <p><strong>💑 To the Couple:</strong> €{{ couple_allocation }}</p>
-            <p><strong>🎗️ To Charity:</strong> €{{ charity_allocation }} ({{ charity_name }})</p>
+            <p><strong>💑 To the Couple:</strong> {{ couple_allocation }}</p>
+            <p><strong>🎗️ To Charity:</strong> {{ charity_allocation }} ({{ charity_name }})</p>
             <p>Your donation reference ID is: <strong>{{ reference_id }}</strong></p>
             <p>If you have any questions or need assistance, feel free to contact us.</p>
         </div>
