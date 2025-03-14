@@ -5,8 +5,6 @@ from django.templatetags.static import static
 from django.utils.html import strip_tags
 from decimal import Decimal
 
-SITE_URL = "https://www.lovethatgivesback.com"
-
 def send_donation_confirmation_email(donation):
     """
     Sends a stylish email confirmation using SVG images from static files.
@@ -14,8 +12,8 @@ def send_donation_confirmation_email(donation):
     subject = "🎉 Thank You for Your Gift!"
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [donation.donor_email]
-    flower_top_url = f"{SITE_URL}{static('images/flower_top.svg')}"
-    flower_bottom_url = f"{SITE_URL}{static('images/flower_bottom.svg')}"
+    flower_top_url = "https://res.cloudinary.com/dnkrfdjzl/image/upload/v1741944607/vector-flower_zaahev.svg"
+    flower_bottom_url = "https://res.cloudinary.com/dnkrfdjzl/image/upload/v1741944656/horizontal-flower_ocky9t.svg"
 
     context = {
         "donor_name": donation.donor_name,
