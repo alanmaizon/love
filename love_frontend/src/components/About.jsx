@@ -85,7 +85,7 @@ function Bio() {
         </p>
         <p>
           Secondly we chose 'Operation Smile', who provides life-changing surgeries to babies and children born with cleft palates, 
-          especially in developing countries. Alan's brother was born with a cleft palate and for surgery made all the difference in his life. 
+          especially in developing countries. Alan's brother was born with a cleft palate and surgery made all the difference in his life. 
           So, it felt like a worthwhile cause to support and an especially personal one.
         </p>
         <p>
