@@ -163,3 +163,11 @@ LOGGING = {
 SECURE_HSTS_SECONDS = 3600  # or 31536000 for 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'maizonalan@gmail.com'
+EMAIL_HOST_PASSWORD = os.environ.get('GOOGLE_APP_PASS')
+DEFAULT_FROM_EMAIL = 'Love That Gives Back <maizonalan@gmail.com>'

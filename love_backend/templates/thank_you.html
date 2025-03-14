@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thank You for Your Gift</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            background: #ffffff;
+            padding: 40px;
+            margin: 40px auto;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            text-align: center;
+        }
+        .header {
+            font-size: 36px;
+            color: #6b705c;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        .line {
+            border-bottom: 1px solid #6b705c;
+            width: 80%;
+            margin: 10px auto;
+        }
+        .content {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            text-align: left;
+            padding: 0 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+        .signature {
+            font-family: 'Georgia', cursive;
+            font-size: 22px;
+            color: #6b705c;
+        }
+        .flower-top-left {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 100px;
+        }
+        .flower-bottom-right {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="{{ flower_top_url }}" class="flower-top-left" alt="Floral decoration">
+        <img src="{{ flower_bottom_url }}" class="flower-bottom-right" alt="Floral decoration">
+
+        <div class="header">Thank You</div>
+        <div class="line"></div>
+        <div class="content">
+            <p><em>Dear {{ donor_name }},</em></p>
+            <p>
+                Your generosity means the world to us! You have donated 
+                <strong>€{{ amount }}</strong>, and it has been allocated as follows:
+            </p>
+            <p><strong>💑 To the Couple:</strong> €{{ couple_allocation }}</p>
+            <p><strong>🎗️ To Charity:</strong> €{{ charity_allocation }} ({{ charity_name }})</p>
+            <p>Your donation reference ID is: <strong>{{ reference_id }}</strong></p>
+            <p>If you have any questions or need assistance, feel free to contact us.</p>
+        </div>
+
+        <div class="footer">
+            Sincerely, <br>
+            <span class="signature">Love That Gives Back</span>
+        </div>
+    </div>
+
+</body>
+</html>
