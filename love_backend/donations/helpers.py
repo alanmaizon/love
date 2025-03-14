@@ -3,6 +3,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from django.utils.html import strip_tags
+from decimal import Decimal
 
 def send_donation_confirmation_email(donation):
     """
@@ -19,8 +20,8 @@ def send_donation_confirmation_email(donation):
         "amount": donation.amount,
         "reference_id": f"GIFT-{donation.id}",
         "charity_name": donation.charity.name,
-        "couple_allocation": donation.amount * 0.5,
-        "charity_allocation": donation.amount * 0.5,
+        "couple_allocation": donation.amount * Decimal('0.5'),
+        "charity_allocation": donation.amount * Decimal('0.5'),
         "flower_top_url": flower_top_url,
         "flower_bottom_url": flower_bottom_url,
     }
