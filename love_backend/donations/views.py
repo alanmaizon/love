@@ -106,10 +106,13 @@ class DonationViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
         donation = self.get_object()
         donation.status = 'confirmed'
         donation.save()
-
-        send_donation_confirmation_email(donation)
+        try:
+            send_donation_confirmation_email(donation)
+        except Exception as e:
+            print(f"Email failed: {e}")  # Logs any email error
 
         serializer = self.get_serializer(donation)
+        return Response(serializer.data, status=drf_status.HTTP_200_OK) 
 
     @action(detail=True, methods=['patch'], url_path='fail')
     def fail_donation(self, request, pk=None):
