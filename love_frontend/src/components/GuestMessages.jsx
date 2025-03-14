@@ -51,11 +51,6 @@ function GuestMessages() {
                   <small>
                     Gifted on {new Date(donation.created_at).toLocaleDateString()}
                   </small>
-                  {donation.amount && (
-                    <p className="mt-2">
-                      <span className="badge bg-success">€{donation.amount}</span>
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
