@@ -6,16 +6,21 @@ import './GuestMessagesCarousel.css'; // Ensure this file is imported
 function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
 
-  // Auto-scrolling setup
+  // Filter out messages with no content
+  const filteredMessages = messages.filter(
+    (msg) => msg.message && msg.message.trim() !== ''
+  );
+
+  // Auto-scrolling setup: scroll by half the container's width for a smoother effect
   useEffect(() => {
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const { scrollLeft, clientWidth, scrollWidth } = carouselRef.current;
-        // Reset to beginning if reached end
-        if (scrollLeft + clientWidth >= scrollWidth) {
+        const increment = clientWidth / 2;
+        if (scrollLeft + clientWidth >= scrollWidth - increment) {
           carouselRef.current.scrollLeft = 0;
         } else {
-          carouselRef.current.scrollLeft += clientWidth;
+          carouselRef.current.scrollLeft += increment;
         }
       }
     }, autoScrollDelay);
@@ -27,12 +32,12 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const handlers = useSwipeable({
     onSwipedLeft: () => {
       if (carouselRef.current) {
-        carouselRef.current.scrollLeft += carouselRef.current.clientWidth;
+        carouselRef.current.scrollLeft += carouselRef.current.clientWidth / 2;
       }
     },
     onSwipedRight: () => {
       if (carouselRef.current) {
-        carouselRef.current.scrollLeft -= carouselRef.current.clientWidth;
+        carouselRef.current.scrollLeft -= carouselRef.current.clientWidth / 2;
       }
     },
     preventDefaultTouchmoveEvent: true,
@@ -53,25 +58,38 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
         userSelect: 'none' // disables text selection
       }}
     >
-      {messages.map((msg) => (
+      {filteredMessages.map((msg) => (
         <div
           key={msg.id}
           style={{
-            position: 'relative',         // Enable absolute positioning for bottom elements
+            position: 'relative',         // for absolute positioning of footer elements
             flex: '0 0 auto',
             marginRight: '1rem',
             border: '1px solid #ccc',
             padding: '1.5rem',
             borderRadius: '8px',
             minWidth: '250px',
-            userSelect: 'none',           // Disable text selection
-            backgroundColor: '#3d2c1e'      // Dark chocolate background
+            minHeight: '350px',            // increased height for a taller card
+            userSelect: 'none',            // disable text selection
+            backgroundColor: '#3d2c1e'       // dark chocolate background
           }}
         >
           {/* Main Message on Top */}
           <p style={{ fontSize: '1.2rem', marginBottom: '2.5rem' }}>
-            {msg.message || "No message provided."}
+            {msg.message}
           </p>
+          {/* Date at Bottom Left */}
+          <small
+            style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '8px',
+              fontFamily: 'Cormorant, serif',
+              fontSize: '0.8rem'
+            }}
+          >
+            Gifted on {new Date(msg.created_at).toLocaleDateString()}
+          </small>
           {/* Donor Name as Signature at Bottom Right */}
           <small
             style={{
