@@ -21,7 +21,7 @@
             position: relative;
             text-align: center;
             background-image: url('{{ flower_top_url }}'), url('{{ flower_bottom_url }}');
-            background-position: top 20px right 20px, bottom left;
+            background-position: top 20px left 20px, bottom right;
             background-repeat: no-repeat, no-repeat;
             background-size: 120px, 120px; /* Adjust size as needed */
         }
@@ -64,10 +64,10 @@
             <p><em>Dear {{ donor_name }},</em></p>
             <p>
                 Your generosity means the world to us! You have donated 
-                <strong>{{ amount }}</strong>, and it has been allocated as follows:
+                <strong>€{{ amount }}</strong>, and it has been allocated as follows:
             </p>
-            <p><strong>💑 To the Couple:</strong> {{ couple_allocation }}</p>
-            <p><strong>🎗️ To Charity:</strong> {{ charity_allocation }} ({{ charity_name }})</p>
+            <p><strong>💑 To the Couple:€</strong> {{ couple_allocation }}</p>
+            <p><strong>🎗️ To Charity:€</strong> {{ charity_allocation }} ({{ charity_name }})</p>
             <p>Your donation reference ID is: <strong>{{ reference_id }}</strong></p>
             <p>If you have any questions or need assistance, feel free to contact us.</p>
         </div>
