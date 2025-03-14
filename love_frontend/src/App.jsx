@@ -104,7 +104,7 @@ function Footer() {
   return (
     <footer className="footer" role="contentinfo">
       <div className="container text-center">
-        <p className="mb-0">Love that gives back © 2025</p>
+        <p className="mb-0">Love That Gives Back © 2025</p>
       </div>
     </footer>
   );
