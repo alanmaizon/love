@@ -88,7 +88,7 @@ function Home() {
       ================================ */}
       <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
-          <About />
+          <BioShort />
         </div>
       </section>
 
