@@ -1,16 +1,24 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import './GuestMessagesCarousel.css'; // Ensure this file is imported
+import './GuestMessagesCarousel.css';
 
 function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
 
-  // Filter out messages with no content
-  const filteredMessages = messages.filter(
-    (msg) => msg.message && msg.message.trim() !== ''
-  );
+  // Function to shuffle array using Fisher-Yates algorithm
+  const shuffleArray = (array) => {
+    let shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
 
-  // Auto-scrolling setup: Moves one full message at a time
+  // Shuffle messages only once when the component mounts
+  const shuffledMessages = useMemo(() => shuffleArray(messages), [messages]);
+
+  // Auto-scrolling: Moves exactly one message at a time
   useEffect(() => {
     const interval = setInterval(() => {
       if (carouselRef.current) {
@@ -57,10 +65,10 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
         cursor: 'grab',
         userSelect: 'none',
         scrollSnapType: 'x mandatory',
-        width: '100vw', // Takes full screen width
+        width: '100vw',
       }}
     >
-      {filteredMessages.map((msg) => (
+      {shuffledMessages.map((msg) => (
         <div
           key={msg.id}
           style={{
@@ -69,7 +77,7 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
             border: '1px solid #ccc',
             padding: '1.5rem',
             borderRadius: '8px',
-            minWidth: '90vw', // Each message takes almost full screen width
+            minWidth: '90vw',
             minHeight: '350px',
             userSelect: 'none',
             backgroundColor: '#3d2c1e',
@@ -79,7 +87,7 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
             textAlign: 'center'
           }}
         >
-          {/* Main Message Centered */}
+          {/* Centered Message */}
           <p style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 'bold' }}>
             {msg.message}
           </p>
