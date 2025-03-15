@@ -1,4 +1,3 @@
-// src/components/GuestMessagesCarousel.jsx
 import React, { useRef, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import './GuestMessagesCarousel.css'; // Ensure this file is imported
@@ -11,12 +10,13 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
     (msg) => msg.message && msg.message.trim() !== ''
   );
 
-  // Auto-scrolling setup: scroll by half the container's width for a smoother effect
+  // Auto-scrolling setup: Moves one full message at a time
   useEffect(() => {
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const { scrollLeft, clientWidth, scrollWidth } = carouselRef.current;
-        const increment = clientWidth / 2;
+        const increment = clientWidth; // Moves one full message width
+
         if (scrollLeft + clientWidth >= scrollWidth - increment) {
           carouselRef.current.scrollLeft = 0;
         } else {
@@ -32,12 +32,12 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const handlers = useSwipeable({
     onSwipedLeft: () => {
       if (carouselRef.current) {
-        carouselRef.current.scrollLeft += carouselRef.current.clientWidth / 2;
+        carouselRef.current.scrollLeft += carouselRef.current.clientWidth;
       }
     },
     onSwipedRight: () => {
       if (carouselRef.current) {
-        carouselRef.current.scrollLeft -= carouselRef.current.clientWidth / 2;
+        carouselRef.current.scrollLeft -= carouselRef.current.clientWidth;
       }
     },
     preventDefaultTouchmoveEvent: true,
@@ -55,54 +55,34 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
         scrollBehavior: 'smooth',
         padding: '1rem',
         cursor: 'grab',
-        userSelect: 'none' // disables text selection
+        userSelect: 'none',
+        scrollSnapType: 'x mandatory',
+        width: '100vw', // Takes full screen width
       }}
     >
       {filteredMessages.map((msg) => (
         <div
           key={msg.id}
           style={{
-            position: 'relative',         // for absolute positioning of footer elements
             flex: '0 0 auto',
-            marginRight: '1rem',
+            scrollSnapAlign: 'center',
             border: '1px solid #ccc',
             padding: '1.5rem',
             borderRadius: '8px',
-            minWidth: '250px',
-            minHeight: '350px',            // increased height for a taller card
-            userSelect: 'none',            // disable text selection
-            backgroundColor: '#3d2c1e'       // dark chocolate background
+            minWidth: '90vw', // Each message takes almost full screen width
+            minHeight: '350px',
+            userSelect: 'none',
+            backgroundColor: '#3d2c1e',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
           }}
         >
-          {/* Main Message on Top */}
-          <p style={{ fontSize: '1.2rem', marginBottom: '2.5rem' }}>
+          {/* Main Message Centered */}
+          <p style={{ fontSize: '1.5rem', color: '#fff', fontWeight: 'bold' }}>
             {msg.message}
           </p>
-          {/* Date at Bottom Left */}
-          <small
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              fontFamily: 'Cormorant, serif',
-              fontSize: '0.8rem'
-            }}
-          >
-            Gifted on {new Date(msg.created_at).toLocaleDateString()}
-          </small>
-          {/* Donor Name as Signature at Bottom Right */}
-          <small
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              right: '8px',
-              fontFamily: 'Cormorant, serif',
-              fontSize: '1rem',
-              fontStyle: 'italic'
-            }}
-          >
-            {msg.donor_name}
-          </small>
         </div>
       ))}
     </div>
