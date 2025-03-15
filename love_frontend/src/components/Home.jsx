@@ -11,7 +11,7 @@ import StatsSection from './StatsSection';
 import CountdownTimer from './CountdownTimer';
 import ExploreCharities from './ExploreCharities';
 import HomeGuestbookSection from './HomeGuestbookSection';
-import About from './About';
+import BioShort from './BioShort';
 import HandsGif from './HandsGif';
 
 function Home() {
