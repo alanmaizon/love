@@ -50,6 +50,10 @@ function BioShort() {
             This way, your love and generosity not only supports our future, but also helps important causes 
             that we believe in.
           </p>
+          <p className="text-center fst-italic mt-3">
+            "For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, 
+            plans to give you hope and a future." - Jeremiah 29:11
+          </p>
         </div>
       </div>
 
@@ -74,10 +78,6 @@ function BioShort() {
         <div className="text-center mt-3">
           <Link to="/about" className="btn btn-primary mt-3">Learn More</Link>
         </div>
-        <p className="text-center fst-italic mt-3">
-          "For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, 
-          plans to give you hope and a future." - Jeremiah 29:11
-        </p>
       </div>
     </div>
   );
