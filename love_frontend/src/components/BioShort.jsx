@@ -6,7 +6,7 @@ import About from './About';
 
 function BioShort() {
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '50px 20px' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       {/* Flex Container for Top Section */}
       <div className="bio-top-section">
         {/* Images Section */}
