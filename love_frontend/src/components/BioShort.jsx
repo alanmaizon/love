@@ -65,6 +65,10 @@ function BioShort() {
           Your love and presence are the greatest gifts. But if you'd like to contribute in another way, we
           welcome support for our chosen charities and our new life together.
         </p>
+        <p style={{ textAlign: 'center', fontStyle: 'italic', marginTop: '1rem' }}>
+          "For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, 
+          plans to give you hope and a future." - Jeremiah 29:11
+        </p>
         <div style={{ textAlign: 'center', marginTop: '1rem' }}>
           <Button onClick={() => navigate('/about-us')} variant="outline">
             Learn More
