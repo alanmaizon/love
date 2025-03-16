@@ -21,7 +21,7 @@ def combined_charts(request):
         total = Donation.objects.filter(
             status='confirmed', created_at__date=date
         ).aggregate(total=Sum('amount'))['total'] or 0
-        trend_totals.append(total)
+        trend_totals.append(max(total, 0))  # Ensure no negative values
 
     # ------------------
     # Chart 2: Donations by Charity (Pie Chart)
@@ -48,7 +48,7 @@ def combined_charts(request):
     # Add more space between the two graphs
     plt.subplots_adjust(hspace=0.4, right=0.85)  
 
-    # Chart 1: Donation Trend (Line Chart)
+    # Chart 1: Donation Trend (Line Chart) - Only Positive Numbers
     axs[0].plot(dates, trend_totals, marker='o', linestyle='-', color=custom_colors[0])  # Use custom color
     axs[0].set_title('Donation Trend (Last 7 Days)', color='white', fontsize=14)
     axs[0].set_xlabel('Date', color='white', fontsize=12)
@@ -62,6 +62,9 @@ def combined_charts(request):
     axs[0].spines['right'].set_color('white')
     axs[0].tick_params(axis='x', colors='white')
     axs[0].tick_params(axis='y', colors='white')
+
+    # **Ensure Y-axis only shows positive values**
+    axs[0].set_ylim(bottom=0)
 
     # Chart 2: Pie Chart for Donation Split by Charity (NO PERCENTAGES)
     wedges, texts = axs[1].pie(sizes, labels=labels, startangle=90, colors=colors)
