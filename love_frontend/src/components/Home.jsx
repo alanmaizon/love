@@ -101,7 +101,7 @@ function Home() {
         <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
           <h2>Wedding Countdown</h2>
           <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-            📅 {new Date(weddingDate).toLocaleDateString('en-US', {
+            {new Date(weddingDate).toLocaleDateString('en-US', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -145,7 +145,7 @@ function Home() {
                 <a href="mailto:maizonalan@gmail.com">
                   <FaEnvelope style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="https://wa.me/35387 0956520" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/353870956520" target="_blank" rel="noopener noreferrer">
                   <FaWhatsapp style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
               </div>
