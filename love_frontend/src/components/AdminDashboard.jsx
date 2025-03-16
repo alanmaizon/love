@@ -1,4 +1,3 @@
-// src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
@@ -6,12 +5,16 @@ function AdminDashboard() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('pending'); // Default tab
+
+  useEffect(() => {
+    fetchDonations();
+  }, []);
 
   // Function to fetch donation data.
   const fetchDonations = async () => {
     try {
       const response = await axiosInstance.get('/donations/');
-      // Check if response.data.results exists (paginated response), otherwise use response.data directly.
       const donationArray = response.data.results ? response.data.results : response.data;
       setDonations(donationArray);
       setLoading(false);
@@ -20,12 +23,8 @@ function AdminDashboard() {
       setLoading(false);
     }
   };
-  
-  useEffect(() => {
-    fetchDonations();
-  }, []);
 
-  // Custom action to confirm a donation via /confirm/ endpoint.
+  // Confirm a donation
   const confirmDonation = async (donationId) => {
     try {
       await axiosInstance.patch(`/donations/${donationId}/confirm/`, {});
@@ -35,7 +34,7 @@ function AdminDashboard() {
     }
   };
 
-  // Custom action to mark a donation as failed via /fail/ endpoint.
+  // Fail a donation
   const failDonation = async (donationId) => {
     try {
       await axiosInstance.patch(`/donations/${donationId}/fail/`, {});
@@ -45,117 +44,104 @@ function AdminDashboard() {
     }
   };
 
-  if (loading) {
-    return <div>Loading donations...</div>;
-  }
+  if (loading) return <div className="text-center mt-4">Loading donations...</div>;
+  if (error) return <div className="text-danger text-center mt-4">{error}</div>;
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+  // Filter donations based on tab selection
+  const pendingDonations = donations.filter(donation => donation.status === 'pending');
+  const processedDonations = donations.filter(donation => donation.status !== 'pending');
 
   return (
-    <div className="container mt-5">
-      <h2>Admin Dashboard</h2>
-      <p>Manage all donations:</p>
-      {donations.length === 0 ? (
-        <p>No donations yet.</p>
-      ) : (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Donor Name</th>
-              <th>Email</th>
-              <th>Amount</th>
-              <th>Message</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {donations.map(donation => (
-              <tr key={donation.id}>
-                <td>{donation.donor_name}</td>
-                <td>{donation.donor_email}</td>
-                <td>${donation.amount}</td>
-                <td>{donation.message}</td>
-                <td>
-                  {donation.status === 'pending' ? (
-                    <>
-                      <button 
-                        className="btn btn-success btn-sm" 
-                        onClick={() => confirmDonation(donation.id)}
-                      >
-                        Confirm
-                      </button>
-                      <button 
-                        className="btn btn-danger btn-sm ms-2" 
-                        onClick={() => failDonation(donation.id)}
-                      >
-                        Fail
-                      </button>
-                    </>
-                  ) : (
-                    <span data-testid={`donation-status-${donation.id}`}>
-                      {donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      <AnalyticsSection />
+    <div className="container mt-4">
+      <h2 className="text-center">Admin Dashboard</h2>
+
+      {/* Tabs */}
+      <ul className="nav nav-tabs justify-content-center mt-3">
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === 'pending' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pending')}
+          >
+            Pending Donations
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === 'processed' ? 'active' : ''}`}
+            onClick={() => setActiveTab('processed')}
+          >
+            Confirmed / Failed
+          </button>
+        </li>
+      </ul>
+
+      {/* Donations Table */}
+      <div className="mt-4">
+        {activeTab === 'pending' ? (
+          <DonationsTable
+            donations={pendingDonations}
+            confirmDonation={confirmDonation}
+            failDonation={failDonation}
+          />
+        ) : (
+          <DonationsTable donations={processedDonations} />
+        )}
+      </div>
     </div>
   );
 }
 
-function AnalyticsSection() {
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchAnalytics = async () => {
-    try {
-      const response = await axiosInstance.get('/analytics/');
-      setAnalytics(response.data);
-      setLoading(false);
-    } catch (err) {
-      setError('Error fetching analytics.');
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
-  if (loading) return <div>Loading analytics...</div>;
-  if (error) return <div>{error}</div>;
+// Table Component
+function DonationsTable({ donations, confirmDonation, failDonation }) {
+  if (donations.length === 0) {
+    return <p className="text-center mt-3">No donations found.</p>;
+  }
 
   return (
-    <div className="mt-5">
-      <h3>Analytics</h3>
-      <p data-testid="total-amount-value">
-        <strong>Total Donation Amount:</strong> ${analytics.total_amount}
-      </p>
-      <p data-testid="donations-count">
-        <strong>Total Donations:</strong> {analytics.donations_count}
-      </p>
-      <ul>
-        {analytics.count_per_charity && analytics.count_per_charity.map(item => (
-          <li key={item.charity__name}>
-            {item.charity__name}: {item.count} donations, Total: ${item.total_allocated}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-5">
-        <h4>Combined Analytics</h4>
-        <img
-          src={`${axiosInstance.defaults.baseURL}/charts/`}
-          alt="Combined Analytics Charts"
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
-      </div>
+    <div className="table-responsive">
+      <table className="table table-striped">
+        <thead className="table-dark">
+          <tr>
+            <th>Donor Name</th>
+            <th>Email</th>
+            <th>Amount (€)</th>
+            <th>Message</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {donations.map(donation => (
+            <tr key={donation.id}>
+              <td>{donation.donor_name}</td>
+              <td>{donation.donor_email}</td>
+              <td>€{donation.amount}</td>
+              <td>{donation.message}</td>
+              <td>
+                {donation.status === 'pending' ? (
+                  <>
+                    <button 
+                      className="btn btn-success btn-sm" 
+                      onClick={() => confirmDonation(donation.id)}
+                    >
+                      Confirm
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm ms-2" 
+                      onClick={() => failDonation(donation.id)}
+                    >
+                      Fail
+                    </button>
+                  </>
+                ) : (
+                  <span className={`badge ${donation.status === 'confirmed' ? 'bg-success' : 'bg-danger'}`}>
+                    {donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
+                  </span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
