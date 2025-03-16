@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import poppy from '../../public/poppy.svg';
 import rose from '../../public/rose.svg';
-import { FaFacebookSquare, FaInstagram, FaTwitterSquare } from 'react-icons/fa';
+import { FaGithub, FaEnvelope, FaWhatsapp } from 'react-icons/fa'; // Updated icons
 
 // Import existing components
 import StatsSection from './StatsSection';
@@ -33,7 +33,6 @@ function Home() {
   // 3) Fetch Data on Mount
   // -------------------------------
   useEffect(() => {
-    // Fetch analytics (like AdminDashboard but for public view)
     axiosInstance.get('/analytics/')
       .then((res) => {
         setAnalytics(res.data);
@@ -45,7 +44,6 @@ function Home() {
         setAnalyticsLoading(false);
       });
 
-    // Fetch public profile for bride/groom details
     axiosInstance.get('/public_profile/')
       .then((res) => {
         setProfile(res.data);
@@ -62,7 +60,6 @@ function Home() {
   // 4) Wedding Date (Memo)
   // -------------------------------
   const weddingDate = useMemo(() => {
-    // Fallback to a known date if profile is unavailable
     return profile?.wedding_date || '2025-04-26T12:30:00';
   }, [profile]);
 
@@ -71,9 +68,7 @@ function Home() {
   // -------------------------------
   return (
     <div className="home-page">
-      {/* ================================
-          HERO SECTION
-      ================================ */}
+      {/* HERO SECTION */}
       <section className="hero-image"></section>
       <section className="hero-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
@@ -83,75 +78,33 @@ function Home() {
         </div>
       </section>
 
-      {/* ================================
-          ABOUT US (with 50% donation note)
-      ================================ */}
+      {/* ABOUT US */}
       <section className="about-us-section" style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}>
         <div className="container">
           <BioShort />
         </div>
       </section>
 
-      {/* ================================
-          CHARITIES
-      ================================ */}
+      {/* CHARITIES */}
       <section className="charities-section" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Charities We Support</h2>
-          <p>
-            50% of your contribution will be donated to one of these charities.
-            Thank you for helping us make the world a better place.
-          </p>
+          <p>50% of your contribution will be donated to one of these charities. Thank you for helping us make the world a better place.</p>
           <ExploreCharities />
         </div>
       </section>
 
-      {/* ================================
-          WEDDING COUNTDOWN
-      ================================ */}
-      <section
-        className="countdown-section text-center"
-        style={{
-          padding: '4rem 1rem',
-          backgroundColor: '#a47864',
-          position: 'relative',
-        }}
-      >
-        {/* Wildflower images on the left and right */}
-        <img
-          src={poppy}
-          alt="Wildflower Poppy"
-          style={{
-            position: 'absolute',
-            left: '20px',
-            bottom: '0',
-            height: '90%',
-            zIndex: 1,
-            opacity: 0.3,
-          }}
-        />
-        <img
-          src={rose}
-          alt="Wildflower Rose"
-          style={{
-            position: 'absolute',
-            right: '20px',
-            bottom: '0',
-            height: '90%',
-            zIndex: 1,
-            opacity: 0.3,
-          }}
-        />
+      {/* WEDDING COUNTDOWN */}
+      <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864', position: 'relative' }}>
+        <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '90%', zIndex: 1, opacity: 0.3 }} />
+        <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '90%', zIndex: 1, opacity: 0.3 }} />
         <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
           <h2>Wedding Countdown</h2>
           <CountdownTimer targetDate={weddingDate} />
         </div>
       </section>
 
-
-      {/* ================================
-          GUESTBOOK
-      ================================ */}
+      {/* GUESTBOOK */}
       <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Guestbook Messages</h2>
@@ -159,18 +112,8 @@ function Home() {
         </div>
       </section>
 
-      {/* ================================
-          ABOUT THE COUPLE (PUBLIC PROFILE)
-      ================================ */}
-      <section
-        className="couple-section text-center"
-        style={{
-          backgroundColor: '#a47864',
-          position: 'relative',
-          padding: '4rem 1rem',
-          overflow: 'hidden'
-        }}
-      >
+      {/* ABOUT THE COUPLE */}
+      <section className="couple-section text-center" style={{ backgroundColor: '#a47864', position: 'relative', padding: '4rem 1rem', overflow: 'hidden' }}>
         <div className="container" style={{ position: 'relative'}}>
           <h2>Meet the Couple</h2>
           {profileLoading ? (
@@ -180,35 +123,22 @@ function Home() {
           ) : profile ? (
             <>
               {profile.profile_picture_url && (
-                <img
-                  src={profile.profile_picture_url}
-                  alt="Couple"
-                  style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }}
-                />
+                <img src={profile.profile_picture_url} alt="Couple" style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }} />
               )}
               <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
               <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
-              <p>
-                You can find us in <strong>{profile.location}</strong>. Feel free to contact us, send us a private message.
-              </p>
-              {/* Social Media Icons */}
-              <div
-                style={{
-                  margin: 0,
-                  marginTop: '1rem',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-              >
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-                  <FaFacebookSquare style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
+              <p>You can find us in <strong>{profile.location}</strong>. Feel free to contact us, send us a private message.</p>
+
+              {/* Updated Social Media Icons */}
+              <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <a href="https://github.com/alanmaizon" target="_blank" rel="noopener noreferrer">
+                  <FaGithub style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-                  <FaInstagram style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
+                <a href="mailto:maizonalan@gmail.com">
+                  <FaEnvelope style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-                  <FaTwitterSquare style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
+                <a href="https://wa.me/3536179069" target="_blank" rel="noopener noreferrer">
+                  <FaWhatsapp style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
               </div>
             </>
@@ -216,32 +146,15 @@ function Home() {
             <p>No profile information available.</p>
           )}
         </div>
-        
+
         {/* HandsGif Background */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1,
-            opacity: 0.3,
-            pointerEvents: 'none'
-          }}
-        >
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1, opacity: 0.3, pointerEvents: 'none' }}>
           <HandsGif />
         </div>
       </section>
 
-      {/* ================================
-          ANALYTICS SECTION
-      ================================ */}
-      <StatsSection
-        analytics={analytics}
-        donationGoal={1200}
-        analyticsLoading={analyticsLoading}
-        analyticsError={analyticsError}
-      />
+      {/* ANALYTICS SECTION */}
+      <StatsSection analytics={analytics} donationGoal={1200} analyticsLoading={analyticsLoading} analyticsError={analyticsError} />
     </div>
   );
 }
