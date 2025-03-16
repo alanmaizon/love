@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import poppy from '../../public/poppy.svg';
 import rose from '../../public/rose.svg';
-import { FaGithub, FaEnvelope, FaWhatsapp } from 'react-icons/fa'; // Updated icons
+import { FaPhoneAlt, FaEnvelope, FaWhatsapp } from 'react-icons/fa'; // Updated icons
 
 // Import existing components
 import StatsSection from './StatsSection';
@@ -139,8 +139,8 @@ function Home() {
 
               {/* Updated Social Media Icons */}
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <a href="https://github.com/alanmaizon" target="_blank" rel="noopener noreferrer">
-                  <FaGithub style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
+                <a href="tel:353896179069" target="_blank" rel="noopener noreferrer">
+                  <FaPhoneAlt style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
                 <a href="mailto:maizonalan@gmail.com">
                   <FaEnvelope style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
