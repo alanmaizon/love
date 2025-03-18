@@ -17,6 +17,7 @@ def combined_charts(request):
     # ------------------
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=29)  # Last 30 days
+    extra_space = timedelta(days=2)  # Extra space after today
     dates = [start_date + timedelta(days=i) for i in range(30)]
     
     trend_totals = []
@@ -37,8 +38,13 @@ def combined_charts(request):
     charity_totals = confirmed_donations.values('charity__name').annotate(
         total=Sum(ExpressionWrapper(F('amount') * Decimal('0.5'), output_field=DecimalField()))
     )
-    labels = [item['charity__name'] for item in charity_totals]
-    sizes = [float(item['total']) for item in charity_totals]
+    labels = []
+    sizes = []
+    for item in charity_totals:
+        percentage = f"{(item['total'] / sum(x['total'] for x in charity_totals) * 100):.1f}%"
+        labels.append(f"{item['charity__name']} ({percentage})")
+        sizes.append(float(item['total']))
+    
     if not labels:
         labels = ['No Donations']
         sizes = [1]
@@ -63,8 +69,8 @@ def combined_charts(request):
 
         axs[0].set_title('Donation Trend (Last 30 Days)', color=text_color, fontsize=14)
 
-        # ✅ Ensure today's date is visible
-        axs[0].set_xlim([start_date, end_date])  
+        # ✅ Ensure today's date is visible with extra space
+        axs[0].set_xlim([start_date, end_date + extra_space])  
         axs[0].set_xticks(filtered_dates[::7] + [end_date])  # Add today explicitly
         axs[0].set_xticklabels(
             [date.strftime('%d-%m') for date in filtered_dates[::7]] + [end_date.strftime('%d-%m')], 
@@ -87,15 +93,9 @@ def combined_charts(request):
         axs[0].set_visible(False)  # Hide chart if no data
 
     # 🥧 Pie Chart
-    wedges, texts = axs[1].pie(sizes, labels=labels, startangle=90, colors=pie_colors, explode=[0.05] * len(labels), shadow=True)
+    axs[1].pie(sizes, labels=labels, startangle=90, colors=pie_colors, explode=[0.05] * len(labels), shadow=True)
     axs[1].axis('equal')
     axs[1].set_title('Donation Split by Charity (50% allocated)', color=text_color, fontsize=14)
-
-    # ✅ Move percentages below names
-    for i, text in enumerate(texts):
-        text.set_color(text_color)  # Charity names
-        percentage = f"{sizes[i] / sum(sizes) * 100:.1f}%"  # Calculate percentage
-        axs[1].text(text.get_position()[0], text.get_position()[1] - 0.1, percentage, ha='center', color=text_color, fontsize=10)
 
     plt.tight_layout()
 
