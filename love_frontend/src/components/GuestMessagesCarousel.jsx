@@ -76,7 +76,7 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
               border: '1px solid #ccc',
               padding: '1.5rem',
               borderRadius: '8px',
-              minWidth: '250px',
+              width: '250px',
               minHeight: '350px', // increased height for a taller card
               userSelect: 'none', // disable text selection
               backgroundColor: '#3d2c1e', // dark chocolate background
