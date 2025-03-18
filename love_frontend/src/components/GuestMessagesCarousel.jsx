@@ -1,25 +1,33 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is imported
+import './GuestMessagesCarousel.css'; // Import the updated CSS file
 
 function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
   const [shuffledMessages, setShuffledMessages] = useState([]);
 
   useEffect(() => {
-    const validMessages = messages.filter(msg => msg.message && msg.message.trim() !== '');
-    setShuffledMessages([...validMessages].sort(() => Math.random() - 0.5));
+    // Filter out empty messages before shuffling
+    const validMessages = messages.filter(
+      (msg) => msg.message && msg.message.trim() !== ''
+    );
+    // Shuffle messages
+    const shuffled = [...validMessages].sort(() => Math.random() - 0.5);
+    setShuffledMessages(shuffled);
   }, [messages]);
 
+  // Auto-scrolling setup: scroll by half the container's width for a smoother effect
   useEffect(() => {
     if (shuffledMessages.length === 0) return;
-    
+
     const interval = setInterval(() => {
       if (carouselRef.current) {
-        const { scrollLeft, clientWidth } = carouselRef.current;
-        carouselRef.current.scrollLeft += clientWidth; // Moves exactly one card width
-        if (carouselRef.current.scrollLeft + clientWidth >= carouselRef.current.scrollWidth) {
-          carouselRef.current.scrollLeft = 0; // Reset to first item when reaching end
+        const { scrollLeft, clientWidth, scrollWidth } = carouselRef.current;
+        const increment = clientWidth / 2;
+        if (scrollLeft + clientWidth >= scrollWidth - increment) {
+          carouselRef.current.scrollLeft = 0;
+        } else {
+          carouselRef.current.scrollLeft += increment;
         }
       }
     }, autoScrollDelay);
@@ -27,32 +35,46 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
     return () => clearInterval(interval);
   }, [autoScrollDelay, shuffledMessages]);
 
+  // Swipe handlers using react-swipeable
   const handlers = useSwipeable({
-    onSwipedLeft: () => { if (carouselRef.current) carouselRef.current.scrollLeft += carouselRef.current.clientWidth; },
-    onSwipedRight: () => { if (carouselRef.current) carouselRef.current.scrollLeft -= carouselRef.current.clientWidth; },
+    onSwipedLeft: () => {
+      if (carouselRef.current) {
+        carouselRef.current.scrollLeft += carouselRef.current.clientWidth / 2;
+      }
+    },
+    onSwipedRight: () => {
+      if (carouselRef.current) {
+        carouselRef.current.scrollLeft -= carouselRef.current.clientWidth / 2;
+      }
+    },
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
   });
 
   return (
-    <div className="container">
-      <div className="row flex-nowrap overflow-auto" {...handlers} ref={carouselRef} 
-           style={{ scrollSnapType: 'x mandatory', scrollBehavior: 'smooth', gap: '1rem' }}>
-        {shuffledMessages.length > 0 ? (
-          shuffledMessages.map((msg) => (
-            <div key={msg.id} className="col-md-4 col-lg-3 d-flex justify-content-center"
-                 style={{ flex: '0 0 auto', scrollSnapAlign: 'start' }}>
-              <div className="card text-center border rounded p-3 bg-dark text-light w-100">
-                <p className="mb-3 fs-5">{msg.message}</p>
-                <small className="text-muted">Gifted on {new Date(msg.created_at).toLocaleDateString()}</small>
-                <small className="fw-bold">{msg.donor_name}</small>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-white text-center w-100">No guest messages available.</p>
-        )}
-      </div>
+    <div
+      {...handlers}
+      ref={carouselRef}
+      className="guest-messages-carousel no-scrollbar"
+    >
+      {shuffledMessages.length > 0 ? (
+        shuffledMessages.map((msg) => (
+          <div key={msg.id} className="card-square">
+            {/* Main Message Centered */}
+            <p className="card-message">{msg.message}</p>
+            {/* Date at Bottom Left */}
+            <small className="card-date">
+              Gifted on {new Date(msg.created_at).toLocaleDateString()}
+            </small>
+            {/* Donor Name as Signature at Bottom Right */}
+            <small className="card-signature">{msg.donor_name}</small>
+          </div>
+        ))
+      ) : (
+        <p className="card-message" style={{ color: '#fff' }}>
+          No guest messages available.
+        </p>
+      )}
     </div>
   );
 }
