@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import './GuestMessagesCarousel.css'; // Ensure this file is imported
+import './GuestMessagesCarousel.css'; // Import the updated CSS file
 
 function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
@@ -56,70 +56,22 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
       {...handlers}
       ref={carouselRef}
       className="guest-messages-carousel no-scrollbar"
-      style={{
-        display: 'flex',
-        overflowX: 'auto',
-        scrollBehavior: 'smooth',
-        padding: '1rem',
-        cursor: 'grab',
-        userSelect: 'none',
-      }}
     >
       {shuffledMessages.length > 0 ? (
         shuffledMessages.map((msg) => (
-          <div
-            key={msg.id}
-            style={{
-              position: 'relative', // for absolute positioning of footer elements
-              flex: '0 0 auto',
-              marginRight: '1rem',
-              border: '1px solid #ccc',
-              padding: '1.5rem',
-              borderRadius: '8px',
-              maxWidth: '350px',
-              minHeight: '350px', // increased height for a taller card
-              userSelect: 'none', // disable text selection
-              backgroundColor: '#3d2c1e', // dark chocolate background
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center', // Center the message vertically
-              alignItems: 'center', // Center the message horizontally
-              textAlign: 'center',
-            }}
-          >
+          <div key={msg.id} className="card-square">
             {/* Main Message Centered */}
-            <p style={{ fontSize: '1.2rem', marginBottom: '2rem', maxWidth: '90%' }}>
-              {msg.message}
-            </p>
+            <p className="card-message">{msg.message}</p>
             {/* Date at Bottom Left */}
-            <small
-              style={{
-                position: 'absolute',
-                bottom: '8px',
-                left: '8px',
-                fontFamily: 'Cormorant, serif',
-                fontSize: '0.8rem',
-              }}
-            >
+            <small className="card-date">
               Gifted on {new Date(msg.created_at).toLocaleDateString()}
             </small>
             {/* Donor Name as Signature at Bottom Right */}
-            <small
-              style={{
-                position: 'absolute',
-                bottom: '8px',
-                right: '8px',
-                fontFamily: 'Cormorant, serif',
-                fontSize: '1rem',
-                fontStyle: 'italic',
-              }}
-            >
-              {msg.donor_name}
-            </small>
+            <small className="card-signature">{msg.donor_name}</small>
           </div>
         ))
       ) : (
-        <p style={{ textAlign: 'center', fontSize: '1.2rem', color: '#fff' }}>
+        <p className="card-message" style={{ color: '#fff' }}>
           No guest messages available.
         </p>
       )}
