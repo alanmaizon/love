@@ -13,7 +13,7 @@ from donations.models import Donation
 
 def combined_charts(request):
     # ------------------
-    # Chart 1: Donation Trend (Last 30 Days - Bar Chart)
+    # Donation Trend (Last 30 Days - Lollipop Chart)
     # ------------------
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=29)  # Last 30 days
@@ -26,12 +26,12 @@ def combined_charts(request):
         ).aggregate(total=Sum('amount'))['total'] or Decimal(0)
         trend_totals.append(max(total, 0))  # Ensure no negative values
 
-    # Remove zero values (filter out zero donations)
+    # Remove zero values (hide empty days)
     filtered_dates = [dates[i] for i in range(len(trend_totals)) if trend_totals[i] > 0]
     filtered_totals = [trend_totals[i] for i in range(len(trend_totals)) if trend_totals[i] > 0]
 
     # ------------------
-    # Chart 2: Donations by Charity (Pie Chart)
+    # Donations by Charity (Pie Chart)
     # ------------------
     confirmed_donations = Donation.objects.filter(status='confirmed')
     charity_totals = confirmed_donations.values('charity__name').annotate(
@@ -43,58 +43,54 @@ def combined_charts(request):
         labels = ['No Donations']
         sizes = [1]
 
-    # 🎨 Custom Gradient for Bar Chart
-    gradient_colors = np.linspace(0.2, 1, len(filtered_dates))  # Light to dark gradient
-    cmap = mcolors.LinearSegmentedColormap.from_list("", ["#FF9A8B", "#D16F52"])  # Gradient colors
-    bar_colors = cmap(gradient_colors)
-
-    # 🎨 Color Palette for Pie Chart
-    custom_colors = ['#BBAA91', '#F1F0E2', '#E4C7B7', '#D16F52', '#D8AE48', '#A47864']
-    colors = custom_colors[:len(labels)]
+    # 🎨 Colors
+    primary_color = "#D16F52"  # Lollipop dot color
+    line_color = "#F1F0E2"  # Stick color
+    text_color = "#F1F0E2"  # Label color
+    pie_colors = ['#BBAA91', '#F1F0E2', '#E4C7B7', '#D16F52', '#D8AE48', '#A47864']
 
     # ------------------
     # Create a composite figure with subplots (VERTICAL LAYOUT)
     # ------------------
     fig, axs = plt.subplots(2, 1, figsize=(8, 12), facecolor='none')
+    plt.subplots_adjust(hspace=0.5, right=0.85)  # Adjust spacing
 
-    # Add spacing between the graphs
-    plt.subplots_adjust(hspace=0.5, right=0.85)
-
-    # 📊 Chart 1: Donation Trend (Bar Chart)
-    if filtered_dates:  # Only display chart if there's non-zero data
-        axs[0].bar(filtered_dates, filtered_totals, color=bar_colors)  # Bar chart with gradient
-        axs[0].set_title('Donation Trend (Last 30 Days)', color='#F1F0E2', fontsize=14)
-        axs[0].set_xlabel('Date', color='#F1F0E2', fontsize=12)
+    # 📍 Lollipop Chart
+    if filtered_dates:
+        axs[0].stem(filtered_dates, filtered_totals, linefmt=line_color, markerfmt=f'o{primary_color}', basefmt=" ")
+        axs[0].set_title('Donation Trend (Last 30 Days)', color=text_color, fontsize=14)
         axs[0].set_xticks(filtered_dates[::7])  # Show labels every 7 days
-        axs[0].set_xticklabels([date.strftime('%d-%m') for date in filtered_dates[::7]], color='#F1F0E2', fontsize=10)
-        axs[0].set_ylabel('Total Donations (€)', color='#F1F0E2', fontsize=12)
-        axs[0].grid(True, color='gray', linestyle='--', alpha=0.6)
-        axs[0].tick_params(axis='x', colors='#F1F0E2')
-        axs[0].tick_params(axis='y', colors='#F1F0E2')
-        axs[0].set_ylim(bottom=0)  # Ensure only positive values
-
-        # ✅ Add labels above bars
+        axs[0].set_xticklabels([date.strftime('%d-%m') for date in filtered_dates[::7]], color=text_color, fontsize=10)
+        
+        # ✅ Add labels above points
         for i, v in enumerate(filtered_totals):
-            axs[0].text(filtered_dates[i], float(v) + float(max(filtered_totals)) * 0.02, f'€{v}', 
-                        ha='center', fontsize=10, color='#F1F0E2')
+            axs[0].text(filtered_dates[i], v + float(max(filtered_totals)) * 0.05, f'€{v}', 
+                        ha='center', fontsize=10, color=text_color)
+
+        axs[0].spines['top'].set_visible(False)
+        axs[0].spines['right'].set_visible(False)
+        axs[0].spines['left'].set_visible(False)
+        axs[0].spines['bottom'].set_color(text_color)
+        axs[0].tick_params(axis='x', colors=text_color)
+        axs[0].set_yticks([])  # Hide Y-axis
 
     else:
-        axs[0].set_visible(False)  # Hide the bar chart if all values are 0
+        axs[0].set_visible(False)  # Hide chart if no data
 
-    # 🥧 Chart 2: Pie Chart for Donation Split by Charity
+    # 🥧 Pie Chart
     explode_values = [0.05] * len(labels)  # Slightly separate slices
     wedges, texts, autotexts = axs[1].pie(
-        sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors,
+        sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=pie_colors,
         explode=explode_values, shadow=True
     )
     axs[1].axis('equal')
-    axs[1].set_title('Donation Split by Charity (50% allocated)', color='#F1F0E2', fontsize=14)
+    axs[1].set_title('Donation Split by Charity (50% allocated)', color=text_color, fontsize=14)
 
     # ✅ Improve Pie Chart Readability
     for text in texts:
-        text.set_color('#F1F0E2')  # Charity names
+        text.set_color(text_color)  # Charity names
     for autotext in autotexts:
-        autotext.set_color('#F1F0E2')  # Percentage labels
+        autotext.set_color(text_color)  # Percentage labels
 
     plt.tight_layout()
 
