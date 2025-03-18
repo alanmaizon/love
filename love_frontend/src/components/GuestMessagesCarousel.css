@@ -16,18 +16,18 @@
   padding: 1rem;
   cursor: grab;
   user-select: none;
+  gap: 1rem; /* Adds spacing between items */
+  align-items: stretch; /* Ensures child items (cards) take full height */
 }
 
 /* Card styling using the aspect-ratio property for square cards */
 .card-square {
   position: relative;
   flex: 0 0 auto;
-  margin-right: 1rem;
-  border: 1px solid #ccc;
-  padding: 1.5rem;
-  border-radius: 8px;
-  aspect-ratio: 1 / 1;  /* Makes the card square */
-  min-height: 350px;    /* Ensures a minimum height */
+  width: 100%; /* Ensures it fills its parent width */
+  max-width: 350px; /* Set a max width for consistency */
+  aspect-ratio: 1 / 1; /* Ensures a perfect square */
+  min-height: unset; /* Remove min-height to let aspect-ratio control height */
   user-select: none;
   background-color: #3d2c1e;
   display: flex;
@@ -36,6 +36,7 @@
   align-items: center;
   text-align: center;
 }
+
 
 /* Style for the main message text */
 .card-message {
