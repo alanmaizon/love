@@ -57,11 +57,15 @@ def combined_charts(request):
 
     # 📍 Lollipop Chart
     if filtered_dates:
-        axs[0].stem(filtered_dates, filtered_totals, linefmt=line_color, markerfmt=f'o{primary_color}', basefmt=" ")
+        markerline, stemline, baseline = axs[0].stem(filtered_dates, filtered_totals, linefmt=line_color, basefmt=" ")
+
+        # ✅ Set marker properties (fixing color issue)
+        plt.setp(markerline, marker='o', markersize=8, color=primary_color, markerfacecolor=primary_color)
+
         axs[0].set_title('Donation Trend (Last 30 Days)', color=text_color, fontsize=14)
         axs[0].set_xticks(filtered_dates[::7])  # Show labels every 7 days
         axs[0].set_xticklabels([date.strftime('%d-%m') for date in filtered_dates[::7]], color=text_color, fontsize=10)
-        
+
         # ✅ Add labels above points
         for i, v in enumerate(filtered_totals):
             axs[0].text(filtered_dates[i], v + float(max(filtered_totals)) * 0.05, f'€{v}', 
@@ -76,6 +80,7 @@ def combined_charts(request):
 
     else:
         axs[0].set_visible(False)  # Hide chart if no data
+
 
     # 🥧 Pie Chart
     explode_values = [0.05] * len(labels)  # Slightly separate slices
