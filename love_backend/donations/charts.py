@@ -8,7 +8,7 @@ matplotlib.use('Agg')  # Use non-GUI backend
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from django.http import HttpResponse
-from django.db.models import Sum, F, DecimalField, ExpressionWrapper
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from donations.models import Donation
 
 def combined_charts(request):
@@ -23,8 +23,12 @@ def combined_charts(request):
     for date in dates:
         total = Donation.objects.filter(
             status='confirmed', created_at__date=date
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        ).aggregate(total=Sum('amount'))['total'] or Decimal(0)
         trend_totals.append(max(total, 0))  # Ensure no negative values
+
+    # Remove zero values (filter out zero donations)
+    filtered_dates = [dates[i] for i in range(len(trend_totals)) if trend_totals[i] > 0]
+    filtered_totals = [trend_totals[i] for i in range(len(trend_totals)) if trend_totals[i] > 0]
 
     # ------------------
     # Chart 2: Donations by Charity (Pie Chart)
@@ -40,7 +44,7 @@ def combined_charts(request):
         sizes = [1]
 
     # 🎨 Custom Gradient for Bar Chart
-    gradient_colors = np.linspace(0.2, 1, len(dates))  # Light to dark gradient
+    gradient_colors = np.linspace(0.2, 1, len(filtered_dates))  # Light to dark gradient
     cmap = mcolors.LinearSegmentedColormap.from_list("", ["#FF9A8B", "#D16F52"])  # Gradient colors
     bar_colors = cmap(gradient_colors)
 
@@ -57,21 +61,25 @@ def combined_charts(request):
     plt.subplots_adjust(hspace=0.5, right=0.85)
 
     # 📊 Chart 1: Donation Trend (Bar Chart)
-    axs[0].bar(dates, trend_totals, color=bar_colors)  # Bar chart with gradient
-    axs[0].set_title('Donation Trend (Last 30 Days)', color='black', fontsize=14)
-    axs[0].set_xlabel('Date', color='black', fontsize=12)
-    axs[0].set_xticks(dates[::7])  # Show labels every 7 days
-    axs[0].set_xticklabels([date.strftime('%d-%m') for date in dates[::7]], color='black', fontsize=10)
-    axs[0].set_ylabel('Total Donations (€)', color='black', fontsize=12)
-    axs[0].grid(True, color='gray', linestyle='--', alpha=0.6)
-    axs[0].tick_params(axis='x', colors='black')
-    axs[0].tick_params(axis='y', colors='black')
-    axs[0].set_ylim(bottom=0)  # Ensure only positive values
+    if filtered_dates:  # Only display chart if there's non-zero data
+        axs[0].bar(filtered_dates, filtered_totals, color=bar_colors)  # Bar chart with gradient
+        axs[0].set_title('Donation Trend (Last 30 Days)', color='#F1F0E2', fontsize=14)
+        axs[0].set_xlabel('Date', color='#F1F0E2', fontsize=12)
+        axs[0].set_xticks(filtered_dates[::7])  # Show labels every 7 days
+        axs[0].set_xticklabels([date.strftime('%d-%m') for date in filtered_dates[::7]], color='#F1F0E2', fontsize=10)
+        axs[0].set_ylabel('Total Donations (€)', color='#F1F0E2', fontsize=12)
+        axs[0].grid(True, color='gray', linestyle='--', alpha=0.6)
+        axs[0].tick_params(axis='x', colors='#F1F0E2')
+        axs[0].tick_params(axis='y', colors='#F1F0E2')
+        axs[0].set_ylim(bottom=0)  # Ensure only positive values
 
-    # ✅ Add labels above bars
-    for i, v in enumerate(trend_totals):
-        axs[0].text(dates[i], float(v) + float(max(trend_totals)) * 0.02, f'€{v}', 
-                    ha='center', fontsize=10, color='black')
+        # ✅ Add labels above bars
+        for i, v in enumerate(filtered_totals):
+            axs[0].text(filtered_dates[i], float(v) + float(max(filtered_totals)) * 0.02, f'€{v}', 
+                        ha='center', fontsize=10, color='#F1F0E2')
+
+    else:
+        axs[0].set_visible(False)  # Hide the bar chart if all values are 0
 
     # 🥧 Chart 2: Pie Chart for Donation Split by Charity
     explode_values = [0.05] * len(labels)  # Slightly separate slices
@@ -80,13 +88,13 @@ def combined_charts(request):
         explode=explode_values, shadow=True
     )
     axs[1].axis('equal')
-    axs[1].set_title('Donation Split by Charity (50% allocated)', color='black', fontsize=14)
+    axs[1].set_title('Donation Split by Charity (50% allocated)', color='#F1F0E2', fontsize=14)
 
     # ✅ Improve Pie Chart Readability
     for text in texts:
-        text.set_color('black')  # Charity names
+        text.set_color('#F1F0E2')  # Charity names
     for autotext in autotexts:
-        autotext.set_color('black')  # Percentage labels
+        autotext.set_color('#F1F0E2')  # Percentage labels
 
     plt.tight_layout()
 
