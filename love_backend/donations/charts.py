@@ -70,7 +70,8 @@ def combined_charts(request):
 
     # ✅ Add labels above bars
     for i, v in enumerate(trend_totals):
-        axs[0].text(dates[i], v + max(trend_totals) * 0.02, f'€{v}', ha='center', fontsize=10, color='black')
+        axs[0].text(dates[i], float(v) + float(max(trend_totals)) * 0.02, f'€{v}', 
+                    ha='center', fontsize=10, color='black')
 
     # 🥧 Chart 2: Pie Chart for Donation Split by Charity
     explode_values = [0.05] * len(labels)  # Slightly separate slices
