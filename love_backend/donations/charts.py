@@ -58,14 +58,18 @@ def combined_charts(request):
     # 📍 Lollipop Chart
     if filtered_dates:
         markerline, stemline, baseline = axs[0].stem(filtered_dates, filtered_totals, linefmt=line_color, basefmt=" ")
-
-        # ✅ Set the marker (dot) color
         markerline.set_markerfacecolor(primary_color)
         markerline.set_markeredgecolor(primary_color)
 
         axs[0].set_title('Donation Trend (Last 30 Days)', color=text_color, fontsize=14)
-        axs[0].set_xticks(filtered_dates[::7])  # Show labels every 7 days
-        axs[0].set_xticklabels([date.strftime('%d-%m') for date in filtered_dates[::7]], color=text_color, fontsize=10)
+
+        # ✅ Ensure today's date is visible
+        axs[0].set_xlim([start_date, end_date])  
+        axs[0].set_xticks(filtered_dates[::7] + [end_date])  # Add today explicitly
+        axs[0].set_xticklabels(
+            [date.strftime('%d-%m') for date in filtered_dates[::7]] + [end_date.strftime('%d-%m')], 
+            color=text_color, fontsize=10
+        )
 
         # ✅ Add labels above points
         for i, v in enumerate(filtered_totals):
@@ -79,25 +83,19 @@ def combined_charts(request):
         axs[0].tick_params(axis='x', colors=text_color)
         axs[0].set_yticks([])  # Hide Y-axis
 
-
     else:
         axs[0].set_visible(False)  # Hide chart if no data
 
-
     # 🥧 Pie Chart
-    explode_values = [0.05] * len(labels)  # Slightly separate slices
-    wedges, texts, autotexts = axs[1].pie(
-        sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=pie_colors,
-        explode=explode_values, shadow=True
-    )
+    wedges, texts = axs[1].pie(sizes, labels=labels, startangle=90, colors=pie_colors, explode=[0.05] * len(labels), shadow=True)
     axs[1].axis('equal')
     axs[1].set_title('Donation Split by Charity (50% allocated)', color=text_color, fontsize=14)
 
-    # ✅ Improve Pie Chart Readability
-    for text in texts:
+    # ✅ Move percentages below names
+    for i, text in enumerate(texts):
         text.set_color(text_color)  # Charity names
-    for autotext in autotexts:
-        autotext.set_color(text_color)  # Percentage labels
+        percentage = f"{sizes[i] / sum(sizes) * 100:.1f}%"  # Calculate percentage
+        axs[1].text(text.get_position()[0], text.get_position()[1] - 0.1, percentage, ha='center', color=text_color, fontsize=10)
 
     plt.tight_layout()
 
