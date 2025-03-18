@@ -8,9 +8,8 @@ matplotlib.use('Agg')  # Use non-GUI backend
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from django.http import HttpResponse
-from django.db.models import Sum, F, DecimalField
+from django.db.models import Sum, F, DecimalField, ExpressionWrapper
 from donations.models import Donation
-from django.db.models import ExpressionWrapper
 
 def combined_charts(request):
     # ------------------
