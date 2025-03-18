@@ -19,11 +19,12 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   // Auto-scrolling setup: scroll by half the container's width for a smoother effect
   useEffect(() => {
     if (shuffledMessages.length === 0) return;
-
+  
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const { scrollLeft, clientWidth, scrollWidth } = carouselRef.current;
-        const increment = clientWidth / 2;
+        const increment = carouselRef.current?.querySelector('.card-square')?.offsetWidth || clientWidth / 2;
+        
         if (scrollLeft + clientWidth >= scrollWidth - increment) {
           carouselRef.current.scrollLeft = 0;
         } else {
@@ -31,9 +32,9 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
         }
       }
     }, autoScrollDelay);
-
+  
     return () => clearInterval(interval);
-  }, [autoScrollDelay, shuffledMessages]);
+  }, [autoScrollDelay, shuffledMessages]);  
 
   // Swipe handlers using react-swipeable
   const handlers = useSwipeable({
