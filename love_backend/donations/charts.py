@@ -52,14 +52,16 @@ def combined_charts(request):
     # 🎨 Colors
     primary_color = "#D16F52"  # Lollipop dot color
     line_color = "#F1F0E2"  # Stick color
-    text_color = "#F1F0E2"  # Label color
+    text_color = "#F1F0E2"  # Title and label color
     pie_colors = ['#BBAA91', '#F1F0E2', '#E4C7B7', '#D16F52', '#D8AE48', '#A47864']
 
     # ------------------
     # Create a composite figure with subplots (VERTICAL LAYOUT)
     # ------------------
     fig, axs = plt.subplots(2, 1, figsize=(8, 12), facecolor='none')
-    plt.subplots_adjust(hspace=0.5, right=0.85)  # Adjust spacing
+
+    # Add space between the charts and titles
+    plt.subplots_adjust(hspace=0.7, top=0.92, bottom=0.08, left=0.15, right=0.85)  
 
     # 📍 Lollipop Chart
     if filtered_dates:
@@ -67,7 +69,7 @@ def combined_charts(request):
         markerline.set_markerfacecolor(primary_color)
         markerline.set_markeredgecolor(primary_color)
 
-        axs[0].set_title('Donation Trend (Last 30 Days)', color=text_color, fontsize=14)
+        axs[0].set_title('Donation Trend (Last 30 Days)', color=text_color, fontsize=14, pad=20)  # Added title margin
 
         # ✅ Ensure today's date is visible with extra space
         axs[0].set_xlim([start_date, end_date + extra_space])  
@@ -93,9 +95,13 @@ def combined_charts(request):
         axs[0].set_visible(False)  # Hide chart if no data
 
     # 🥧 Pie Chart
-    axs[1].pie(sizes, labels=labels, startangle=90, colors=pie_colors, explode=[0.05] * len(labels), shadow=True)
+    wedges, texts = axs[1].pie(sizes, labels=labels, startangle=90, colors=pie_colors, explode=[0.05] * len(labels), shadow=True)
     axs[1].axis('equal')
-    axs[1].set_title('Donation Split by Charity (50% allocated)', color=text_color, fontsize=14)
+    axs[1].set_title('Donation Split by Charity (50% allocated)', color=text_color, fontsize=14, pad=20)  # Added title margin
+
+    # ✅ Change Pie Chart Label Colors to F1F0E2
+    for text in texts:
+        text.set_color(text_color)
 
     plt.tight_layout()
 
