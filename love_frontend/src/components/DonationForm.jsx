@@ -110,6 +110,7 @@ function DonationForm() {
               </div>
             ))}
           </div>
+          <small>Your donation amount is private</small>
         </div>
         {selectedAmount === "custom" && (
           <div className="mb-3">
