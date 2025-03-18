@@ -10,6 +10,7 @@ import matplotlib.colors as mcolors
 from django.http import HttpResponse
 from django.db.models import Sum, F, DecimalField
 from donations.models import Donation
+from django.db.models import ExpressionWrapper
 
 def combined_charts(request):
     # ------------------
