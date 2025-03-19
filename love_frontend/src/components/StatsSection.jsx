@@ -26,9 +26,11 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
             <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
               {analytics.count_per_charity &&
                 analytics.count_per_charity.map((item) => (
-                  <li key={item.charity__name}>
-                    {item.charity__name}: {item.count} donations, Total Allocated: €{item.total_allocated.toLocaleString()}
-                  </li>
+                <li key={item.charity__name}>
+                  <span>{item.charity__name}: {item.count} donations</span>
+                  <br />
+                  <span>Total Allocated: €{item.total_allocated.toLocaleString()}</span>
+                </li>
                 ))}
             </ul>
 
