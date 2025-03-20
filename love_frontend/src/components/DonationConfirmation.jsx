@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { SiRevolut, SiVisa, SiMastercard, SiApplepay, SiGooglepay } from 'react-icons/si';
@@ -73,7 +72,7 @@ function DonationConfirmation() {
             <SiGooglepay size={40} />
           </div>
 
-          <p className="text-success mb-2">
+          <p className="text-muted mb-2">
             The payment link is secure. You will receive a confirmation email once your payment is processed.
           </p>
 
