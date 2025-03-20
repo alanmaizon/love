@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { SiRevolut, SiVisa, SiMastercard, SiApplepay, SiGooglepay } from 'react-icons/si';
+
 
 function DonationConfirmation() {
   const location = useLocation();
@@ -63,15 +65,15 @@ function DonationConfirmation() {
             Pay with Revolut Checkout
           </a>
 
-          <div className="my-3 flex items-center space-x-4">
-            <span className="text-2xl"><SiRevolut /></span>
-            <span className="text-2xl"><SiVisa /></span>
-            <span className="text-2xl"><SiMastercard /></span>
-            <span className="text-2xl"><SiApplepay /></span>
-            <span className="text-2xl"><SiGooglepay /></span>
+          <div className="my-3 d-flex align-items-center gap-4">
+            <SiRevolut size={40} />
+            <SiVisa size={40} />
+            <SiMastercard size={40} />
+            <SiApplepay size={40} />
+            <SiGooglepay size={40} />
           </div>
 
-          <p className="text-sm text-green-600 mb-2">
+          <p className="text-success mb-2">
             The payment link is secure. You will receive a confirmation email once your payment is processed.
           </p>
 
