@@ -28,16 +28,14 @@ function DonationConfirmation() {
     return <div>Loading payment instructions...</div>;
   }
 
-  // Define preset allowed donation amounts with their corresponding Revolut checkout links
   const presetPaymentLinks = {
-    10: "https://checkout.revolut.com/pay/91fe7cf9-ca92-41fd-9a52-00ed6c7e5a97",
-    20: "https://checkout.revolut.com/pay/0be0f6d5-9ded-4b17-b303-04070476dc55",
-    50: "https://checkout.revolut.com/pay/0b8c3ee5-7e4e-4fda-80f3-73a6c87c2ea5",
-    100: "https://checkout.revolut.com/pay/8761b44b-a67d-4b73-a153-ba33e36ceeff"
+    10: import.meta.env.VITE_REVOLUT_LINK_10,
+    20: import.meta.env.VITE_REVOLUT_LINK_20,
+    50: import.meta.env.VITE_REVOLUT_LINK_50,
+    100: import.meta.env.VITE_REVOLUT_LINK_100,
   };
 
-  // Revolut checkout link for custom amounts
-  const customPaymentLink = "https://checkout.revolut.com/pay/b4b564f7-56ab-4a96-bfde-35277a0a7d7b";
+  const customPaymentLink = import.meta.env.VITE_REVOLUT_LINK_CUSTOM;
 
   // Parse the donation amount from the donation object
   const donationAmount = parseFloat(donation.amount);
