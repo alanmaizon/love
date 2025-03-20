@@ -63,25 +63,23 @@ function DonationConfirmation() {
             Pay with Revolut Checkout
           </a>
 
-          <div className="my-3">
-            <span className="mr-3 text-xl"><SiRevolut /></span>
-            <span className="mr-3 text-xl"><SiVisa /></span>
-            <span className="mr-3 text-xl"><SiMastercard /></span>
-            <span className="mr-3 text-xl"><SiApplepay /></span>
-            <span className="mr-3 text-xl"><SiGooglepay /></span>
+          <div className="my-3 flex items-center space-x-4">
+            <span className="text-2xl"><SiRevolut /></span>
+            <span className="text-2xl"><SiVisa /></span>
+            <span className="text-2xl"><SiMastercard /></span>
+            <span className="text-2xl"><SiApplepay /></span>
+            <span className="text-2xl"><SiGooglepay /></span>
           </div>
+
+          <p className="text-sm text-green-600 mb-2">
+            The payment link is secure. You will receive a confirmation email once your payment is processed.
+          </p>
 
           <hr />
           <p>You can also transfer manually using the details below:</p>
           <ul>
             <li><strong>Bank:</strong> {profile.bank_name}</li>
             <li><strong>Account Number:</strong> {profile.account_number}</li>
-            <li>
-              <strong>Revolut Transfer:</strong>{' '}
-              <a href={`https://revolut.me/${profile.revolut_username}`} target="_blank" rel="noopener noreferrer">
-                revolut.me/{profile.revolut_username}
-              </a>
-            </li>
             <li><strong>Reference:</strong> GIFT-{donation.id}</li>
           </ul>
         </>
