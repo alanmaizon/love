@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
+import { SiRevolut, SiVisa, SiMastercard, SiApplepay, SiGooglepay } from 'react-icons/si';
 
 function DonationConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
   const donation = location.state?.donation;
 
-  // Fetch public profile to get bank details (and possibly other data)
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -57,20 +57,31 @@ function DonationConfirmation() {
             <li><strong>Amount:</strong> €{donation.amount}</li>
             <li><strong>Message:</strong> {donation.message || 'No message provided'}</li>
           </ul>
-          <p>To complete your gift, click below to pay via Revolut:</p>
-          <a
-            href={paymentLink}
-            className="btn btn-primary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Pay with Revolut
+          <p>To complete your gift, select a payment method:</p>
+
+          <a href={paymentLink} className="btn btn-primary mb-3" target="_blank" rel="noopener noreferrer">
+            Pay with Revolut Checkout
           </a>
+
+          <div className="my-3">
+            <span className="mr-3 text-xl"><SiRevolut /></span>
+            <span className="mr-3 text-xl"><SiVisa /></span>
+            <span className="mr-3 text-xl"><SiMastercard /></span>
+            <span className="mr-3 text-xl"><SiApplepay /></span>
+            <span className="mr-3 text-xl"><SiGooglepay /></span>
+          </div>
+
           <hr />
-          <p>Alternatively, you can manually transfer the amount using the following details:</p>
+          <p>You can also transfer manually using the details below:</p>
           <ul>
-            <li><strong>Bank:</strong> {profile ? profile.bank_name : 'N/A'}</li>
-            <li><strong>Account Number:</strong> {profile ? profile.account_number : 'N/A'}</li>
+            <li><strong>Bank:</strong> {profile.bank_name}</li>
+            <li><strong>Account Number:</strong> {profile.account_number}</li>
+            <li>
+              <strong>Revolut Transfer:</strong>{' '}
+              <a href={`https://revolut.me/${profile.revolut_username}`} target="_blank" rel="noopener noreferrer">
+                revolut.me/{profile.revolut_username}
+              </a>
+            </li>
             <li><strong>Reference:</strong> GIFT-{donation.id}</li>
           </ul>
         </>
