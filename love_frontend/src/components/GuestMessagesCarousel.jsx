@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
+import './GuestMessagesCarousel.css';
 
 function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
   const carouselRef = useRef(null);
