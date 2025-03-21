@@ -1,5 +1,4 @@
-// src/components/DonationForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -9,55 +8,64 @@ function DonationForm() {
   const preselectedCharity = location.state?.selectedCharity || '';
 
   const [charities, setCharities] = useState([]);
-  const [donorName, setDonorName] = useState('');
-  const [donorEmail, setDonorEmail] = useState('');
-  const [selectedAmount, setSelectedAmount] = useState('');
-  const [customAmount, setCustomAmount] = useState('');
-  const [message, setMessage] = useState('');
-  const [selectedCharity, setSelectedCharity] = useState(preselectedCharity);
+  const [formState, setFormState] = useState({
+    donorName: '',
+    donorEmail: '',
+    selectedAmount: '',
+    customAmount: '',
+    message: '',
+    selectedCharity: preselectedCharity,
+  });
   const [feedback, setFeedback] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     axiosInstance.get('/charities/')
-      .then(response => {
-        setCharities(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching charities:', error);
-      });
+      .then(response => setCharities(response.data))
+      .catch(error => console.error('Error fetching charities:', error));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
-    let amountValue;
-    if (selectedAmount === 'custom') {
-      amountValue = parseFloat(customAmount);
-    } else {
-      amountValue = parseFloat(selectedAmount);
-    }
+    const amountValue = formState.selectedAmount === 'custom'
+      ? parseFloat(formState.customAmount)
+      : parseFloat(formState.selectedAmount);
 
     if (!amountValue || amountValue <= 0) {
       setFeedback('Please enter a valid donation amount.');
       return;
     }
 
-    const donationData = {
-      donor_name: donorName,
-      donor_email: donorEmail,
-      amount: amountValue,
-      message: message,
-      charity: selectedCharity,
-    };
+    if (!formState.selectedCharity) {
+      setFeedback('Please select a charity.');
+      return;
+    }
+
+    setLoading(true);
+    setFeedback('');
 
     try {
-      const response = await axiosInstance.post('/donations/', donationData);
+      const response = await axiosInstance.post('/donations/', {
+        donor_name: formState.donorName,
+        donor_email: formState.donorEmail,
+        amount: amountValue,
+        message: formState.message,
+        charity: formState.selectedCharity,
+      });
       navigate('/confirmation', { state: { donation: response.data } });
     } catch (error) {
       console.error('Error submitting donation:', error);
       setFeedback('Error submitting donation. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [formState, navigate]);
 
   return (
     <div className="container mt-5">
@@ -73,9 +81,10 @@ function DonationForm() {
           <input
             type="text"
             id="donorName"
+            name="donorName"
             className="form-control"
-            value={donorName}
-            onChange={(e) => setDonorName(e.target.value)}
+            value={formState.donorName}
+            onChange={handleChange}
             required
           />
         </div>
@@ -84,25 +93,26 @@ function DonationForm() {
           <input
             type="email"
             id="donorEmail"
+            name="donorEmail"
             className="form-control"
-            value={donorEmail}
-            onChange={(e) => setDonorEmail(e.target.value)}
+            value={formState.donorEmail}
+            onChange={handleChange}
             required
           />
         </div>
         <div className="mb-3" role="radiogroup" aria-labelledby="contributionAmountLabel">
           <label id="contributionAmountLabel" className="form-label">Contribution Amount</label>
           <div>
-            {["10", "20", "50", "100", "custom"].map((value) => (
+            {["10", "20", "50", "100", "custom"].map(value => (
               <div key={value} className="form-check form-check-inline">
                 <input
                   id={`amount-${value}`}
                   className="form-check-input"
                   type="radio"
-                  name="amountOptions"
+                  name="selectedAmount"
                   value={value}
-                  checked={selectedAmount === value}
-                  onChange={(e) => setSelectedAmount(e.target.value)}
+                  checked={formState.selectedAmount === value}
+                  onChange={handleChange}
                 />
                 <label className="form-check-label" htmlFor={`amount-${value}`}>
                   {value === "custom" ? "Custom" : `€${value}`}
@@ -112,32 +122,32 @@ function DonationForm() {
           </div>
           <small>Your donation amount is private</small>
         </div>
-        {selectedAmount === "custom" && (
+        {formState.selectedAmount === "custom" && (
           <div className="mb-3">
             <label htmlFor="customAmount" className="form-label">Enter Custom Amount</label>
             <input
               type="number"
               id="customAmount"
+              name="customAmount"
               className="form-control"
-              value={customAmount}
-              onChange={(e) => setCustomAmount(e.target.value)}
+              value={formState.customAmount}
+              onChange={handleChange}
             />
           </div>
         )}
         <div className="mb-3">
-          <label htmlFor="charity" className="form-label">Select one charity</label>
+          <label htmlFor="selectedCharity" className="form-label">Select one charity</label>
           <select
-            id="charity"
+            id="selectedCharity"
+            name="selectedCharity"
             className="form-select"
-            value={selectedCharity}
-            onChange={(e) => setSelectedCharity(e.target.value)}
+            value={formState.selectedCharity}
+            onChange={handleChange}
             required
           >
             <option value="">-- Select a Charity --</option>
-            {charities.map((charity) => (
-              <option key={charity.id} value={charity.id}>
-                {charity.name}
-              </option>
+            {charities.map(charity => (
+              <option key={charity.id} value={charity.id}>{charity.name}</option>
             ))}
           </select>
         </div>
@@ -145,14 +155,17 @@ function DonationForm() {
           <label htmlFor="message" className="form-label">Write a message (Optional)</label>
           <textarea
             id="message"
+            name="message"
             className="form-control"
             rows="3"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={formState.message}
+            onChange={handleChange}
           />
           <small>This will be visible to others</small>
         </div>
-        <button type="submit" className="btn btn-primary">Send Gift</button>
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? 'Processing...' : 'Send Gift'}
+        </button>
       </form>
     </div>
   );
