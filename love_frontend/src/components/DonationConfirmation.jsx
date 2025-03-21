@@ -30,36 +30,34 @@ function DonationConfirmation() {
   }, [paymentLink]);
 
   return (
-    <div className="container min-vh-100 d-flex justify-content-center align-items-center">
-      <div className="text-center p-5 rounded shadow-sm">
-        <h2>Gift Confirmation</h2>
-        <p className="mt-4">You are being securely redirected to complete your payment.</p>
+    <div className="container d-flex justify-content-center align-items-center">
+      <h2>Gift Confirmation</h2>
+      <p className="mt-4">You are being securely redirected to complete your payment.</p>
 
-        <div className="my-3 d-flex justify-content-center align-items-center gap-3 text-success">
-          <FaLock size={32} />
-          <span className="fw-semibold">Secure Payment</span>
-        </div>
-
-        <div className="my-3 d-flex justify-content-center align-items-center gap-4">
-          <SiRevolut size={36} />
-          <SiVisa size={36} />
-          <SiMastercard size={36} />
-          <SiApplepay size={36} />
-          <SiGooglepay size={36} />
-        </div>
-
-        <a href={paymentLink} className="btn btn-primary my-3" target="_blank" rel="noopener noreferrer">
-          Click here if you're not redirected automatically.
-        </a>
-
-        <small className="d-block mt-4">
-          You will receive a confirmation email once your payment is processed.
-        </small>
-
-        <button className="btn btn-secondary mt-3" onClick={() => navigate('/')}>
-          Return Home
-        </button>
+      <div className="my-3 d-flex justify-content-center align-items-center gap-3 text-success">
+        <FaLock size={32} />
+        <span className="fw-semibold">Secure Payment</span>
       </div>
+
+      <div className="my-3 d-flex justify-content-center align-items-center gap-4">
+        <SiRevolut size={36} />
+        <SiVisa size={36} />
+        <SiMastercard size={36} />
+        <SiApplepay size={36} />
+        <SiGooglepay size={36} />
+      </div>
+
+      <a href={paymentLink} className="btn btn-primary my-3" target="_blank" rel="noopener noreferrer">
+        Click here if you're not redirected automatically.
+      </a>
+
+      <small className="d-block mt-4">
+        You will receive a confirmation email once your payment is processed.
+      </small>
+
+      <button className="btn btn-secondary mt-3" onClick={() => navigate('/')}>
+        Return Home
+      </button>
     </div>
   );
 }
