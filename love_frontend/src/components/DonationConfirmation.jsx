@@ -14,7 +14,7 @@ function DonationConfirmation() {
   useEffect(() => {
     const timer = setTimeout(() => {
       window.location.href = paymentLink;
-    }, 5000);
+    }, 10000);
 
     setLoading(false);
 
