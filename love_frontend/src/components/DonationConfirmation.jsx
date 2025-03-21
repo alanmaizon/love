@@ -30,8 +30,8 @@ function DonationConfirmation() {
   }, [paymentLink]);
 
   return (
-    <div className="container min-vh-100 d-flex justify-content-center align-items-center bg-light">
-      <div className="text-center p-5 bg-white rounded shadow-sm">
+    <div className="container min-vh-100 d-flex justify-content-center align-items-center">
+      <div className="text-center p-5 rounded shadow-sm">
         <h2>Gift Confirmation</h2>
         <p className="mt-4">You are being securely redirected to complete your payment.</p>
 
