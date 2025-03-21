@@ -16,9 +16,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bio', 
             'location', 
             'profile_picture_url',
-            'bank_name', 
-            'account_number', 
-            'revolut_username',
             'isAdmin',
         ]
 

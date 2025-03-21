@@ -15,9 +15,6 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
             wedding_date=date(2025, 4, 26),  # default wedding date
             bio='',
             location='Ireland',
-            bank_name='',
-            account_number='',
-            bank_identifier='',
         )
     else:
         instance.profile.save()
