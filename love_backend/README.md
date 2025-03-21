@@ -1,6 +1,6 @@
 # **Love Backend**
 
-This is the **Django backend** for **Love That Gives Back**, a wedding gift platform that allows guests to contribute to **charities** sending money **directly to the couple**.
+This is the **Django backend** for **Love That Gives Back**, a wedding gift platform that allows guests to contribute to **charities** sending money **directly to the couple**. Backend hosted in Render **[api.lovethatgivesback.com](https://api.lovethatgivesback.com)**
 
 ---
 
@@ -134,4 +134,6 @@ gunicorn love_backend.wsgi:application --bind 0.0.0.0:8000
 ```
 For **Render**, configure `DATABASE_URL` in `.env`.
 ```
+```
+---
 
