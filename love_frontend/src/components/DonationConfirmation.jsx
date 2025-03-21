@@ -26,16 +26,16 @@ const DonationConfirmation = () => {
   }, [paymentLink]);
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen">
+    <section className="flex flex-col items-center justify-center min-h-screen text-center">
       <h2 className="text-2xl font-semibold mb-4">Thank you for your generous donation of €{donation.amount}!</h2>
-      <p className="mb-4 text-center">You'll be securely redirected to complete your payment shortly.</p>
+      <p className="mb-4">You'll be securely redirected to complete your payment shortly.</p>
       <div className="flex items-center space-x-2 mb-6 text-green-600">
-        <FaLock size={24} />
+        <FaLock size={30} />
         <span className="font-medium">Secure payment via Revolut</span>
       </div>
       <div className="flex items-center space-x-4 mb-6">
-        <FaCcVisa size={48} className="text-blue-700" />
-        <FaCcMastercard size={48} className="text-red-500" />
+        <FaCcVisa size={60} className="text-blue-700" />
+        <FaCcMastercard size={60} className="text-red-500" />
       </div>
       <a
         href={paymentLink}
