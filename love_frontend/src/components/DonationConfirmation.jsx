@@ -24,14 +24,14 @@ function DonationConfirmation() {
   useEffect(() => {
     const timer = setTimeout(() => {
       window.location.href = paymentLink;
-    }, 10000); // Increased to 10 seconds
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [paymentLink]);
 
   return (
     <div className="container d-flex justify-content-center align-items-center">
-      <div className="text-center p-5">
+      <div className="text-center">
         <h2>Gift Confirmation</h2>
         <p className="mt-4">You are being securely redirected to complete your payment.</p>
 
