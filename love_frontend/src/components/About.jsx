@@ -46,7 +46,8 @@ function Bio() {
           </p>
           <p style={{ color: '#EAD7BB' }}>
             This way, your love and generosity not only supports our future, but also helps important causes 
-            that we believe in.
+            that we believe in. We hope to use the 50% of your donation that’s going to us towards a trip to Argentina to visit Alan’s family, who Anna hasn’t met yet. 
+            This would be a dream come true for us!
           </p>
         </div>
       </div>
