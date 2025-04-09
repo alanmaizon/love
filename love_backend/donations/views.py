@@ -16,7 +16,8 @@ from decimal import Decimal
 from .helpers import send_donation_confirmation_email 
 import requests
 from django.conf import settings
-
+import logging
+logger = logging.getLogger(__name__)
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([CsrfExemptSessionAuthentication])
@@ -147,9 +148,12 @@ class YouTubeProxyView(APIView):
                 'id': video_id,
                 'key': youtube_api_key,
             })
+            logger.debug(f"YouTube API response: {response.json()}")
             response.raise_for_status()
             return Response(response.json())
         except requests.exceptions.HTTPError as http_err:
+            logger.error(f"YouTube API HTTP error: {http_err}")
             return Response({'error': 'YouTube API HTTP error', 'details': str(http_err)}, status=500)
         except requests.exceptions.RequestException as req_err:
+            logger.error(f"YouTube API request error: {req_err}")
             return Response({'error': 'YouTube API request error', 'details': str(req_err)}, status=500)

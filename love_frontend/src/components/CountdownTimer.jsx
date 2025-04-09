@@ -37,9 +37,13 @@ function CountdownTimer({ targetDate }) {
 
   useEffect(() => {
     const fetchBroadcastStatus = async () => {
+      if (!youtubeVideoId) {
+        console.error('Missing YouTube video ID');
+        return;
+      }
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/youtube-proxy/`, // Use the production API URL
+          `${import.meta.env.VITE_API_URL}/api/youtube-proxy/`,
           { params: { videoId: youtubeVideoId } }
         );
         const status = response.data.items[0]?.status?.lifeCycleStatus;
@@ -48,8 +52,7 @@ function CountdownTimer({ targetDate }) {
         console.error('Error fetching broadcast status:', error);
       }
     };
-
-    // Fetch the broadcast status on mount
+  
     fetchBroadcastStatus();
   }, [youtubeVideoId]);
 
