@@ -137,22 +137,47 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
 
-
 class YouTubeProxyView(APIView):
     def get(self, request):
         video_id = request.GET.get('videoId')
         if not video_id:
             return Response({'error': 'Missing videoId parameter'}, status=400)
 
-        # Load OAuth2 credentials
-
+        # Load OAuth2 credentials from environment variables
         credentials_json = os.getenv('GOOGLE_CREDENTIALS')
-        credentials = Credentials.from_authorized_user_info(json.loads(credentials_json), scopes=[
-            'https://www.googleapis.com/auth/youtube.readonly'
-        ])
+        refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
 
+        if not credentials_json or not refresh_token:
+            return Response({'error': 'Missing Google credentials or refresh token'}, status=500)
+
+        credentials_info = json.loads(credentials_json)
+        client_id = credentials_info['web']['client_id']
+        client_secret = credentials_info['web']['client_secret']
+        token_uri = credentials_info['web']['token_uri']
+
+        # Refresh the access token
         try:
-            # Build the YouTube API client
+            response = requests.post(
+                token_uri,
+                data={
+                    'client_id': client_id,
+                    'client_secret': client_secret,
+                    'refresh_token': refresh_token,
+                    'grant_type': 'refresh_token',
+                },
+            )
+            response_data = response.json()
+            if 'access_token' not in response_data:
+                return Response({'error': 'Failed to refresh access token', 'details': response_data}, status=500)
+
+            access_token = response_data['access_token']
+        except Exception as e:
+            logger.error(f"Error refreshing access token: {e}")
+            return Response({'error': 'Error refreshing access token', 'details': str(e)}, status=500)
+
+        # Use the refreshed access token to call the YouTube API
+        credentials = Credentials(access_token)
+        try:
             youtube = build('youtube', 'v3', credentials=credentials)
             response = youtube.liveBroadcasts().list(
                 part='snippet,status',
