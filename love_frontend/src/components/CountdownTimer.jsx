@@ -41,15 +41,37 @@ function CountdownTimer({ targetDate }) {
         console.error('Missing YouTube video ID');
         return;
       }
+  
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/youtube-proxy/`,
           { params: { videoId: youtubeVideoId } }
         );
-        const status = response.data.items[0]?.status?.lifeCycleStatus;
-        setBroadcastStatus(status);
+        const video = response.data.items[0];
+        const details = video?.liveStreamingDetails;
+  
+        if (!details) {
+          setBroadcastStatus('unknown');
+          return;
+        }
+  
+        const now = new Date();
+        const start = details.actualStartTime ? new Date(details.actualStartTime) : null;
+        const end = details.actualEndTime ? new Date(details.actualEndTime) : null;
+        const scheduled = details.scheduledStartTime ? new Date(details.scheduledStartTime) : null;
+  
+        if (start && !end) {
+          setBroadcastStatus('live');
+        } else if (end) {
+          setBroadcastStatus('ended');
+        } else if (scheduled && scheduled > now) {
+          setBroadcastStatus('upcoming');
+        } else {
+          setBroadcastStatus('unknown');
+        }
       } catch (error) {
         console.error('Error fetching broadcast status:', error);
+        setBroadcastStatus('error');
       }
     };
   
@@ -85,9 +107,9 @@ function CountdownTimer({ targetDate }) {
               allowFullScreen
             ></iframe>
           </div>
-        ) : (
+        ) : broadcastStatus === 'ended' ? (
           <div className="youtube-video">
-            <h3>Just Married!</h3>
+            <h3>Just Married! Watch the Recording</h3>
             <iframe
               width="560"
               height="315"
@@ -98,6 +120,8 @@ function CountdownTimer({ targetDate }) {
               allowFullScreen
             ></iframe>
           </div>
+        ) : (
+          <div>Broadcast status: {broadcastStatus}</div>
         )
       ) : (
         <span>

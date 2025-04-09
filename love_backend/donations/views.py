@@ -179,8 +179,8 @@ class YouTubeProxyView(APIView):
         credentials = Credentials(access_token)
         try:
             youtube = build('youtube', 'v3', credentials=credentials)
-            response = youtube.liveBroadcasts().list(
-                part='snippet,status',
+            response = youtube.videos().list(
+                part='snippet,status,liveStreamingDetails',
                 id=video_id
             ).execute()
             return Response(response)
