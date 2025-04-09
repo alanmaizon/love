@@ -150,7 +150,7 @@ class YouTubeProxyView(APIView):
         if not credentials_json or not refresh_token:
             return Response({'error': 'Missing Google credentials or refresh token'}, status=500)
 
-        credentials_info = json.loads(credentials_json)
+        credentials_info = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
         client_id = credentials_info['web']['client_id']
         client_secret = credentials_info['web']['client_secret']
         token_uri = credentials_info['web']['token_uri']
