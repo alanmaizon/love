@@ -146,11 +146,19 @@ class YouTubeProxyView(APIView):
         # Load OAuth2 credentials from environment variables
         credentials_json = os.getenv('GOOGLE_CREDENTIALS')
         refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
-
+        
         if not credentials_json or not refresh_token:
             return Response({'error': 'Missing Google credentials or refresh token'}, status=500)
-
-        credentials_info = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
+        
+        try:
+            credentials_info = json.loads(credentials_json)  # Parse JSON
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in GOOGLE_CREDENTIALS: {e}")
+            return Response({'error': 'Invalid Google credentials format'}, status=500)
+        
+        if 'web' not in credentials_info or not all(k in credentials_info['web'] for k in ['client_id', 'client_secret', 'token_uri']):
+            return Response({'error': 'Invalid Google credentials structure'}, status=500)
+        
         client_id = credentials_info['web']['client_id']
         client_secret = credentials_info['web']['client_secret']
         token_uri = credentials_info['web']['token_uri']
