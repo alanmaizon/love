@@ -21,6 +21,20 @@ import requests
 from django.conf import settings
 import logging
 
+def youtube_video_details(request):
+    video_id = request.GET.get('videoId')
+    api_key = 'YOUTUBE_API_KEY'
+
+    if not video_id:
+        return JsonResponse({'error': 'Missing videoId parameter'}, status=400)
+
+    url = f'https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id={video_id}&key={api_key}'
+    try:
+        response = requests.get(url)
+        return JsonResponse(response.json(), safe=False)
+    except requests.RequestException as e:
+        return JsonResponse({'error': 'Failed to fetch video details', 'details': str(e)}, status=500)
+    
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([CsrfExemptSessionAuthentication])

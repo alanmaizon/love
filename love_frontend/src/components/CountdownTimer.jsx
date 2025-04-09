@@ -38,35 +38,26 @@ function CountdownTimer({ targetDate }) {
 
   useEffect(() => {
     const fetchBroadcastStatus = async () => {
-      if (!youtubeVideoId || !apiKey) {
-        console.error('Missing YouTube video ID or API key');
-        return;
-      }
-
       try {
         const response = await axios.get(
-          `https://www.googleapis.com/youtube/v3/videos`,
+          `${import.meta.env.VITE_API_URL}/youtube-video-details`,
           {
-            params: {
-              part: 'snippet,liveStreamingDetails',
-              id: youtubeVideoId,
-              key: apiKey,
-            },
+            params: { videoId: youtubeVideoId },
           }
         );
         const video = response.data.items[0];
         const details = video?.liveStreamingDetails;
-
+    
         if (!details) {
           setBroadcastStatus('unknown');
           return;
         }
-
+    
         const now = new Date();
         const start = details.actualStartTime ? new Date(details.actualStartTime) : null;
         const end = details.actualEndTime ? new Date(details.actualEndTime) : null;
         const scheduled = details.scheduledStartTime ? new Date(details.scheduledStartTime) : null;
-
+    
         if (start && !end) {
           setBroadcastStatus('live');
         } else if (end) {
