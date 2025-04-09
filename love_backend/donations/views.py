@@ -13,6 +13,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
 from decimal import Decimal
 from .helpers import send_donation_confirmation_email 
+import requests
+from django.conf import settings
+
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([CsrfExemptSessionAuthentication])
@@ -127,3 +130,22 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     serializer_class = CharitySerializer
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [AllowAny]
+
+def youtube_proxy(request):
+    video_id = request.GET.get('videoId')
+    if not video_id:
+        return JsonResponse({'error': 'Missing videoId parameter'}, status=400)
+
+    youtube_api_key = settings.YOUTUBE_API_KEY
+    youtube_api_url = 'https://www.googleapis.com/youtube/v3/liveBroadcasts'
+
+    try:
+        response = requests.get(youtube_api_url, params={
+            'part': 'snippet,status',
+            'id': video_id,
+            'key': youtube_api_key,
+        })
+        response.raise_for_status()
+        return JsonResponse(response.json())
+    except requests.RequestException as e:
+        return JsonResponse({'error': 'Failed to fetch data from YouTube API', 'details': str(e)}, status=500)

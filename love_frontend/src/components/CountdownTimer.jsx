@@ -22,7 +22,6 @@ function CountdownTimer({ targetDate }) {
   const [broadcastStatus, setBroadcastStatus] = useState(null);
 
   const youtubeVideoId = import.meta.env.VITE_YOUTUBE_VIDEO_ID;
-  const youtubeApiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,14 +39,8 @@ function CountdownTimer({ targetDate }) {
     const fetchBroadcastStatus = async () => {
       try {
         const response = await axios.get(
-          `https://www.googleapis.com/youtube/v3/liveBroadcasts`,
-          {
-            params: {
-              part: 'snippet,status',
-              id: youtubeVideoId,
-              key: youtubeApiKey,
-            },
-          }
+          `/api/youtube-proxy/`, // Call the Django proxy endpoint
+          { params: { videoId: youtubeVideoId } }
         );
         const status = response.data.items[0]?.status?.lifeCycleStatus;
         setBroadcastStatus(status);
@@ -58,7 +51,7 @@ function CountdownTimer({ targetDate }) {
 
     // Fetch the broadcast status on mount
     fetchBroadcastStatus();
-  }, [youtubeVideoId, youtubeApiKey]);
+  }, [youtubeVideoId]);
 
   return (
     <div className="countdown-timer">

@@ -13,6 +13,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 # Debug setting
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+
 ALLOWED_HOSTS = [
     'love-backend-8wbj.onrender.com',
     'api.lovethatgivesback.com',
