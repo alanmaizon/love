@@ -2,6 +2,7 @@ from rest_framework import viewsets, status as drf_status
 from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Profile, Donation, Charity
 from .serializers import DonationSerializer, CharitySerializer, ProfileSerializer
 from .mixins import CsrfExemptMixin
@@ -131,21 +132,24 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [AllowAny]
 
-def youtube_proxy(request):
-    video_id = request.GET.get('videoId')
-    if not video_id:
-        return JsonResponse({'error': 'Missing videoId parameter'}, status=400)
+class YouTubeProxyView(APIView):
+    def get(self, request):
+        video_id = request.GET.get('videoId')
+        if not video_id:
+            return Response({'error': 'Missing videoId parameter'}, status=400)
 
-    youtube_api_key = settings.YOUTUBE_API_KEY
-    youtube_api_url = 'https://www.googleapis.com/youtube/v3/liveBroadcasts'
+        youtube_api_key = settings.YOUTUBE_API_KEY
+        youtube_api_url = 'https://www.googleapis.com/youtube/v3/liveBroadcasts'
 
-    try:
-        response = requests.get(youtube_api_url, params={
-            'part': 'snippet,status',
-            'id': video_id,
-            'key': youtube_api_key,
-        })
-        response.raise_for_status()
-        return JsonResponse(response.json())
-    except requests.RequestException as e:
-        return JsonResponse({'error': 'Failed to fetch data from YouTube API', 'details': str(e)}, status=500)
+        try:
+            response = requests.get(youtube_api_url, params={
+                'part': 'snippet,status',
+                'id': video_id,
+                'key': youtube_api_key,
+            })
+            response.raise_for_status()
+            return Response(response.json())
+        except requests.exceptions.HTTPError as http_err:
+            return Response({'error': 'YouTube API HTTP error', 'details': str(http_err)}, status=500)
+        except requests.exceptions.RequestException as req_err:
+            return Response({'error': 'YouTube API request error', 'details': str(req_err)}, status=500)
