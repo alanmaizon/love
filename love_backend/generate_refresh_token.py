@@ -14,7 +14,7 @@ SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 
 # Run the OAuth2 flow
 flow = InstalledAppFlow.from_client_config(credentials_info, SCOPES)
-credentials = flow.run_console()
+credentials = flow.run_local_server(port=8080, prompt='consent')
 
 # Output the refresh token
 print("Refresh Token:", credentials.refresh_token)
