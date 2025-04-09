@@ -22,6 +22,7 @@ function CountdownTimer({ targetDate }) {
   const [broadcastStatus, setBroadcastStatus] = useState(null);
 
   const youtubeVideoId = import.meta.env.VITE_YOUTUBE_VIDEO_ID;
+  const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY; // Add your API key to the environment variables
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -37,29 +38,35 @@ function CountdownTimer({ targetDate }) {
 
   useEffect(() => {
     const fetchBroadcastStatus = async () => {
-      if (!youtubeVideoId) {
-        console.error('Missing YouTube video ID');
+      if (!youtubeVideoId || !apiKey) {
+        console.error('Missing YouTube video ID or API key');
         return;
       }
-  
+
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/youtube-proxy/`,
-          { params: { videoId: youtubeVideoId } }
+          `https://www.googleapis.com/youtube/v3/videos`,
+          {
+            params: {
+              part: 'snippet,liveStreamingDetails',
+              id: youtubeVideoId,
+              key: apiKey,
+            },
+          }
         );
         const video = response.data.items[0];
         const details = video?.liveStreamingDetails;
-  
+
         if (!details) {
           setBroadcastStatus('unknown');
           return;
         }
-  
+
         const now = new Date();
         const start = details.actualStartTime ? new Date(details.actualStartTime) : null;
         const end = details.actualEndTime ? new Date(details.actualEndTime) : null;
         const scheduled = details.scheduledStartTime ? new Date(details.scheduledStartTime) : null;
-  
+
         if (start && !end) {
           setBroadcastStatus('live');
         } else if (end) {
@@ -74,9 +81,9 @@ function CountdownTimer({ targetDate }) {
         setBroadcastStatus('error');
       }
     };
-  
+
     fetchBroadcastStatus();
-  }, [youtubeVideoId]);
+  }, [youtubeVideoId, apiKey]);
 
   return (
     <div className="countdown-timer">
