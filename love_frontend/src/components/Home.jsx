@@ -60,7 +60,7 @@ function Home() {
   // 4) Wedding Date (Memo)
   // -------------------------------
   const weddingDate = useMemo(() => {
-    return profile?.wedding_date || '2025-04-26T12:30:00';
+    return profile?.wedding_date || '2025-04-26T13:00:00+01:00';
   }, [profile]);
 
   // -------------------------------
@@ -99,7 +99,7 @@ function Home() {
         <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '90%', zIndex: 1, opacity: 0.3 }} />
         <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '90%', zIndex: 1, opacity: 0.3 }} />
         <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
-          <h2>Wedding Countdown</h2>
+          <h2>Join us for our special day!</h2>
           <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
             {new Date(weddingDate).toLocaleDateString('en-US', {
               weekday: 'long',
@@ -162,7 +162,7 @@ function Home() {
       </section>
 
       {/* ANALYTICS SECTION */}
-      <StatsSection analytics={analytics} donationGoal={1200} analyticsLoading={analyticsLoading} analyticsError={analyticsError} />
+      <StatsSection analytics={analytics} donationGoal={2200} analyticsLoading={analyticsLoading} analyticsError={analyticsError} />
     </div>
   );
 }

@@ -93,7 +93,7 @@ function DonationForm() {
         <div className="mb-3" role="radiogroup" aria-labelledby="contributionAmountLabel">
           <label id="contributionAmountLabel" className="form-label">Contribution Amount</label>
           <div>
-            {["10", "20", "50", "100", "custom"].map((value) => (
+            {["20", "50", "100", "200", "custom"].map((value) => (
               <div key={value} className="form-check form-check-inline">
                 <input
                   id={`amount-${value}`}

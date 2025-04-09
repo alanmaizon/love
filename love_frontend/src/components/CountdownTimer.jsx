@@ -1,5 +1,5 @@
-// src/components/CountdownTimer.jsx
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function CountdownTimer({ targetDate }) {
   const calculateTimeLeft = () => {
@@ -11,29 +11,102 @@ function CountdownTimer({ targetDate }) {
         days: Math.floor((difference / (1000 * 60 * 60 * 24)) % 7),
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
         minutes: Math.floor((difference / (1000 * 60)) % 60),
-        seconds: Math.floor((difference / 1000) % 60)
+        seconds: Math.floor((difference / 1000) % 60),
       };
     }
     return timeLeft;
   };
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-  
+  const [isCountdownFinished, setIsCountdownFinished] = useState(false);
+  const [broadcastStatus, setBroadcastStatus] = useState(null);
+
+  const youtubeVideoId = import.meta.env.VITE_YOUTUBE_VIDEO_ID;
+  const youtubeApiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      const timeLeft = calculateTimeLeft();
+      setTimeLeft(timeLeft);
+      if (Object.keys(timeLeft).length === 0) {
+        setIsCountdownFinished(true);
+        clearInterval(timer);
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
 
+  useEffect(() => {
+    const fetchBroadcastStatus = async () => {
+      try {
+        const response = await axios.get(
+          `https://www.googleapis.com/youtube/v3/liveBroadcasts`,
+          {
+            params: {
+              part: 'snippet,status',
+              id: youtubeVideoId,
+              key: youtubeApiKey,
+            },
+          }
+        );
+        const status = response.data.items[0]?.status?.lifeCycleStatus;
+        setBroadcastStatus(status);
+      } catch (error) {
+        console.error('Error fetching broadcast status:', error);
+      }
+    };
+
+    // Fetch the broadcast status on mount
+    fetchBroadcastStatus();
+  }, [youtubeVideoId, youtubeApiKey]);
+
   return (
     <div className="countdown-timer">
-      {Object.keys(timeLeft).length > 0 ? (
+      {broadcastStatus === 'upcoming' ? (
+        <div className="youtube-video">
+          <h3>Countdown to the Ceremony</h3>
+          <iframe
+            width="560"
+            height="315"
+            src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      ) : isCountdownFinished ? (
+        broadcastStatus === 'live' ? (
+          <div className="youtube-video">
+            <h3>The Ceremony is Live!</h3>
+            <iframe
+              width="560"
+              height="315"
+              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        ) : (
+          <div className="youtube-video">
+            <h3>Just Married!</h3>
+            <iframe
+              width="560"
+              height="315"
+              src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        )
+      ) : (
         <span>
           {timeLeft.weeks}w {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
         </span>
-      ) : (
-        <span>It's time!</span>
       )}
     </div>
   );

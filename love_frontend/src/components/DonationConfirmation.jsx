@@ -9,10 +9,10 @@ function DonationConfirmation() {
   const donation = location.state?.donation;
 
   const presetPaymentLinks = {
-    10: import.meta.env.VITE_REVOLUT_LINK_10,
     20: import.meta.env.VITE_REVOLUT_LINK_20,
     50: import.meta.env.VITE_REVOLUT_LINK_50,
     100: import.meta.env.VITE_REVOLUT_LINK_100,
+    200: import.meta.env.VITE_REVOLUT_LINK_200,
   };
 
   const customPaymentLink = import.meta.env.VITE_REVOLUT_LINK_CUSTOM;
