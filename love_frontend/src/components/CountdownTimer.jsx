@@ -39,7 +39,7 @@ function CountdownTimer({ targetDate }) {
     const fetchBroadcastStatus = async () => {
       try {
         const response = await axios.get(
-          `/api/youtube-proxy/`, // Call the Django proxy endpoint
+          `${import.meta.env.VITE_API_URL}/api/youtube-proxy/`, // Use the production API URL
           { params: { videoId: youtubeVideoId } }
         );
         const status = response.data.items[0]?.status?.lifeCycleStatus;
