@@ -144,24 +144,35 @@ class YouTubeProxyView(APIView):
             return Response({'error': 'Missing videoId parameter'}, status=400)
 
         # Load OAuth2 credentials from environment variables
+
         credentials_json = os.getenv('GOOGLE_CREDENTIALS')
         refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
         
         if not credentials_json or not refresh_token:
+            logger.error("Missing environment variables for Google credentials or refresh token.")
             return Response({'error': 'Missing Google credentials or refresh token'}, status=500)
         
         try:
-            credentials_info = json.loads(credentials_json)  # Parse JSON
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in GOOGLE_CREDENTIALS: {e}")
+            # Double parsing in case it's a stringified JSON string
+            if isinstance(credentials_json, str):
+                parsed_once = json.loads(credentials_json)
+                # If it’s still a string (e.g., JSON inside a string), parse again
+                credentials_info = json.loads(parsed_once) if isinstance(parsed_once, str) else parsed_once
+            else:
+                credentials_info = credentials_json
+        except Exception as e:
+            logger.error(f"Error parsing GOOGLE_CREDENTIALS: {e}")
             return Response({'error': 'Invalid Google credentials format'}, status=500)
         
-        if 'web' not in credentials_info or not all(k in credentials_info['web'] for k in ['client_id', 'client_secret', 'token_uri']):
+        # Validate expected structure
+        try:
+            web_creds = credentials_info.get('web', {})
+            client_id = web_creds['client_id']
+            client_secret = web_creds['client_secret']
+            token_uri = web_creds['token_uri']
+        except KeyError as e:
+            logger.error(f"Missing key in credentials: {e}")
             return Response({'error': 'Invalid Google credentials structure'}, status=500)
-        
-        client_id = credentials_info['web']['client_id']
-        client_secret = credentials_info['web']['client_secret']
-        token_uri = credentials_info['web']['token_uri']
 
         # Refresh the access token
         try:
