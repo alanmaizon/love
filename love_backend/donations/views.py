@@ -20,7 +20,7 @@ from .helpers import send_donation_confirmation_email
 import requests
 from django.conf import settings
 import logging
-logger = logging.getLogger(__name__)
+
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([CsrfExemptSessionAuthentication])
@@ -137,71 +137,72 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
 
+logger = logging.getLogger(__name__)
+
 class YouTubeProxyView(APIView):
     def get(self, request):
         video_id = request.GET.get('videoId')
         if not video_id:
             return Response({'error': 'Missing videoId parameter'}, status=400)
 
-        # Load OAuth2 credentials from environment variables
-
         credentials_json = os.getenv('GOOGLE_CREDENTIALS')
         refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
-        
+
         if not credentials_json or not refresh_token:
-            logger.error("Missing environment variables for Google credentials or refresh token.")
+            logger.error("Missing Google credentials or refresh token.")
             return Response({'error': 'Missing Google credentials or refresh token'}, status=500)
-        
+
+        # Attempt to parse the credentials
         try:
-            # Double parsing in case it's a stringified JSON string
-            if isinstance(credentials_json, str):
-                parsed_once = json.loads(credentials_json)
-                # If it’s still a string (e.g., JSON inside a string), parse again
-                credentials_info = json.loads(parsed_once) if isinstance(parsed_once, str) else parsed_once
+            parsed = json.loads(credentials_json)
+            if isinstance(parsed, str):
+                credentials_info = json.loads(parsed)
             else:
-                credentials_info = credentials_json
+                credentials_info = parsed
         except Exception as e:
-            logger.error(f"Error parsing GOOGLE_CREDENTIALS: {e}")
-            return Response({'error': 'Invalid Google credentials format'}, status=500)
-        
-        # Validate expected structure
+            logger.error(f"Failed to parse GOOGLE_CREDENTIALS: {e}")
+            return Response({'error': 'Invalid credentials format'}, status=500)
+
         try:
-            web_creds = credentials_info.get('web', {})
-            client_id = web_creds['client_id']
-            client_secret = web_creds['client_secret']
-            token_uri = web_creds['token_uri']
-        except KeyError as e:
-            logger.error(f"Missing key in credentials: {e}")
+            web_creds = credentials_info.get("web", {})
+            client_id = web_creds["client_id"]
+            client_secret = web_creds["client_secret"]
+            token_uri = web_creds["token_uri"]
+        except (KeyError, TypeError) as e:
+            logger.error(f"Invalid structure in GOOGLE_CREDENTIALS: {e}")
             return Response({'error': 'Invalid Google credentials structure'}, status=500)
 
-        # Refresh the access token
+        # Refresh access token
         try:
-            response = requests.post(
+            token_response = requests.post(
                 token_uri,
                 data={
                     'client_id': client_id,
                     'client_secret': client_secret,
                     'refresh_token': refresh_token,
                     'grant_type': 'refresh_token',
-                },
+                }
             )
-            response_data = response.json()
-            if 'access_token' not in response_data:
-                return Response({'error': 'Failed to refresh access token', 'details': response_data}, status=500)
+            token_data = token_response.json()
+            access_token = token_data.get('access_token')
 
-            access_token = response_data['access_token']
+            if not access_token:
+                logger.error(f"Failed to refresh access token: {token_data}")
+                return Response({'error': 'Failed to refresh access token', 'details': token_data}, status=500)
         except Exception as e:
-            logger.error(f"Error refreshing access token: {e}")
+            logger.error(f"Exception during token refresh: {e}")
             return Response({'error': 'Error refreshing access token', 'details': str(e)}, status=500)
 
-        # Use the refreshed access token to call the YouTube API
-        credentials = Credentials(access_token)
+        # Use the access token to get video info
         try:
+            credentials = Credentials(token=access_token)
             youtube = build('youtube', 'v3', credentials=credentials)
+
             response = youtube.videos().list(
                 part='snippet,status,liveStreamingDetails',
                 id=video_id
             ).execute()
+
             return Response(response)
         except Exception as e:
             logger.error(f"YouTube API error: {e}")
