@@ -8,6 +8,9 @@ from .serializers import DonationSerializer, CharitySerializer, ProfileSerialize
 from .mixins import CsrfExemptMixin
 from .utils import CsrfExemptSessionAuthentication
 import json
+import os
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
@@ -133,27 +136,29 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [AllowAny]
 
+
+
 class YouTubeProxyView(APIView):
     def get(self, request):
         video_id = request.GET.get('videoId')
         if not video_id:
             return Response({'error': 'Missing videoId parameter'}, status=400)
 
-        youtube_api_key = settings.YOUTUBE_API_KEY
-        youtube_api_url = 'https://www.googleapis.com/youtube/v3/liveBroadcasts'
+        # Load OAuth2 credentials
+
+        credentials_json = os.getenv('GOOGLE_CREDENTIALS')
+        credentials = Credentials.from_authorized_user_info(json.loads(credentials_json), scopes=[
+            'https://www.googleapis.com/auth/youtube.readonly'
+        ])
 
         try:
-            response = requests.get(youtube_api_url, params={
-                'part': 'snippet,status',
-                'id': video_id,
-                'key': youtube_api_key,
-            })
-            logger.debug(f"YouTube API response: {response.json()}")
-            response.raise_for_status()
-            return Response(response.json())
-        except requests.exceptions.HTTPError as http_err:
-            logger.error(f"YouTube API HTTP error: {http_err}")
-            return Response({'error': 'YouTube API HTTP error', 'details': str(http_err)}, status=500)
-        except requests.exceptions.RequestException as req_err:
-            logger.error(f"YouTube API request error: {req_err}")
-            return Response({'error': 'YouTube API request error', 'details': str(req_err)}, status=500)
+            # Build the YouTube API client
+            youtube = build('youtube', 'v3', credentials=credentials)
+            response = youtube.liveBroadcasts().list(
+                part='snippet,status',
+                id=video_id
+            ).execute()
+            return Response(response)
+        except Exception as e:
+            logger.error(f"YouTube API error: {e}")
+            return Response({'error': 'YouTube API error', 'details': str(e)}, status=500)
