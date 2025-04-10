@@ -99,11 +99,19 @@ function Home() {
         <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '35%', zIndex: 0, opacity: 0.3 }} />
         <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '35%', zIndex: 0, opacity: 0.3 }} />
         <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
+
           <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
         <CountdownTimer targetDate={weddingDate} />
           </div>
-          <h2 style={{ marginTop: '2rem' }}>Join Us Live</h2>
-          <p>Watch our wedding ceremony live on YouTube.</p>
+          <h2>Wedding live stream</h2>
+          <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+        {new Date(weddingDate).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+          </p>
         </div>
       </section>
 
