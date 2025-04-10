@@ -15,6 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
+from django.core.cache import cache
+from django.utils.encoding import force_str
 from decimal import Decimal
 from .helpers import send_donation_confirmation_email 
 import requests
@@ -159,34 +161,22 @@ class YouTubeProxyView(APIView):
         if not video_id:
             return Response({'error': 'Missing videoId parameter'}, status=400)
 
-        credentials_json = os.getenv('GOOGLE_CREDENTIALS')
-        refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
+        cache_key = f'youtube_video_{video_id}'
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            logger.info(f"Returning cached YouTube response for videoId={video_id}")
+            return Response(cached_response)
 
-        if not credentials_json or not refresh_token:
-            logger.error("Missing Google credentials or refresh token.")
-            return Response({'error': 'Missing Google credentials or refresh token'}, status=500)
+        # Simpler: load credentials from flat env vars
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+        refresh_token = os.getenv("GOOGLE_REFRESH_TOKEN")
+        token_uri = "https://oauth2.googleapis.com/token"
 
-        # Attempt to parse the credentials
-        try:
-            parsed = json.loads(credentials_json)
-            if isinstance(parsed, str):
-                credentials_info = json.loads(parsed)
-            else:
-                credentials_info = parsed
-        except Exception as e:
-            logger.error(f"Failed to parse GOOGLE_CREDENTIALS: {e}")
-            return Response({'error': 'Invalid credentials format'}, status=500)
+        if not all([client_id, client_secret, refresh_token]):
+            logger.error("Missing one or more Google OAuth credentials")
+            return Response({'error': 'Missing credentials'}, status=500)
 
-        try:
-            web_creds = credentials_info.get("web", {})
-            client_id = web_creds["client_id"]
-            client_secret = web_creds["client_secret"]
-            token_uri = web_creds["token_uri"]
-        except (KeyError, TypeError) as e:
-            logger.error(f"Invalid structure in GOOGLE_CREDENTIALS: {e}")
-            return Response({'error': 'Invalid Google credentials structure'}, status=500)
-
-        # Refresh access token
         try:
             token_response = requests.post(
                 token_uri,
@@ -197,28 +187,26 @@ class YouTubeProxyView(APIView):
                     'grant_type': 'refresh_token',
                 }
             )
+            token_response.raise_for_status()
             token_data = token_response.json()
             access_token = token_data.get('access_token')
-
             if not access_token:
-                logger.error(f"Failed to refresh access token: {token_data}")
-                return Response({'error': 'Failed to refresh access token', 'details': token_data}, status=500)
+                logger.error(f"Access token missing: {token_data}")
+                return Response({'error': 'Token exchange failed', 'details': token_data}, status=500)
         except Exception as e:
-            logger.error(f"Exception during token refresh: {e}")
-            return Response({'error': 'Error refreshing access token', 'details': str(e)}, status=500)
+            logger.exception("Error refreshing token")
+            return Response({'error': 'Token refresh error', 'details': str(e)}, status=500)
 
-        # Use the access token to get video info
         try:
             credentials = Credentials(token=access_token)
             youtube = build('youtube', 'v3', credentials=credentials)
-
             response = youtube.videos().list(
                 part='snippet,status,liveStreamingDetails',
                 id=video_id
             ).execute()
 
+            cache.set(cache_key, response, timeout=60)
             return Response(response)
         except Exception as e:
-            logger.error(f"YouTube API error: {e}")
+            logger.exception("YouTube API call failed")
             return Response({'error': 'YouTube API error', 'details': str(e)}, status=500)
-        

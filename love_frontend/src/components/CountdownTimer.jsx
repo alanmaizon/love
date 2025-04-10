@@ -2,64 +2,65 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function CountdownTimer({ targetDate }) {
-  const calculateTimeLeft = () => {
-    const difference = +new Date(targetDate) - +new Date();
-    let timeLeft = {};
-    if (difference > 0) {
-      timeLeft = {
-        weeks: Math.floor(difference / (1000 * 60 * 60 * 24 * 7)),
-        days: Math.floor((difference / (1000 * 60 * 60 * 24)) % 7),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / (1000 * 60)) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
-    return timeLeft;
-  };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState({});
   const [isCountdownFinished, setIsCountdownFinished] = useState(false);
   const [broadcastStatus, setBroadcastStatus] = useState(null);
-
   const youtubeVideoId = import.meta.env.VITE_YOUTUBE_VIDEO_ID;
 
+  // Countdown logic
   useEffect(() => {
-    const timer = setInterval(() => {
-      const timeLeft = calculateTimeLeft();
-      setTimeLeft(timeLeft);
-      if (Object.keys(timeLeft).length === 0) {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const difference = +new Date(targetDate) - +now;
+      if (difference > 0) {
+        return {
+          weeks: Math.floor(difference / (1000 * 60 * 60 * 24 * 7)),
+          days: Math.floor((difference / (1000 * 60 * 60 * 24)) % 7),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / (1000 * 60)) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        };
+      }
+      return {};
+    };
+
+    const interval = setInterval(() => {
+      const time = calculateTimeLeft();
+      setTimeLeft(time);
+      if (Object.keys(time).length === 0) {
         setIsCountdownFinished(true);
-        clearInterval(timer);
+        clearInterval(interval);
       }
     }, 1000);
-    return () => clearInterval(timer);
+
+    return () => clearInterval(interval);
   }, [targetDate]);
 
+  // Get livestream status from backend
   useEffect(() => {
     const fetchBroadcastStatus = async () => {
       if (!youtubeVideoId) {
         console.error('Missing YouTube video ID');
         return;
       }
-  
+
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/youtube-proxy/`,
-          { params: { videoId: youtubeVideoId } }
-        );
-        const video = response.data.items[0];
-        const details = video?.liveStreamingDetails;
-  
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/youtube-proxy/`, {
+          params: { videoId: youtubeVideoId },
+        });
+
+        const details = response.data.items[0]?.liveStreamingDetails;
+
         if (!details) {
           setBroadcastStatus('unknown');
           return;
         }
-  
+
         const now = new Date();
         const start = details.actualStartTime ? new Date(details.actualStartTime) : null;
         const end = details.actualEndTime ? new Date(details.actualEndTime) : null;
         const scheduled = details.scheduledStartTime ? new Date(details.scheduledStartTime) : null;
-  
+
         if (start && !end) {
           setBroadcastStatus('live');
         } else if (end) {
@@ -69,12 +70,12 @@ function CountdownTimer({ targetDate }) {
         } else {
           setBroadcastStatus('unknown');
         }
-      } catch (error) {
-        console.error('Error fetching broadcast status:', error);
+      } catch (err) {
+        console.error('Error fetching livestream data:', err);
         setBroadcastStatus('error');
       }
     };
-  
+
     fetchBroadcastStatus();
   }, [youtubeVideoId]);
 
@@ -82,7 +83,9 @@ function CountdownTimer({ targetDate }) {
     <div className="countdown-timer">
       {broadcastStatus === 'upcoming' ? (
         <div className="youtube-video">
-          <h3>Countdown to the Ceremony</h3>
+          <span>
+            {timeLeft.weeks}w {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+          </span>
           <iframe
             width="560"
             height="315"
@@ -107,7 +110,7 @@ function CountdownTimer({ targetDate }) {
               allowFullScreen
             ></iframe>
           </div>
-        ) : broadcastStatus === 'ended' ? (
+        ) : (
           <div className="youtube-video">
             <h3>Just Married! Watch the Recording</h3>
             <iframe
@@ -120,8 +123,6 @@ function CountdownTimer({ targetDate }) {
               allowFullScreen
             ></iframe>
           </div>
-        ) : (
-          <div>Broadcast status: {broadcastStatus}</div>
         )
       ) : (
         <span>

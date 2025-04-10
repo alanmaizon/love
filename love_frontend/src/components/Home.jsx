@@ -96,23 +96,25 @@ function Home() {
 
       {/* WEDDING COUNTDOWN */}
       <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864', position: 'relative' }}>
-        <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '90%', zIndex: 1, opacity: 0.3 }} />
-        <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '90%', zIndex: 1, opacity: 0.3 }} />
+        <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '45%', zIndex: 1000, opacity: 0.3 }} />
+        <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '45%', zIndex: 1000, opacity: 0.3 }} />
         <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
           <h2>Join us for our special day!</h2>
           <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-            {new Date(weddingDate).toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
+        {new Date(weddingDate).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
           </p>
-          <CountdownTimer targetDate={weddingDate} />
+          <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
+        <CountdownTimer targetDate={weddingDate} />
+          </div>
         </div>
       </section>
 
-      {/* GUESTBOOK */}
+        {/* GUESTBOOK */}
       <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Guestbook Messages</h2>
