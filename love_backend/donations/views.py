@@ -221,3 +221,4 @@ class YouTubeProxyView(APIView):
         except Exception as e:
             logger.error(f"YouTube API error: {e}")
             return Response({'error': 'YouTube API error', 'details': str(e)}, status=500)
+        

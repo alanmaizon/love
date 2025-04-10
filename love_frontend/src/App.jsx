@@ -109,6 +109,7 @@ function Footer() {
       <div className="container text-center">
         <p className="mb-0">
           Love That Gives Back © 2025
+          <br />
           <span className="footer-links ms-2">
             <Link to="/terms-of-service" className="footer-link">Terms of Service</Link> | 
             <Link to="/privacy-policy" className="footer-link ms-1">Privacy Policy</Link>
