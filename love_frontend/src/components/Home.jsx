@@ -96,8 +96,8 @@ function Home() {
 
       {/* WEDDING COUNTDOWN */}
       <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864', position: 'relative' }}>
-        <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '45%', zIndex: 1000, opacity: 0.3 }} />
-        <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '45%', zIndex: 1000, opacity: 0.3 }} />
+        <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '45%', zIndex: 0, opacity: 0.3 }} />
+        <img src={rose} alt="Wildflower Rose" style={{ position: 'absolute', right: '20px', bottom: '0', height: '45%', zIndex: 0, opacity: 0.3 }} />
         <div className="container" style={{ fontSize: '1.5rem', position: 'relative' }}>
           <h2>Join us for our special day!</h2>
           <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
