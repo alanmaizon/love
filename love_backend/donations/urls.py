@@ -1,4 +1,3 @@
-# love_backend/donations/urls.pys
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import YouTubeProxyView, DonationViewSet, CharityViewSet, login_view, logout_view, donation_analytics, profile_detail, public_profile
