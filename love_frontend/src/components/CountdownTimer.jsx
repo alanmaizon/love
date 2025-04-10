@@ -84,13 +84,22 @@ function CountdownTimer({ targetDate }) {
       {broadcastStatus === 'upcoming' ? (
         <div className="youtube-video">
           <h3>The Ceremony is Coming Soon!</h3>
-          <span>
-            {timeLeft.weeks}w {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
-          </span>
-          <br />
-          <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }}>
+          <div style={{ 
+            position: 'relative', 
+            paddingBottom: '56.25%', 
+            height: 0, 
+            overflow: 'hidden', 
+            maxWidth: '800px', // Set a max width for desktop
+            margin: '0 auto' // Center the iframe
+          }}>
             <iframe
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              style={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                width: '100%', 
+                height: '100%' 
+              }}
               src={`https://www.youtube.com/embed/${youtubeVideoId}`}
               title="YouTube video player"
               frameBorder="0"
