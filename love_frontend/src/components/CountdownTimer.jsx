@@ -82,27 +82,12 @@ function CountdownTimer({ targetDate }) {
   return (
     <div className="countdown-timer">
       {broadcastStatus === 'upcoming' ? (
-        <div className="youtube-video">
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>The Ceremony is Coming Soon!</h3>
-          <div style={{ 
-            position: 'relative', 
-            paddingBottom: '56.25%', 
-            overflow: 'hidden',
-            maxWidth: '768px', // Set a max width for desktop
-            maxHeight: '432px', // Set a max height for desktop
-            margin: '0 auto' // Center the iframe
-          }}>
+        <div className="youtube-video text-center">
+          <h3 className="mb-4">The Ceremony is Coming Soon!</h3>
+          <div className="ratio ratio-16x9 mx-auto" style={{ maxWidth: '768px' }}>
             <iframe
-              style={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: '100%', 
-                height: '100%' 
-              }}
               src={`https://www.youtube.com/embed/${youtubeVideoId}`}
               title="YouTube video player"
-              frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             ></iframe>
@@ -110,30 +95,28 @@ function CountdownTimer({ targetDate }) {
         </div>
       ) : isCountdownFinished ? (
         broadcastStatus === 'live' ? (
-          <div className="youtube-video">
+          <div className="youtube-video text-center">
             <h3>The Ceremony is Live!</h3>
-            <iframe
-              width="560"
-              height="315"
-              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+            <div className="ratio ratio-16x9 mx-auto" style={{ maxWidth: '768px' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
           </div>
         ) : (
-          <div className="youtube-video">
+          <div className="youtube-video text-center">
             <h3>Just Married! Watch the Recording</h3>
-            <iframe
-              width="560"
-              height="315"
-              src={`https://www.youtube.com/embed/${youtubeVideoId}`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+            <div className="ratio ratio-16x9 mx-auto" style={{ maxWidth: '768px' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
           </div>
         )
       ) : (
@@ -143,6 +126,7 @@ function CountdownTimer({ targetDate }) {
       )}
     </div>
   );
+  
 }
 
 export default CountdownTimer;
