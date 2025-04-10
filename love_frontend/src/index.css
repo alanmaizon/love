@@ -86,6 +86,18 @@ html, body, #root {
   z-index: 1000;
 }
 
+.footer-links {
+  font-size: 12px; /* Smaller font size for the links */
+}
+
+.footer-link {
+  color: #A67B5B;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
 
 /* 🎨 Buttons */
 .btn-primary {

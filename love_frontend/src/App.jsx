@@ -21,6 +21,9 @@ import PrivateRoute from './components/PrivateRoute';
 import GuestMessages from './components/GuestMessages';
 import About from './components/About';
 
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
+
 function Header() {
   const { authUser } = useContext(AuthContext);
 
@@ -104,7 +107,13 @@ function Footer() {
   return (
     <footer className="footer" role="contentinfo">
       <div className="container text-center">
-        <p className="mb-0">Love That Gives Back © 2025</p>
+        <p className="mb-0">
+          Love That Gives Back © 2025
+          <span className="footer-links ms-2">
+            <Link to="/terms-of-service" className="footer-link">Terms of Service</Link> | 
+            <Link to="/privacy-policy" className="footer-link ms-1">Privacy Policy</Link>
+          </span>
+        </p>
       </div>
     </footer>
   );
@@ -132,6 +141,8 @@ function App() {
             <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
             <Route path="/messages" element={<GuestMessages />} />
             <Route path="/about" element={<About />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
         <Footer />
