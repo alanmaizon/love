@@ -103,8 +103,8 @@ function Home() {
           <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
         <CountdownTimer targetDate={weddingDate} />
           </div>
-          <h2>Wedding live stream</h2>
-          <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+          <h2 style={{ marginTop: '2rem' }}>Wedding live stream</h2>
+          <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginTop: '2rem' }}>
         {new Date(weddingDate).toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
