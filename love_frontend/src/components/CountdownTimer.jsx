@@ -83,13 +83,13 @@ function CountdownTimer({ targetDate }) {
     <div className="countdown-timer">
       {broadcastStatus === 'upcoming' ? (
         <div className="youtube-video">
-          <h3>The Ceremony is Coming Soon!</h3>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>The Ceremony is Coming Soon!</h3>
           <div style={{ 
             position: 'relative', 
             paddingBottom: '56.25%', 
-            height: 0, 
-            overflow: 'hidden', 
-            maxWidth: '800px', // Set a max width for desktop
+            overflow: 'hidden',
+            maxWidth: '768px', // Set a max width for desktop
+            maxHeight: '432px', // Set a max height for desktop
             margin: '0 auto' // Center the iframe
           }}>
             <iframe
