@@ -127,13 +127,45 @@ python manage.py test
 ---
 
 ## **🚀 Deployment**
-For production, use **Gunicorn & Nginx** with **PostgreSQL**.
-```sh
+
+This application is fully deployed using [**Render**](https://render.com) with:
+
+- ✅ **Backend** (`Django + DRF`) hosted on Render:  
+  🔗 `https://api.lovethatgivesback.com`
+- ✅ **Frontend** (`React + Vite`) hosted on Render:  
+  🔗 `https://www.lovethatgivesback.com`
+- ✅ **Database**: Managed **PostgreSQL**, provisioned via Render’s PostgreSQL service.
+
+### 🧩 Backend Setup (Render Configuration)
+- **Gunicorn** is used as the production WSGI HTTP server.
+- No `manage.py runserver` is used in production.
+
+```bash
 pip install gunicorn
 gunicorn love_backend.wsgi:application --bind 0.0.0.0:8000
 ```
-For **Render**, configure `DATABASE_URL` in `.env`.
-```
-```
+
+### 🌱 Environment Variables (Render)
+All critical variables are configured in Render's **Environment tab** under the backend service:
+
+| Variable                  | Purpose                                  |
+|---------------------------|------------------------------------------|
+| `SECRET_KEY`              | Django security key                      |
+| `DATABASE_URL`            | PostgreSQL connection URI                |
+| `ALLOWED_HOSTS`           | Set to your Render app domain            |
+| `CORS_ORIGIN_WHITELIST`   | Whitelisted frontend domains             |
+
+> ✅ These variables are **not hardcoded** and are securely stored on Render.
+
 ---
 
+### 🌍 Custom Domains
+
+Both frontend and backend are deployed on **custom domains**:
+
+- `https://www.lovethatgivesback.com` → React/Vite frontend
+- `https://api.lovethatgivesback.com` → Django/DRF backend
+
+Proper **CORS headers** and **CSRF settings** have been configured to allow secure communication between domains.
+
+---

@@ -142,13 +142,13 @@ function Home() {
 
               {/* Updated Social Media Icons */}
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <a href="tel:353896179069" target="_blank" rel="noopener noreferrer">
+                <a href={`tel:${import.meta.env.VITE_PHONE_NUMBER}`} target="_blank" rel="noopener noreferrer">
                   <FaPhoneAlt style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="mailto:maizonalan@gmail.com">
+                <a href={`mailto:${import.meta.env.VITE_EMAIL}`}>
                   <FaEnvelope style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
-                <a href="https://wa.me/353870956520" target="_blank" rel="noopener noreferrer">
+                <a href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
                   <FaWhatsapp style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
                 </a>
               </div>

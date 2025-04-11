@@ -62,8 +62,28 @@
 - Use bootstrap and CSS for a modern, responsive design.
 - Ensure compatibility across devices.  
 
-### 6. **API Integration**  
-- **External API:** Display live progress using an external API for secure payments.  
+### 6. **API Integration**
+
+- **External API:**  
+  Integrated with the **YouTube Data API v3** using **OAuth2** to securely retrieve metadata about a scheduled livestream video.
+
+- **Use Case:**  
+  Guests visiting the homepage will see a **countdown timer** that transitions to an embedded YouTube livestream video. This dynamic behavior is powered by real-time data retrieved from the YouTube API, such as:
+  - `scheduledStartTime`
+  - `actualStartTime`
+  - `actualEndTime`
+  - `liveBroadcastStatus`
+
+- **Backend Implementation:**  
+  - A Django view at `/api/youtube-proxy/?videoId=...` acts as a secure proxy.
+  - It uses a long-lived **refresh token** to generate an access token on the server, without requiring user interaction.
+  - Fetches metadata using the `youtube.videos().list(...)` endpoint.
+  - Handles API errors gracefully with detailed logging.
+
+- **Security:**  
+  - OAuth2 credentials and the refresh token are stored securely as environment variables.
+  - Tokens are never exposed to the frontend.
+  - The server refreshes the access token as needed, following Google’s best practices.
 
 ---
 

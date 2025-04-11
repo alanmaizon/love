@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import dj_database_url
+import json
 
 load_dotenv()  # Load .env variables
 
@@ -15,15 +16,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 
-ALLOWED_HOSTS = [
-    'love-backend-8wbj.onrender.com',
-    'api.lovethatgivesback.com',
-    'lovethatgivesback.com',
-    'www.lovethatgivesback.com',
-    'love-frontend.onrender.com',
-    'localhost',
-    '127.0.0.1',
-]
+ALLOWED_HOSTS = json.loads(os.getenv("ALLOWED_HOSTS", '["localhost", "127.0.0.1"]'))
 
 # Application definition
 INSTALLED_APPS = [
@@ -59,13 +52,8 @@ MIDDLEWARE = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = [
-        'https://lovethatgivesback.com',
-        'https://www.lovethatgivesback.com',
-        'https://love-backend-8wbj.onrender.com',
-        'https://love-frontend.onrender.com',
-        'https://api.lovethatgivesback.com',
-    ]
+    CORS_ALLOWED_ORIGINS = json.loads(os.getenv("CORS_ALLOWED_ORIGINS", '[]'))
+
 
 CORS_ALLOW_CREDENTIALS = True
 
