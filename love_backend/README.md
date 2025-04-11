@@ -153,7 +153,7 @@ All critical variables are configured in Render's **Environment tab** under the 
 | `SECRET_KEY`              | Django security key                      |
 | `DATABASE_URL`            | PostgreSQL connection URI                |
 | `ALLOWED_HOSTS`           | Set to your Render app domain            |
-| `CORS_ORIGIN_WHITELIST`   | Whitelisted frontend domains             |
+| `CORS_ALLOWED_ORIGINS`    | Whitelisted frontend domains             |
 
 > ✅ These variables are **not hardcoded** and are securely stored on Render.
 
