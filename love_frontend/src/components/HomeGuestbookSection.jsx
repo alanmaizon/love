@@ -1,6 +1,5 @@
-// src/components/HomeGuestbookSection.jsx
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../api/axiosInstance';
+import Papa from 'papaparse';
 import GuestMessagesCarousel from './GuestMessagesCarousel';
 
 function HomeGuestbookSection() {
@@ -9,16 +8,32 @@ function HomeGuestbookSection() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axiosInstance.get('/donations/')
+    fetch('/data/donations.csv')
       .then((response) => {
-        // Filter messages to only show confirmed guest messages.
-        const confirmedMessages = response.data.filter(
-          (msg) => msg.status === 'confirmed'
-        );
-        setMessages(confirmedMessages);
+        if (!response.ok) throw new Error('Failed to fetch CSV');
+        return response.text();
       })
-      .catch(() => setError('Failed to load guest messages.'))
-      .finally(() => setLoading(false));
+      .then((csvText) => {
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const confirmedMessages = results.data.filter(
+              (msg) => msg.status.toLowerCase() === 'confirmed'
+            );
+            setMessages(confirmedMessages);
+            setLoading(false);
+          },
+          error: () => {
+            setError('Failed to parse CSV.');
+            setLoading(false);
+          }
+        });
+      })
+      .catch(() => {
+        setError('Failed to load guest messages.');
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <p>Loading messages...</p>;
