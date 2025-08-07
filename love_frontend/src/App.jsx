@@ -49,15 +49,18 @@ function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+            /*
             <li className="nav-item">
               <Link className="nav-link" to="/messages">Guestbook</Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/charities">Charities</Link>
             </li>
+            /*
             <li className="nav-item">
               <Link className="nav-link" to="/about">About Us</Link>
             </li>
+            /*
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -95,6 +98,7 @@ function Header() {
                 )}
               </ul>
             </li>
+            /*
           </ul>
         </div>
       </div>
