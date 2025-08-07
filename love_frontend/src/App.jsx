@@ -49,56 +49,9 @@ function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            /*
-            <li className="nav-item">
-              <Link className="nav-link" to="/messages">Guestbook</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/charities">Charities</Link>
-            </li>
-            /*
             <li className="nav-item">
               <Link className="nav-link" to="/about">About Us</Link>
             </li>
-            /*
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#!"
-                id="userDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                {authUser ? authUser.username : "Account"}
-              </a>
-              <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                {authUser ? (
-                  <>
-                    <li>
-                      <Link className="dropdown-item" to="/dashboard">Dashboard</Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item" to="/profile">Profile</Link>
-                    </li>
-                    {authUser.isAdmin && (
-                      <li>
-                        <Link className="dropdown-item" to="/admin">Admin</Link>
-                      </li>
-                    )}
-                    <li><hr className="dropdown-divider" /></li>
-                    <li>
-                      <Link className="dropdown-item" to="/logout">Logout</Link>
-                    </li>
-                  </>
-                ) : (
-                  <li>
-                    <Link className="dropdown-item" to="/login">Login</Link>
-                  </li>
-                )}
-              </ul>
-            </li>
-            /*
           </ul>
         </div>
       </div>
