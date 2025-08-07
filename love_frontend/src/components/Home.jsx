@@ -74,6 +74,14 @@ function Home() {
         <div className="container">
           <h1>Welcome to Our Wedding Celebration</h1>
           <p>We're excited to share our special day with you!</p>
+          <a
+            href="https://www.icloud.com/sharedalbum/#B2U5oqs3qi8eEdk"
+            className="btn btn-primary mt-3"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Wedding Album
+          </a>
         </div>
       </section>
 
