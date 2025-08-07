@@ -12,7 +12,7 @@ import CountdownTimer from './CountdownTimer';
 import ExploreCharities from './ExploreCharities';
 import HomeGuestbookSection from './HomeGuestbookSection';
 import BioShort from './BioShort';
-import HandsGif from './HandsGif';
+import CoupleSection from './CoupleSection';
 
 function Home() {
   // -------------------------------
