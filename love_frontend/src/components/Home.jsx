@@ -74,7 +74,6 @@ function Home() {
         <div className="container">
           <h1>Welcome to Our Wedding Celebration</h1>
           <p>We're excited to share our special day with you!</p>
-          <Link to="/donate" className="btn btn-primary mt-3">Send a Gift & Leave a Message</Link>
         </div>
       </section>
 
@@ -84,16 +83,7 @@ function Home() {
           <BioShort />
         </div>
       </section>
-      /*
-      {/* CHARITIES */}
-      <section className="charities-section" style={{ padding: '4rem 1rem' }}>
-        <div className="container">
-          <h2>Charities We Support</h2>
-          <p>50% of your contribution will be donated to one of these charities. Thank you for helping us make the world a better place.</p>
-          <ExploreCharities />
-        </div>
-      </section>
-      /*
+      
       {/* WEDDING LIVESTREAM */}
       <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864', position: 'relative' }}>
         <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '35%', zIndex: 0, opacity: 0.3 }} />
@@ -129,10 +119,6 @@ function Home() {
           <CoupleSection />
         </div>
       </section>
-      /*
-      {/* ANALYTICS SECTION */}
-      <StatsSection analytics={analytics} donationGoal={2200} analyticsLoading={analyticsLoading} analyticsError={analyticsError} />
-      /*
     </div>
   );
 }
