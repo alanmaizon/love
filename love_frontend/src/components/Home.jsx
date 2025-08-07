@@ -84,7 +84,7 @@ function Home() {
           <BioShort />
         </div>
       </section>
-
+      /*
       {/* CHARITIES */}
       <section className="charities-section" style={{ padding: '4rem 1rem' }}>
         <div className="container">
@@ -93,7 +93,7 @@ function Home() {
           <ExploreCharities />
         </div>
       </section>
-
+      /*
       {/* WEDDING LIVESTREAM */}
       <section className="countdown-section text-center" style={{ padding: '4rem 1rem', backgroundColor: '#a47864', position: 'relative' }}>
         <img src={poppy} alt="Wildflower Poppy" style={{ position: 'absolute', left: '20px', bottom: '0', height: '35%', zIndex: 0, opacity: 0.3 }} />
@@ -123,49 +123,16 @@ function Home() {
         </div>
       </section>
 
-      {/* ABOUT THE COUPLE */}
-      <section className="couple-section text-center" style={{ backgroundColor: '#a47864', position: 'relative', padding: '4rem 1rem', overflow: 'hidden' }}>
-        <div className="container" style={{ position: 'relative'}}>
-          <h2>Meet the Couple</h2>
-          {profileLoading ? (
-            <p>All you need is love...</p>
-          ) : profileError ? (
-            <p className="text-danger">{profileError}</p>
-          ) : profile ? (
-            <>
-              {profile.profile_picture_url && (
-                <img src={profile.profile_picture_url} alt="Couple" style={{ maxWidth: '150px', borderRadius: '50%', marginBottom: '1rem' }} />
-              )}
-              <p><strong>{profile.bride_name} &amp; {profile.groom_name}</strong></p>
-              <p>{profile.bio || "We're looking forward to celebrating with you!"}</p>
-              <p>You can find us in <strong>{profile.location}</strong>. Feel free to contact us, send us a private message.</p>
-
-              {/* Updated Social Media Icons */}
-              <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <a href={`tel:${import.meta.env.VITE_PHONE_NUMBER}`} target="_blank" rel="noopener noreferrer">
-                  <FaPhoneAlt style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
-                </a>
-                <a href={`mailto:${import.meta.env.VITE_EMAIL}`}>
-                  <FaEnvelope style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
-                </a>
-                <a href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
-                  <FaWhatsapp style={{ fontSize: '2rem', margin: '1rem', color: '#EAD7BB' }} />
-                </a>
-              </div>
-            </>
-          ) : (
-            <p>No profile information available.</p>
-          )}
-        </div>
-
-        {/* HandsGif Background */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1, opacity: 0.3, pointerEvents: 'none' }}>
-          <HandsGif />
+      {/* COUPLE SECTION */}
+      <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
+        <div className="container">
+          <CoupleSection />
         </div>
       </section>
-
+      /*
       {/* ANALYTICS SECTION */}
       <StatsSection analytics={analytics} donationGoal={2200} analyticsLoading={analyticsLoading} analyticsError={analyticsError} />
+      /*
     </div>
   );
 }
