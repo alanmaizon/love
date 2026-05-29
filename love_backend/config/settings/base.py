@@ -48,6 +48,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    # Local apps (apps/ is on sys.path; referenced by short name).
+    'core',
+    'accounts',
+    'campaigns',
+    'messaging',
     'donations',
     'cloudinary',
     'cloudinary_storage',
