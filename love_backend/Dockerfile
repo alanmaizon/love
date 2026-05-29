@@ -35,4 +35,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
 
 # Single-task skeleton: migrate then serve. When you scale past ONE task,
 # move `migrate` to a one-off ECS task to avoid concurrent migrations.
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn love_backend.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -"]

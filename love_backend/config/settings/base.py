@@ -1,17 +1,37 @@
+"""
+Shared settings for all environments.
+
+Environment is selected via DJANGO_SETTINGS_MODULE:
+  - config.settings.dev   (local development; DEBUG, relaxed cookies/CORS)
+  - config.settings.prod  (production; HTTPS hardening behind a proxy)
+
+Secrets come from the environment only (.env locally, SSM in prod). See
+.env.example. Never commit real values.
+"""
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
 import dj_database_url
 import json
 
-load_dotenv()  # Load .env variables
+load_dotenv()  # Load .env variables (local dev)
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+# config/settings/base.py -> parents[2] is the love_backend/ project root.
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+# Treat `apps/` as a sources root so each app is importable by its short name
+# (e.g. `donations`, `core`). This keeps app labels and table names (donations_*)
+# and the existing migration history unchanged after relocating apps under apps/.
+# NOTE: there is intentionally no apps/__init__.py — `apps` is a path entry, not
+# a package, so apps are never double-imported as both `donations` and
+# `apps.donations`.
+sys.path.insert(0, str(BASE_DIR / "apps"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
 
-# Debug setting
+# Safe-by-default; dev.py overrides to True.
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
@@ -48,13 +68,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
-# For local development, allow all origins or specify from .env
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    CORS_ALLOWED_ORIGINS = json.loads(os.getenv("CORS_ALLOWED_ORIGINS", '[]'))
-
-
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
@@ -66,7 +79,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-ROOT_URLCONF = 'love_backend.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -84,9 +97,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'love_backend.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database configuration with default fallback to SQLite for local testing:
+# Database: defaults to SQLite locally; DATABASE_URL (RDS) in prod.
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL', f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}")
@@ -95,18 +108,10 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -118,39 +123,28 @@ USE_TZ = True
 # Static files
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# WhiteNoise: hash + compress for long-cache, cache-busting static in prod.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-SESSION_COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', None)
-CSRF_COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', None)
-
-
-# Enable cross-site cookies
-SESSION_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SAMESITE = 'None'
+# Cookie domain is env-driven so the same image runs on ALB DNS / custom domain /
+# localhost. Unset/blank = bind to the current host. Secure flags + SameSite are
+# set per-environment in dev.py / prod.py.
+SESSION_COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN') or None
+CSRF_COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN') or None
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
+        'console': {'class': 'logging.StreamHandler'},
     },
     'root': {
         'handlers': ['console'],
         'level': 'WARNING',
     },
 }
-
-# HSTS (HTTP Strict Transport Security) settings
-
-SECURE_HSTS_SECONDS = 3600  # or 31536000 for 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
