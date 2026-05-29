@@ -1,56 +1,70 @@
 """
-Idempotent importer for the historical wedding donations CSV.
+Idempotent backfill of the historical wedding donations CSV into the v2 model.
 
-Usage (from love_backend/):
-    python manage.py import_donations \
-        --csv ../love_frontend/public/data/donations.csv
+From love_backend/:
+    python manage.py import_donations --csv ../love_frontend/public/data/donations.csv
+    python manage.py import_donations --csv <path> --dry-run   # preview, writes nothing
 
-    # preview without writing anything:
-    python manage.py import_donations --csv <path> --dry-run
+Safe to re-run: charities match by name, the campaign by slug, donations by
+(donor_email, amount, message), and messages by their donation. Nothing is
+duplicated.
 
-Safe to run more than once: existing donations (matched on
-donor_email + amount + message) are skipped, not duplicated.
+What it does (CP2):
+- creates/updates the 3 real charities as VERIFIED, with slug + website
+- creates the flagship Campaign ("Anna & Alan's Wedding") owned by a host user,
+  and links the charities as beneficiaries
+- imports each donation, attaches it to the flagship campaign, preserves the
+  original CSV timestamps
+- copies each donation's message into the moderatable Message table (approved)
 
-Note: confirmation emails are only sent by the manual `confirm_donation`
-admin/API action, never on create — so importing history does NOT email
-your wedding guests.
+Money note: there is NO 50/50 split here — the full donated amount is recorded
+as raised for charity, matching the v2 "money only reaches verified charities"
+model. Confirmation emails are sent only by the manual confirm action, never on
+import, so wedding guests are not emailed.
 """
 
 import csv
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
+from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
+from django.utils.text import slugify
 
 from donations.models import Charity, Donation
+from campaigns.models import Campaign, CampaignBeneficiary
+from messaging.models import Message
 
-# CSV charity_id -> real charity name.
-# Rename these to your actual charities (or rename later in the admin —
-# the importer matches charities by name via get_or_create).
-CHARITY_NAMES = {
-    "1": "Charity #1 (rename me)",
-    "2": "Charity #2 (rename me)",
-    "3": "Charity #3 (rename me)",
+# CSV charity_id -> real charity (name + public website).
+CHARITIES = {
+    "1": {"name": "Mary's Meals", "website": "https://www.marysmeals.org"},
+    "2": {"name": "Operation Smile", "website": "https://www.operationsmile.org"},
+    "3": {"name": "Xingu Vivo", "website": "https://xinguvivo.org.br"},
 }
 
-# Map any casing of the CSV status onto the model's lowercase choices.
-STATUS_MAP = {
-    "confirmed": "confirmed",
-    "pending": "pending",
-    "failed": "failed",
-}
+# Flagship campaign (the real wedding) — the launch seed + DEV.to material.
+HOST_USERNAME = "anna_alan"
+CAMPAIGN_TITLE = "Anna & Alan's Wedding"
+CAMPAIGN_SLUG = "anna-and-alan"
+CAMPAIGN_EVENT_DATE = date(2025, 4, 26)
+CAMPAIGN_LOCATION = "Ireland"
+CAMPAIGN_GOAL = Decimal("4000")
+CAMPAIGN_STORY = (
+    "In lieu of gifts, we asked our guests to help us celebrate by giving to "
+    "causes close to our hearts. Every message below came with a donation. "
+    "Thank you for being part of our day."
+)
+
+STATUS_MAP = {"confirmed": "confirmed", "pending": "pending", "failed": "failed"}
 
 
 class Command(BaseCommand):
-    help = "Import historical donations from donations.csv into the database."
+    help = "Backfill historical donations, the flagship campaign, charities, and messages."
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--csv",
-            required=True,
-            help="Path to donations.csv",
-        )
+        parser.add_argument("--csv", required=True, help="Path to donations.csv")
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -67,88 +81,158 @@ class Command(BaseCommand):
         except FileNotFoundError:
             raise CommandError(f"CSV not found: {path}")
 
-        created, skipped, junk = self._import(rows, dry_run)
+        stats = self._import(rows, dry_run)
 
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS(
-            f"Done. created={created} skipped(existing)={skipped} "
-            f"junk(ignored)={junk} {'[DRY RUN — nothing written]' if dry_run else ''}"
+            "Done. "
+            f"charities={stats['charities']} "
+            f"donations_created={stats['created']} "
+            f"donations_skipped={stats['skipped']} "
+            f"messages_created={stats['messages']} "
+            f"junk={stats['junk']} "
+            f"{'[DRY RUN — rolled back]' if dry_run else ''}"
         ))
 
     @transaction.atomic
     def _import(self, rows, dry_run):
-        created = skipped = junk = 0
-        charity_cache = {}
+        stats = {"charities": 0, "created": 0, "skipped": 0, "messages": 0, "junk": 0}
 
+        # --- 1. Charities (verified) ---
+        charity_by_csv_id = {}
+        for csv_id, info in CHARITIES.items():
+            charity = self._upsert_charity(info)
+            charity_by_csv_id[csv_id] = charity
+            stats["charities"] += 1
+
+        # --- 2. Flagship campaign + beneficiaries ---
+        campaign = self._get_or_create_campaign()
+        for charity in charity_by_csv_id.values():
+            CampaignBeneficiary.objects.get_or_create(
+                campaign=campaign, charity=charity,
+                defaults={"split_percent": Decimal("100")},
+            )
+
+        # --- 3. Donations + messages ---
         for row in rows:
             amount_raw = (row.get("amount") or "").strip()
-            charity_id = (row.get("charity_id") or "").strip()
+            csv_id = (row.get("charity_id") or "").strip()
             donor_name = (row.get("donor_name") or "").strip()
 
-            # Skip the empty/malformed trailing row in the CSV.
-            if not amount_raw or not charity_id or not donor_name:
-                junk += 1
+            if not amount_raw or not csv_id or not donor_name:
+                stats["junk"] += 1
                 continue
 
             try:
                 amount = Decimal(amount_raw)
             except InvalidOperation:
-                self.stderr.write(f"  ! bad amount {amount_raw!r}, skipping row")
-                junk += 1
+                self.stderr.write(f"  ! bad amount {amount_raw!r}, skipping")
+                stats["junk"] += 1
                 continue
 
-            # Resolve (and cache) the charity for this row.
-            if charity_id not in charity_cache:
-                name = CHARITY_NAMES.get(charity_id, f"Charity #{charity_id}")
-                if dry_run:
-                    charity = Charity(name=name)
-                else:
-                    charity, _ = Charity.objects.get_or_create(name=name)
-                charity_cache[charity_id] = charity
-            charity = charity_cache[charity_id]
+            charity = charity_by_csv_id.get(csv_id)
+            if charity is None:
+                self.stderr.write(f"  ! unknown charity_id {csv_id!r}, skipping")
+                stats["junk"] += 1
+                continue
 
-            message = (row.get("message") or "").strip()
+            message_text = (row.get("message") or "").strip()
             donor_email = (row.get("donor_email") or "").strip()
             status = STATUS_MAP.get((row.get("status") or "").strip().lower(), "confirmed")
+            created_ts = self._parse_dt(row.get("created_at"))
+            updated_ts = self._parse_dt(row.get("updated_at")) or created_ts
 
-            # Idempotency: match on the natural key of a donation.
-            exists = Donation.objects.filter(
-                donor_email=donor_email,
-                amount=amount,
-                message=message,
-            ).exists()
-            if exists:
-                skipped += 1
-                continue
+            donation = Donation.objects.filter(
+                donor_email=donor_email, amount=amount, message=message_text,
+            ).first()
 
-            self.stdout.write(f"  + {donor_name} — €{amount} -> {charity.name}")
-            if dry_run:
-                created += 1
-                continue
+            if donation:
+                stats["skipped"] += 1
+                # Heal older imports that predate campaigns.
+                if donation.campaign_id is None:
+                    donation.campaign = campaign
+                    donation.save(update_fields=["campaign"])
+            else:
+                self.stdout.write(f"  + {donor_name} — €{amount} -> {charity.name}")
+                if dry_run:
+                    stats["created"] += 1
+                else:
+                    donation = Donation.objects.create(
+                        charity=charity, campaign=campaign,
+                        donor_name=donor_name, donor_email=donor_email,
+                        amount=amount, message=message_text,
+                        status=status, user=None,
+                    )
+                    # created_at/updated_at are auto-managed; preserve CSV dates.
+                    if created_ts:
+                        Donation.objects.filter(pk=donation.pk).update(
+                            created_at=created_ts, updated_at=updated_ts,
+                        )
+                    stats["created"] += 1
 
-            donation = Donation.objects.create(
-                charity=charity,
-                donor_name=donor_name,
-                donor_email=donor_email,
-                amount=amount,
-                message=message,
-                status=status,
-                user=None,
-            )
-
-            # created_at/updated_at are auto-managed, so bypass them with an
-            # UPDATE to preserve the original timestamps from the CSV.
-            ts = self._parse_dt(row.get("created_at"))
-            if ts:
-                Donation.objects.filter(pk=donation.pk).update(
-                    created_at=ts,
-                    updated_at=self._parse_dt(row.get("updated_at")) or ts,
+            # Mirror the message into the moderatable guestbook (approved).
+            if message_text and not dry_run and donation is not None:
+                _, made = Message.objects.get_or_create(
+                    donation=donation,
+                    defaults={
+                        "campaign": campaign,
+                        "display_name": donor_name,
+                        "body": message_text,
+                        "moderation_status": Message.APPROVED,
+                        "published_at": created_ts or timezone.now(),
+                    },
                 )
-            created += 1
+                if made:
+                    stats["messages"] += 1
+            elif message_text and dry_run:
+                stats["messages"] += 1
 
         if dry_run:
             transaction.set_rollback(True)
-        return created, skipped, junk
+        return stats
+
+    # --- helpers ---
+    def _upsert_charity(self, info):
+        charity, _ = Charity.objects.get_or_create(name=info["name"])
+        charity.website = info["website"]
+        if not charity.slug:
+            charity.slug = self._unique_charity_slug(charity)
+        charity.verification_status = Charity.VERIFIED
+        if charity.verified_at is None:
+            charity.verified_at = timezone.now()
+        charity.is_active = True
+        charity.save()
+        return charity
+
+    def _unique_charity_slug(self, charity):
+        base = slugify(charity.name) or "charity"
+        slug, n = base, 1
+        while Charity.objects.filter(slug=slug).exclude(pk=charity.pk).exists():
+            n += 1
+            slug = f"{base}-{n}"
+        return slug
+
+    def _get_or_create_campaign(self):
+        host, _ = User.objects.get_or_create(
+            username=HOST_USERNAME,
+            defaults={"first_name": "Anna & Alan", "email": ""},
+        )
+        campaign, _ = Campaign.objects.get_or_create(
+            slug=CAMPAIGN_SLUG,
+            defaults={
+                "owner": host,
+                "type": Campaign.WEDDING,
+                "title": CAMPAIGN_TITLE,
+                "story": CAMPAIGN_STORY,
+                "event_date": CAMPAIGN_EVENT_DATE,
+                "location": CAMPAIGN_LOCATION,
+                "goal_amount": CAMPAIGN_GOAL,
+                "currency": "EUR",
+                "visibility": Campaign.PUBLIC,
+                "status": Campaign.ACTIVE,
+            },
+        )
+        return campaign
 
     @staticmethod
     def _parse_dt(value):
@@ -156,6 +240,10 @@ class Command(BaseCommand):
         if not value:
             return None
         try:
-            return datetime.fromisoformat(value)
+            dt = datetime.fromisoformat(value)
         except ValueError:
             return None
+        # CSV timestamps are naive; make them tz-aware (USE_TZ=True).
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_default_timezone())
+        return dt
