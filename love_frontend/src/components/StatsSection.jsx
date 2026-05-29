@@ -4,7 +4,7 @@ import axiosInstance from '../api/axiosInstance';
 
 function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyticsError }) {
   // Calculate current donation total and progress percentage.
-  const currentTotal = analytics ? analytics.total_amount : 0;
+  const currentTotal = Number(analytics?.total_amount ?? 0);
   const progressPercentage = Math.min((currentTotal / donationGoal) * 100, 100);
 
   return (
@@ -18,10 +18,10 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
         ) : analytics ? (
           <>
             <p>
-              <strong>Total Donation Amount:</strong> €{analytics.total_amount.toLocaleString()}
+              <strong>Total Donation Amount:</strong> €{Number(analytics.total_amount ?? 0).toLocaleString()}
             </p>
             <p>
-              <strong>Total Donations:</strong> {analytics.donations_count.toLocaleString()}
+              <strong>Total Donations:</strong> {Number(analytics.donations_count ?? 0).toLocaleString()}
             </p>
             <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
               {analytics.count_per_charity &&
@@ -31,7 +31,7 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
                     <strong>{item.charity__name}</strong>: {item.count} donations
                   </div>
                   <div>
-                    Total Allocated: €{item.total_allocated.toLocaleString()}
+                    Total Allocated: €{Number(item.total_allocated ?? 0).toLocaleString()}
                   </div>
                 </li>
                 

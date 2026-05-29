@@ -42,6 +42,13 @@ class CharitySerializer(serializers.ModelSerializer):
 
 
 class DonationSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        request = self.context.get('request')
+        if not request or not (request.user and request.user.is_staff):
+            ret.pop('donor_email', None)
+        return ret
+
     class Meta:
         model = Donation
         fields = [

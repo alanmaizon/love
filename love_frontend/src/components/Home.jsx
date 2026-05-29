@@ -7,43 +7,23 @@ import rose from '../../public/rose.svg';
 import { FaPhoneAlt, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 
 // Import existing components
-import StatsSection from './StatsSection';
 import CountdownTimer from './CountdownTimer';
-import ExploreCharities from './ExploreCharities';
 import HomeGuestbookSection from './HomeGuestbookSection';
 import BioShort from './BioShort';
 import CoupleSection from './CoupleSection';
 
 function Home() {
   // -------------------------------
-  // 1) State for Analytics
-  // -------------------------------
-  const [analytics, setAnalytics] = useState(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
-  const [analyticsError, setAnalyticsError] = useState('');
-
-  // -------------------------------
-  // 2) State for Public Profile
+  // 1) State for Public Profile
   // -------------------------------
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
 
   // -------------------------------
-  // 3) Fetch Data on Mount
+  // 2) Fetch Data on Mount
   // -------------------------------
   useEffect(() => {
-    axiosInstance.get('/analytics/')
-      .then((res) => {
-        setAnalytics(res.data);
-      })
-      .catch(() => {
-        setAnalyticsError('Failed to load analytics data.');
-      })
-      .finally(() => {
-        setAnalyticsLoading(false);
-      });
-
     axiosInstance.get('/public_profile/')
       .then((res) => {
         setProfile(res.data);
@@ -57,14 +37,14 @@ function Home() {
   }, []);
 
   // -------------------------------
-  // 4) Wedding Date (Memo)
+  // 3) Wedding Date (Memo)
   // -------------------------------
   const weddingDate = useMemo(() => {
     return profile?.wedding_date || '2025-04-26T13:00:00+01:00';
   }, [profile]);
 
   // -------------------------------
-  // 5) Render
+  // 4) Render
   // -------------------------------
   return (
     <div className="home-page">
@@ -74,14 +54,12 @@ function Home() {
         <div className="container">
           <h1>Welcome to Our Wedding Celebration</h1>
           <p>We're excited to share our special day with you!</p>
-          <a
-            href="https://www.icloud.com/sharedalbum/#B2U5oqs3qi8eEdk"
+          <Link
+            to="/donate"
             className="btn btn-primary mt-3"
-            target="_blank"
-            rel="noopener noreferrer"
           >
-            Wedding Album
-          </a>
+            Donate
+          </Link>
         </div>
       </section>
 

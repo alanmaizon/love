@@ -124,8 +124,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-SESSION_COOKIE_DOMAIN = "api.lovethatgivesback.com"
-CSRF_COOKIE_DOMAIN = "api.lovethatgivesback.com"
+SESSION_COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', None)
+CSRF_COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', None)
 
 
 # Enable cross-site cookies

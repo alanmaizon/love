@@ -25,7 +25,7 @@ import logging
 
 def youtube_video_details(request):
     video_id = request.GET.get('videoId')
-    api_key = 'YOUTUBE_API_KEY'
+    api_key = os.getenv('YOUTUBE_API_KEY')
 
     if not video_id:
         return JsonResponse({'error': 'Missing videoId parameter'}, status=400)
@@ -71,6 +71,12 @@ def public_profile(request):
     serializer = ProfileSerializer(profile)
     data = serializer.data
     data['isPublic'] = True  # Add flag
+    
+    # Remove sensitive bank details for public viewing
+    sensitive_fields = ['bank_name', 'account_name', 'account_number', 'sort_code', 'revolut_username']
+    for field in sensitive_fields:
+        data.pop(field, None)
+        
     return Response(data)
 
 @api_view(['GET'])
@@ -120,10 +126,14 @@ def logout_view(request):
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 class DonationViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
-    queryset = Donation.objects.all()
+    queryset = Donation.objects.all().order_dict() if hasattr(Donation.objects, 'order_dict') else Donation.objects.all().order_by('-created_at')
     serializer_class = DonationSerializer
     authentication_classes = [CsrfExemptSessionAuthentication]
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'POST', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAdminUser()]
 
     @action(detail=True, methods=['patch'], url_path='confirm')
     def confirm_donation(self, request, pk=None):
@@ -146,11 +156,17 @@ class DonationViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
         serializer = self.get_serializer(donation)
         return Response(serializer.data, status=drf_status.HTTP_200_OK)
 
+from rest_framework.permissions import AllowAny, IsAdminUser, SAFE_METHODS
+
 class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     queryset = Charity.objects.all()
     serializer_class = CharitySerializer
     authentication_classes = [CsrfExemptSessionAuthentication]
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        if self.request.method in SAFE_METHODS:
+            return [AllowAny()]
+        return [IsAdminUser()]
 
 
 logger = logging.getLogger(__name__)

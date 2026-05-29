@@ -20,7 +20,12 @@ function DonationForm() {
   useEffect(() => {
     axiosInstance.get('/charities/')
       .then(response => {
-        setCharities(response.data);
+        const charityList = Array.isArray(response.data)
+          ? response.data
+          : Array.isArray(response.data?.results)
+            ? response.data.results
+            : [];
+        setCharities(charityList);
       })
       .catch(error => {
         console.error('Error fetching charities:', error);
@@ -134,7 +139,7 @@ function DonationForm() {
             required
           >
             <option value="">-- Select a Charity --</option>
-            {charities.map((charity) => (
+            {Array.isArray(charities) && charities.map((charity) => (
               <option key={charity.id} value={charity.id}>
                 {charity.name}
               </option>

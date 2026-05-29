@@ -1,0 +1,22 @@
+{
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "love_backend.settings",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "fileCheckpointingEnabled": true,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Syntax-checking edited Python…",
+            "timeout": 15,
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // empty' | { read -r f; case \"$f\" in *love_backend/*.py) out=$(python3 -m py_compile \"$f\" 2>&1) || jq -n --arg c \"Syntax error in $f\" --arg o \"$out\" '{hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:($c+\"\\n\"+$o)}}' ;; esac; } 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
