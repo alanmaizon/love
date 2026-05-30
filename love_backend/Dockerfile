@@ -8,9 +8,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PORT=8000
 
+# Pin the whole container to prod so manage.py (migrate, import_donations,
+# createsuperuser, drain_outbox) and gunicorn agree. Without this, manage.py
+# defaults to config.settings.dev (DEBUG=True) while wsgi serves prod.
+ENV DJANGO_SETTINGS_MODULE=config.settings.prod
+
 WORKDIR /app
 
-# Build deps for psycopg2 / Pillow / matplotlib on slim (no compilers by default).
+# Build deps for psycopg2 / Pillow on slim (no compilers by default).
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential libpq-dev curl \
     && rm -rf /var/lib/apt/lists/*
