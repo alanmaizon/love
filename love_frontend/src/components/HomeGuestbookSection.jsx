@@ -1,51 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import Papa from 'papaparse';
+import axiosInstance from '../api/axiosInstance';
 import GuestMessagesCarousel from './GuestMessagesCarousel';
 
+// v2: guest messages come from the moderated API (approved only), not the static
+// CSV. Mapped to the {donor_name, message} shape GuestMessagesCarousel expects.
 function HomeGuestbookSection() {
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/data/donations.csv')
-      .then((response) => {
-        if (!response.ok) throw new Error('Failed to fetch CSV');
-        return response.text();
+    axiosInstance.get('/messages/?campaign=anna-and-alan')
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        setMessages(
+          list
+            .filter((m) => m.body && m.body.trim() !== '')
+            .map((m) => ({ donor_name: m.display_name, message: m.body })),
+        );
       })
-      .then((csvText) => {
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const confirmedMessages = results.data.filter(
-              (msg) => msg.status.toLowerCase() === 'confirmed'
-            );
-            setMessages(confirmedMessages);
-            setLoading(false);
-          },
-          error: () => {
-            setError('Failed to parse CSV.');
-            setLoading(false);
-          }
-        });
-      })
-      .catch(() => {
-        setError('Failed to load guest messages.');
-        setLoading(false);
-      });
+      .catch((error) => console.error('Error loading messages:', error));
   }, []);
 
-  if (loading) return <p>Loading messages...</p>;
-  if (error) return <p className="text-danger">{error}</p>;
-
-  return (
-    <section className="guestbook-section">
-      <div className="container">
-        <GuestMessagesCarousel messages={messages} />
-      </div>
-    </section>
-  );
+  return <GuestMessagesCarousel messages={messages} />;
 }
 
 export default HomeGuestbookSection;

@@ -6,54 +6,67 @@ export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [authUser, setAuthUser] = useState(null);
-  const [publicProfile, setPublicProfile] = useState(null);
+  // The flagship (default public) campaign — replaces the old single Profile.
+  const [campaign, setCampaign] = useState(null);
 
-  // Listen for login/logout events between open tabs
+  // Sync login/logout across open tabs.
   useEffect(() => {
     const channel = new BroadcastChannel('auth_channel');
     channel.onmessage = (e) => {
-      if (e.data.type === 'LOGOUT') {
-        setAuthUser(null);
-      } else if (e.data.type === 'LOGIN') {
-        setAuthUser(e.data.payload);
-      }
+      if (e.data.type === 'LOGOUT') setAuthUser(null);
+      else if (e.data.type === 'LOGIN') setAuthUser(e.data.payload);
     };
-    return () => {
-      channel.close();
-    };
+    return () => channel.close();
   }, []);
 
-  // Check for an authenticated session on mount
+  // Authenticated session check (v2: /me/, not /profile/).
   useEffect(() => {
-    const loggedOut = localStorage.getItem('loggedOut');
-    if (!loggedOut) {
-      axiosInstance.get('/profile/')
-        .then((res) => {
-          const displayName = `${res.data.bride_name} & ${res.data.groom_name}`;
-          setAuthUser({ username: displayName, ...res.data });
-        })
-        .catch(() => {
-          setAuthUser(null);
-        });
-    } else {
+    if (localStorage.getItem('loggedOut')) {
       setAuthUser(null);
+      return;
     }
+    axiosInstance.get('/me/')
+      .then((res) => {
+        if (res.data?.authenticated) {
+          setAuthUser({
+            username: res.data.username,
+            displayName: res.data.display_name,
+            isAdmin: res.data.isAdmin,
+          });
+        } else {
+          setAuthUser(null);
+        }
+      })
+      .catch(() => setAuthUser(null));
   }, []);
 
-  // Optionally, still fetch public profile data
+  // Public flagship campaign (v2: /campaign/, not /public_profile/).
   useEffect(() => {
-    axiosInstance.get('/public_profile/')
-      .then((res) => {
-        const profileData = { ...res.data, isPublic: true };
-        setPublicProfile(profileData);
-      })
-      .catch(() => {
-        setPublicProfile(null);
-      });
+    axiosInstance.get('/campaign/')
+      .then((res) => setCampaign(res.data))
+      .catch(() => setCampaign(null));
   }, []);
+
+  // Backward-compatible view for existing wedding-display components
+  // (CoupleSection/BioShort/CountdownTimer read bride_name/groom_name/etc).
+  const publicProfile = campaign
+    ? (() => {
+        const host = campaign.host_display_name || campaign.title || '';
+        const [brideName = host, groomName = ''] = host.split(' & ');
+        return {
+          bride_name: brideName,
+          groom_name: groomName,
+          bio: campaign.story || '',
+          location: campaign.location || '',
+          wedding_date: campaign.event_date || null,
+          profile_picture_url: campaign.cover_image_url || '',
+          isPublic: true,
+        };
+      })()
+    : null;
 
   return (
-    <AuthContext.Provider value={{ authUser, setAuthUser, publicProfile }}>
+    <AuthContext.Provider value={{ authUser, setAuthUser, campaign, publicProfile }}>
       {children}
     </AuthContext.Provider>
   );

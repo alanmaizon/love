@@ -24,12 +24,20 @@ function Home() {
   // 2) Fetch Data on Mount
   // -------------------------------
   useEffect(() => {
-    axiosInstance.get('/public_profile/')
+    // v2: flagship campaign drives the wedding display (was /public_profile/).
+    axiosInstance.get('/campaign/')
       .then((res) => {
-        setProfile(res.data);
+        const c = res.data;
+        setProfile({
+          bride_name: (c.host_display_name || '').split(' & ')[0] || '',
+          groom_name: (c.host_display_name || '').split(' & ')[1] || '',
+          bio: c.story || '',
+          location: c.location || '',
+          wedding_date: c.event_date,
+        });
       })
       .catch(() => {
-        setProfileError('Failed to load public profile data.');
+        setProfileError('Failed to load campaign data.');
       })
       .finally(() => {
         setProfileLoading(false);

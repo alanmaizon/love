@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'campaigns',
     'messaging',
     'donations',
+    'payments',
     'cloudinary',
     'cloudinary_storage',
 ]
@@ -164,3 +165,12 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'maizonalan@gmail.com'
 EMAIL_HOST_PASSWORD = os.environ.get('GOOGLE_APP_PASS')
 DEFAULT_FROM_EMAIL = 'Love That Gives Back <maizonalan@gmail.com>'
+
+# --- Stripe (test keys locally; live keys via SSM in prod) ---
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+# Platform application fee in basis points (100 = 1%). Default 0 -> 100% to charity.
+PLATFORM_FEE_BPS = int(os.environ.get('PLATFORM_FEE_BPS', '0'))
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+STRIPE_CURRENCY = os.environ.get('STRIPE_CURRENCY', 'eur')
