@@ -55,12 +55,28 @@ INSTALLED_APPS = [
     'messaging',
     'donations',
     'payments',
-    'cloudinary',
-    'cloudinary_storage',
 ]
 
-# Cloudinary settings
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# --- Media storage: S3 in prod (django-storages), filesystem locally ---
+# boto3 resolves credentials from the ECS task role in prod (no keys in env).
+# The S3 backend string is imported lazily, so settings load fine without
+# django-storages installed when AWS_STORAGE_BUCKET_NAME is unset (local dev).
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', '')
+AWS_QUERYSTRING_AUTH = False        # public, unsigned media URLs
+AWS_S3_FILE_OVERWRITE = False
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STORAGES = {
+    'default': (
+        {'BACKEND': 'storages.backends.s3.S3Storage'}
+        if AWS_STORAGE_BUCKET_NAME
+        else {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
+    ),
+    # WhiteNoise: hashed + compressed static for long-cache busting in prod.
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -132,11 +148,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Static files (storage backend configured in STORAGES above).
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# WhiteNoise: hash + compress for long-cache, cache-busting static in prod.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -21,10 +21,14 @@ dj_database_url==0.5.0
 gunicorn==20.1.0
 whitenoise==6.0.0
 
-# Media (Cloudinary; pillow backs Django ImageField)
+# Media: S3 via django-storages (pillow backs Django ImageField).
+# Local dev falls back to filesystem storage when AWS_STORAGE_BUCKET_NAME is unset.
 pillow==11.1.0
-cloudinary
-django-cloudinary-storage
+django-storages>=1.14,<2
+boto3
+
+# Payments
+stripe>=12,<13
 
 # Integrations
 requests

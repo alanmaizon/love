@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from cloudinary_storage.storage import MediaCloudinaryStorage
-from cloudinary.utils import cloudinary_url
 
 # v2: the single-couple Profile model (incl. plaintext bank_name/account_number/
 # revolut_username) was retired in CP3 in favour of Campaign. Bank data is never
@@ -29,7 +27,6 @@ class Charity(models.Model):
     website = models.URLField(blank=True)
     logo = models.ImageField(
         upload_to='charity_logos',
-        storage=MediaCloudinaryStorage(),
         blank=True,
         null=True
     )
@@ -46,11 +43,7 @@ class Charity(models.Model):
 
     def get_logo_url(self):
         if self.logo:
-            url, options = cloudinary_url(
-                self.logo.name,
-                width=300, height=300, crop="lfill"
-            )
-            return url
+            return self.logo.url
         return None
 
     @property

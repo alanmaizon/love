@@ -1,123 +1,80 @@
-// src/components/DonationForm.test.jsx
+// test/DonationForm.test.jsx
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import '@testing-library/jest-dom';
 import DonationForm from '../src/components/DonationForm';
-import axios from 'axios';
-import { BrowserRouter } from 'react-router-dom';
+import axiosInstance from '../src/api/axiosInstance';
 
-// Wrap components in BrowserRouter so that routing-dependent components work
-const renderWithRouter = (component) => {
-  return render(<BrowserRouter>{component}</BrowserRouter>);
-};
+vi.mock('../src/api/axiosInstance', () => ({
+  default: { get: vi.fn(), post: vi.fn() },
+}));
 
-// We mock axios so that our tests don't make real HTTP calls.
-vi.mock('axios')
+const renderForm = () =>
+  render(<MemoryRouter><DonationForm /></MemoryRouter>);
 
-
-describe('DonationForm Component - Additional Tests', () => {
-  beforeEach(() => {
-    // Mock charities API call for useEffect
-    axios.get.mockResolvedValueOnce({
-      data: [
-        { id: 1, name: 'Charity One' },
-        { id: 2, name: 'Charity Two' }
-      ]
-    });
+const loadCharities = () =>
+  axiosInstance.get.mockResolvedValueOnce({
+    data: [
+      { id: 1, name: 'Charity One' },
+      { id: 2, name: 'Charity Two' },
+    ],
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
+describe('DonationForm (v2: Stripe Checkout)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  test('shows the custom amount input when "Custom" is selected', async () => {
+    loadCharities();
+    renderForm();
+    await waitFor(() => screen.getByText(/-- Select a Charity --/i));
+    fireEvent.click(screen.getByLabelText(/^custom$/i));
+    expect(screen.getByLabelText(/enter custom amount/i)).toBeInTheDocument();
   });
 
-  test('shows custom amount input when "Custom" is selected', async () => {
-    renderWithRouter(<DonationForm />);
-    // Wait for charities to load
+  test('shows a validation error when the amount is missing', async () => {
+    loadCharities();
+    renderForm();
     await waitFor(() => screen.getByText(/-- Select a Charity --/i));
 
-    // Select the "Custom" radio option.
-    const customRadio = screen.getByLabelText(/Custom/i);
-    fireEvent.click(customRadio);
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'John Doe' } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: /send gift/i }));
 
-    // Check that the custom amount input appears.
-    expect(screen.getByLabelText(/Enter Custom Amount/i)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(/please enter a valid donation amount/i)
+    );
+    expect(axiosInstance.post).not.toHaveBeenCalled();
   });
- 
-  test('shows validation error when donation amount is missing', async () => {
-    renderWithRouter(<DonationForm />);
-    // Wait for charities to load
-    await waitFor(() => screen.getByText(/-- Select a Charity --/i));
-    
-    // Fill in required fields except the donation amount.
-    fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
-    
-    // Select the "Custom" option, which should display the custom amount input.
-    fireEvent.click(screen.getByTestId('radio-amount-custom'));
-    
-    // Fill in the Charity dropdown so native validation doesn't block submission.
-    fireEvent.change(screen.getByLabelText(/Select Charity/i), { target: { value: '1' } });
 
-    // Leave the custom amount input empty, then submit the form.
-    const donateButton = screen.getByRole('button', { name: /Donate/i });
-    fireEvent.click(donateButton);
-    
-    // Wait for the validation feedback to appear.
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Please enter a valid donation amount.');
-    });
-  });  
-  
-
-  test('submits donation when form is filled correctly', async () => {
-    // Mock the POST request to donations endpoint to return a successful response.
-    axios.post.mockResolvedValueOnce({
-      data: {
-        id: 1,
-        donor_name: 'John Doe',
-        donor_email: 'john@example.com',
-        amount: 50,
-        message: 'Great cause!',
-        status: 'pending'
-      }
+  test('posts to the checkout endpoint when the form is filled in', async () => {
+    loadCharities();
+    axiosInstance.post.mockResolvedValueOnce({ data: { checkout_url: 'https://stripe.test/cs_123' } });
+    // jsdom can't perform real navigation; make location.href assignable so the
+    // success path (window.location.href = checkout_url) doesn't throw.
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { href: '' },
     });
 
-    renderWithRouter(<DonationForm />);
-    // Wait for charities to load
+    renderForm();
     await waitFor(() => screen.getByText(/-- Select a Charity --/i));
 
-    // Fill in the form fields.
-    fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
-    
-    // Select a preset donation amount (e.g., $50)
-    fireEvent.click(screen.getByTestId('radio-amount-50'));
+    fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: 'John Doe' } });
+    fireEvent.change(screen.getByLabelText(/^email$/i), { target: { value: 'john@example.com' } });
+    fireEvent.click(screen.getByLabelText('€50'));
+    fireEvent.change(screen.getByLabelText(/select one charity/i), { target: { value: '1' } });
 
-    
-    // Select a charity from the dropdown.
-    fireEvent.change(screen.getByLabelText(/Select Charity/i), { target: { value: '1' } });
-    // Optionally fill in a message.
-    fireEvent.change(screen.getByLabelText(/Personal Message/i), { target: { value: 'Great cause!' } });
-    
-    // Submit the form.
-    const donateButton = screen.getByRole('button', { name: /Donate/i });
-    fireEvent.click(donateButton);
+    fireEvent.click(screen.getByRole('button', { name: /send gift/i }));
 
-    // Wait for navigation (redirection) or a success message.
-    // Since our component redirects on success, we can mock the useNavigate hook if needed,
-    // but for now we'll check that axios.post was called with the correct data.
-    await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        'http://localhost:8000/api/donations/',
-        expect.objectContaining({
-          donor_name: 'John Doe',
-          donor_email: 'john@example.com',
-          amount: 50,
-          message: 'Great cause!',
-          charity: '1'
-        }),
-        { withCredentials: true }
-      );
+    await waitFor(() => expect(axiosInstance.post).toHaveBeenCalled());
+    const [url, body] = axiosInstance.post.mock.calls[0];
+    expect(url).toBe('/payments/checkout/');
+    expect(body).toMatchObject({
+      donor_name: 'John Doe',
+      donor_email: 'john@example.com',
+      amount: 50,
+      charity: '1',
     });
   });
 });
-

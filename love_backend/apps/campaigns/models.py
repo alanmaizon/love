@@ -6,7 +6,6 @@ verified charities.
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from cloudinary_storage.storage import MediaCloudinaryStorage
 
 from core.models import TimeStampedModel, TenantScopedManager
 
@@ -69,7 +68,6 @@ class Campaign(TimeStampedModel):
     story = models.TextField(blank=True)
     cover_image = models.ImageField(
         upload_to="campaign_covers",
-        storage=MediaCloudinaryStorage(),
         blank=True,
         null=True,
     )

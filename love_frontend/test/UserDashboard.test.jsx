@@ -1,40 +1,50 @@
+// test/UserDashboard.test.jsx
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import axios from 'axios';
-import UserDashboard from '../src/components/UserDashboard';
+import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
+import UserDashboard from '../src/components/UserDashboard';
+import axiosInstance from '../src/api/axiosInstance';
 
-vi.mock('axios')
+vi.mock('../src/api/axiosInstance', () => ({
+  default: { get: vi.fn() },
+}));
+
+const renderDash = () =>
+  render(<MemoryRouter><UserDashboard /></MemoryRouter>);
 
 describe('UserDashboard', () => {
-  test('displays loading state initially', () => {
-    axios.get.mockResolvedValueOnce({ data: [] });
-    render(<UserDashboard />);
-    expect(screen.getByText(/Loading donations/i)).toBeInTheDocument();
+  beforeEach(() => vi.clearAllMocks());
+
+  test('shows a loading state initially', () => {
+    axiosInstance.get.mockReturnValueOnce(new Promise(() => {})); // never resolves
+    renderDash();
+    expect(screen.getByText(/loading donations/i)).toBeInTheDocument();
   });
 
-  test('renders donations after fetch', async () => {
-    const donationData = [
-      {
-        id: 1,
-        donor_name: 'John Doe',
-        donor_email: 'john@example.com',
-        amount: 50,
-        message: 'Great cause!',
-        status: 'pending'
-      }
-    ];
-    axios.get.mockResolvedValueOnce({ data: donationData });
-    render(<UserDashboard />);
-    // Wait for donation data to appear in the DOM.
-    await waitFor(() => expect(screen.getByText(/John Doe/i)).toBeInTheDocument());
-    expect(screen.getByText(/john@example.com/i)).toBeInTheDocument();
-    expect(screen.getByText('$50')).toBeInTheDocument();
+  test('renders donations after fetch (v2: euro amounts, donor email)', async () => {
+    axiosInstance.get.mockResolvedValueOnce({
+      data: [
+        {
+          id: 1,
+          donor_name: 'John Doe',
+          donor_email: 'john@example.com',
+          amount: 50,
+          message: 'Great cause!',
+          status: 'confirmed',
+        },
+      ],
+    });
+    renderDash();
+    await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+    expect(screen.getByText('john@example.com')).toBeInTheDocument();
+    expect(screen.getByText('€50')).toBeInTheDocument();
+    expect(screen.getByText(/confirmed/i)).toBeInTheDocument();
   });
 
-  test('displays error message if fetch fails', async () => {
-    axios.get.mockRejectedValueOnce(new Error('API Error'));
-    render(<UserDashboard />);
-    await waitFor(() => expect(screen.getByText(/Error fetching donations/i)).toBeInTheDocument());
+  test('shows an error message if the fetch fails', async () => {
+    axiosInstance.get.mockRejectedValueOnce(new Error('API Error'));
+    renderDash();
+    await waitFor(() => expect(screen.getByText(/error fetching donations/i)).toBeInTheDocument());
   });
 });
