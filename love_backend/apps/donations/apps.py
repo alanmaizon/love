@@ -6,4 +6,4 @@ class DonationsConfig(AppConfig):
     name = 'donations'
 
     def ready(self):
-        import donations.signals
+        import donations.signals  # noqa: F401  (kept for future signals)

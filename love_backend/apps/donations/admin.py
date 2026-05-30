@@ -1,20 +1,9 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
-    Profile, Charity, Donation,
+    Charity, Donation,
     PayoutAccount, LedgerEntry, Receipt, Payout,
 )
-
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'display_profile_picture', 'bride_name', 'groom_name')
-
-    def display_profile_picture(self, obj):
-        url = obj.get_profile_picture_url()
-        if url:
-            return format_html('<img src="{}" style="max-height: 50px;"/>', url)
-        return "No Image"
-    display_profile_picture.short_description = "Profile Picture"
 
 @admin.register(Charity)
 class CharityAdmin(admin.ModelAdmin):

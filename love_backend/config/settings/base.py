@@ -82,6 +82,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    # JSON only — no browsable HTML API rendering donor data in a web page.
+    # (Donor email is also stripped for non-staff in DonationSerializer; this is
+    # defense-in-depth.) The browsable API can be re-enabled in dev if desired.
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
 }
 
 ROOT_URLCONF = 'config.urls'

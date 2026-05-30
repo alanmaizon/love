@@ -1,8 +1,13 @@
 # donations/tests.py
+from datetime import date
+from decimal import Decimal
+
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
 from .models import Donation, Charity
+from campaigns.models import Campaign
+from messaging.models import Message
 
 # -------------------------
 # Login Endpoint Tests
@@ -230,3 +235,109 @@ class CharityTests(APITestCase):
         resp = self.client.delete(f"/api/charities/{charity.id}/")
         self.assertEqual(resp.status_code, 204)
         self.assertFalse(Charity.objects.filter(id=charity.id).exists())
+
+
+# -------------------------
+# v2 API surface (CP3)
+# -------------------------
+class V2ApiTests(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_user(
+            username="admin", password="adminpass123", is_staff=True
+        )
+        self.host = User.objects.create_user(username="host", password="x")
+        self.charity = Charity.objects.create(
+            name="Test Charity", slug="test-charity",
+            verification_status=Charity.VERIFIED,
+        )
+        self.campaign = Campaign.objects.create(
+            owner=self.host, type=Campaign.WEDDING, title="Test Wedding",
+            slug="test-wedding", visibility=Campaign.PUBLIC, status=Campaign.ACTIVE,
+            goal_amount=Decimal("1000"), event_date=date(2025, 4, 26),
+        )
+        self.donation = Donation.objects.create(
+            charity=self.charity, campaign=self.campaign,
+            donor_name="Jane", donor_email="jane@example.com",
+            amount=Decimal("100"), message="Congrats!", status="confirmed",
+        )
+        Message.objects.create(
+            campaign=self.campaign, donation=self.donation,
+            display_name="Jane", body="Congrats!",
+            moderation_status=Message.APPROVED,
+        )
+
+    def test_public_campaign_default_returns_flagship(self):
+        resp = self.client.get("/api/campaign/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["slug"], "test-wedding")
+        # Beneficiary charities are embedded.
+        self.assertIn("beneficiaries", resp.json())
+
+    def test_public_campaign_by_slug(self):
+        resp = self.client.get("/api/campaign/test-wedding/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["title"], "Test Wedding")
+
+    def test_campaign_payload_has_no_owner_pii(self):
+        resp = self.client.get("/api/campaign/test-wedding/")
+        body = resp.json()
+        # Host is exposed only as a friendly display name — never the raw
+        # username/email, and never an `owner` object.
+        self.assertNotIn("owner", body)
+        self.assertNotIn("owner_email", body)
+        # The username must not leak in any serialized *value* (key names like
+        # "host_display_name" legitimately contain "host", so check values).
+        self.assertNotIn(self.host.username, "".join(str(v) for v in body.values()))
+
+    def test_guestbook_returns_approved_only(self):
+        # Add a pending message that must NOT appear.
+        Message.objects.create(
+            campaign=self.campaign, display_name="Spam", body="hidden",
+            moderation_status=Message.PENDING,
+        )
+        resp = self.client.get("/api/messages/?campaign=test-wedding")
+        self.assertEqual(resp.status_code, 200)
+        bodies = [m["body"] for m in resp.json()]
+        self.assertIn("Congrats!", bodies)
+        self.assertNotIn("hidden", bodies)
+
+    def test_analytics_is_100_percent_charity(self):
+        resp = self.client.get("/api/analytics/")
+        body = resp.json()
+        # No 50/50 split: charity_amount equals total, no couple_amount key.
+        self.assertEqual(float(body["total_amount"]), 100.0)
+        self.assertEqual(float(body["charity_amount"]), 100.0)
+        self.assertNotIn("couple_amount", body)
+
+    def test_stats_shape(self):
+        resp = self.client.get("/api/stats/")
+        if resp.status_code != 200 or "trend" not in resp.json():
+            with open("/tmp/stats_debug.txt", "w") as fh:
+                fh.write(f"status={resp.status_code}\n")
+                fh.write(resp.content.decode("utf-8", "replace"))
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertEqual(len(body["trend"]), 30)
+        self.assertTrue(any(c["charity"] == "Test Charity" for c in body["by_charity"]))
+
+    def test_donation_list_hides_email_from_anonymous(self):
+        resp = self.client.get("/api/donations/")
+        rows = resp.json()
+        rows = rows["results"] if isinstance(rows, dict) else rows
+        self.assertTrue(all("donor_email" not in r for r in rows))
+
+    def test_donation_list_shows_email_to_admin(self):
+        self.client.force_authenticate(user=self.admin)
+        resp = self.client.get("/api/donations/")
+        rows = resp.json()
+        rows = rows["results"] if isinstance(rows, dict) else rows
+        self.assertTrue(any("donor_email" in r for r in rows))
+
+    def test_charities_endpoint_no_internal_fields(self):
+        resp = self.client.get("/api/charities/")
+        rows = resp.json()
+        rows = rows["results"] if isinstance(rows, dict) else rows
+        for r in rows:
+            self.assertNotIn("contact_email", r)
+            self.assertNotIn("registration_number", r)

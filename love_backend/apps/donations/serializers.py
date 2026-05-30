@@ -1,77 +1,103 @@
 from rest_framework import serializers
-from .models import Profile, Charity, Donation
 
+from campaigns.models import Campaign, CampaignBeneficiary
+from messaging.models import Message
 
-class ProfileSerializer(serializers.ModelSerializer):
-    profile_picture_url = serializers.SerializerMethodField()
-    isAdmin = serializers.SerializerMethodField()
+from .models import Charity, Donation
 
-    class Meta:
-        model = Profile
-        fields = [
-            'id', 
-            'bride_name', 
-            'groom_name', 
-            'wedding_date', 
-            'bio', 
-            'location', 
-            'profile_picture_url',
-            'bank_name', 
-            'account_number', 
-            'revolut_username',
-            'isAdmin',
-        ]
-
-    def get_profile_picture_url(self, obj):
-        return obj.get_profile_picture_url() or ""
-
-    def get_isAdmin(self, obj):
-        # Assumes that the Profile is linked to a User instance.
-        return obj.user.is_staff  # or obj.user.is_superuser if you prefer
-    
 
 class CharitySerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Charity model.
-    It exposes the basic details of each charity.
-    """
+    """Public charity card. Read-only verification info; no ops/internal fields."""
+
+    logo_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Charity
-        fields = ['id', 'name', 'description', 'website', 'logo']
+        fields = [
+            "id", "name", "slug", "description", "website", "logo_url",
+            "verification_status", "is_verified",
+        ]
+        # contact_email / registration_number are intentionally NOT exposed.
 
+    def get_logo_url(self, obj):
+        return obj.get_logo_url() or ""
+
+
+class BeneficiarySerializer(serializers.ModelSerializer):
+    charity = CharitySerializer(read_only=True)
+
+    class Meta:
+        model = CampaignBeneficiary
+        fields = ["charity", "split_percent"]
+
+
+class CampaignSerializer(serializers.ModelSerializer):
+    """Public campaign page payload. No owner PII beyond a display name."""
+
+    beneficiaries = BeneficiarySerializer(many=True, read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
+    host_display_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Campaign
+        fields = [
+            "id", "type", "title", "slug", "story", "cover_image_url",
+            "event_date", "location", "goal_amount", "currency",
+            "visibility", "status", "host_display_name", "beneficiaries",
+            "created_at",
+        ]
+
+    def get_cover_image_url(self, obj):
+        return obj.cover_image.url if obj.cover_image else ""
+
+    def get_host_display_name(self, obj):
+        # A friendly label only — never the owner's email/username for PII safety.
+        return (obj.owner.get_full_name() or obj.owner.first_name or "Host").strip()
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    """Public guestbook entry. Anonymous donors render as 'Anonymous'."""
+
+    display_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Message
+        fields = ["id", "display_name", "body", "created_at", "published_at"]
+
+    def get_display_name(self, obj):
+        return "Anonymous" if obj.is_anonymous else obj.display_name
 
 
 class DonationSerializer(serializers.ModelSerializer):
+    """
+    Donor email is stripped for non-staff (PII). `status` and money fields are
+    server-controlled — only set via the payment/webhook flow, never by the client.
+    """
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request or not (request.user and request.user.is_staff):
-            ret.pop('donor_email', None)
+            ret.pop("donor_email", None)
         return ret
 
     class Meta:
         model = Donation
         fields = [
-            'id',
-            'user',
-            'charity',
-            'donor_name',
-            'donor_email',
-            'amount',
-            'message',
-            'status',
-            'created_at',
-            'updated_at',
+            "id", "user", "charity", "campaign",
+            "donor_name", "donor_email", "amount", "currency",
+            "message", "is_anonymous", "status", "created_at", "updated_at",
         ]
-        read_only_fields = ['user', 'status', 'created_at', 'updated_at']
+        read_only_fields = [
+            "user", "status", "currency", "created_at", "updated_at",
+        ]
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        # If the user is authenticated, assign them; otherwise, leave user as None.
+        request = self.context.get("request")
         if request and request.user and request.user.is_authenticated:
-            validated_data['user'] = request.user
+            validated_data["user"] = request.user
         else:
-            validated_data['user'] = None
+            validated_data["user"] = None
         return super().create(validated_data)
 
     def validate_amount(self, value):

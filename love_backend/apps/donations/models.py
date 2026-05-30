@@ -1,39 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
-from cloudinary.models import CloudinaryField
 from cloudinary_storage.storage import MediaCloudinaryStorage
 from cloudinary.utils import cloudinary_url
 
-# NOTE (v2): Profile is retained here only until CP3, where it is retired in
-# favour of Campaign and its bank fields are deleted. Do not build on it.
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    bride_name = models.CharField(max_length=255, default="Anna")
-    groom_name = models.CharField(max_length=255, default="Alan")
-    wedding_date = models.DateField()
-    bio = models.TextField(blank=True)
-    location = models.CharField(max_length=255)
-    profile_picture = models.ImageField(
-        upload_to='profile_pictures',
-        storage=MediaCloudinaryStorage(),
-        blank=True,
-        null=True
-    )
-    bank_name = models.CharField(max_length=255)
-    account_number = models.CharField(max_length=100)
-    revolut_username = models.CharField(max_length=255, default="alanmaizon")
-
-    def get_profile_picture_url(self):
-        if self.profile_picture:
-            url, options = cloudinary_url(
-                self.profile_picture.name,
-                width=300, height=300, crop="fill"
-            )
-            return url
-        return None
-
-    def __str__(self):
-        return f"{self.user.username}'s Profile"
+# v2: the single-couple Profile model (incl. plaintext bank_name/account_number/
+# revolut_username) was retired in CP3 in favour of Campaign. Bank data is never
+# stored — payout identity lives in PayoutAccount as a Stripe account id only.
 
 
 class Charity(models.Model):
