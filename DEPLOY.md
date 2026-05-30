@@ -61,7 +61,11 @@ put CORS_ALLOWED_ORIGINS String       '["https://yourdomain.com"]'
 put CSRF_TRUSTED_ORIGINS String       '["https://yourdomain.com"]'
 put DATABASE_URL         SecureString "postgres://loveadmin:CHANGEME@<rds-endpoint>:5432/love"
 put GOOGLE_APP_PASS      SecureString "<gmail app password>"
+put AWS_STORAGE_BUCKET_NAME String    "love-media-yourname"   # S3 bucket for uploads
+put AWS_S3_REGION_NAME      String    "$REGION"
 # COOKIE_DOMAIN: leave unset, or set to ".yourdomain.com" if API+web share it.
+# Media uploads go to S3 via django-storages; boto3 uses the ECS task role for
+# auth (grant it s3:PutObject/GetObject on the media bucket) — no keys in env.
 ```
 The ECS task definition references these by ARN as `secrets` (so values never sit
 in image layers or Terraform state).
