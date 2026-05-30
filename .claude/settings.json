@@ -1,6 +1,6 @@
 {
   "env": {
-    "DJANGO_SETTINGS_MODULE": "love_backend.settings",
+    "DJANGO_SETTINGS_MODULE": "config.settings.dev",
     "PYTHONDONTWRITEBYTECODE": "1"
   },
   "fileCheckpointingEnabled": true,

@@ -127,3 +127,72 @@ class OutboxDrainTests(TestCase):
             call_command("drain_outbox")  # second run must not duplicate
         self.assertEqual(Receipt.objects.filter(donation=donation).count(), 1)
         self.assertEqual(OutboxEvent.objects.filter(status=OutboxEvent.DONE).count(), 1)
+
+
+class CheckoutAuthorizationTests(TestCase):
+    """POST /checkout/ must not honour a caller-supplied donation id (an IDOR that
+    leaks the donor's email via the prefilled Stripe page) and must reject bad
+    amounts before any donation is created."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.charity = Charity.objects.create(
+            name="C", slug="c", verification_status=Charity.VERIFIED,
+        )
+        PayoutAccount.objects.create(
+            charity=self.charity, stripe_account_id="acct_test", charges_enabled=True,
+        )
+
+    def _payload(self, **over):
+        data = {
+            "charity": self.charity.id,
+            "donor_name": "Attacker",
+            "donor_email": "attacker@example.com",
+            "amount": "25",
+        }
+        data.update(over)
+        return data
+
+    def _victim(self):
+        return Donation.objects.create(
+            charity=self.charity, donor_name="Victim",
+            donor_email="victim@example.com", amount=Decimal("50"), status="pending",
+        )
+
+    @mock.patch("payments.services.create_checkout_session", return_value="https://stripe.test/cs")
+    def test_donation_id_alone_buys_nothing(self, create_session):
+        """An id with no charity (the IDOR payload) must never reach Stripe."""
+        victim = self._victim()
+        resp = self.client.post(
+            "/api/payments/checkout/",
+            data={"donation_id": victim.id, "amount": "25"}, format="json",
+        )
+        self.assertEqual(resp.status_code, 404)
+        create_session.assert_not_called()
+        victim.refresh_from_db()
+        self.assertEqual(victim.status, "pending")  # untouched
+
+    @mock.patch("payments.services.create_checkout_session", return_value="https://stripe.test/cs")
+    def test_smuggled_donation_id_is_ignored_fresh_donation_created(self, create_session):
+        """A smuggled id is ignored: a new donation is created for the caller and
+        the victim's donation (and email) is never used for the session."""
+        victim = self._victim()
+        resp = self.client.post(
+            "/api/payments/checkout/", data=self._payload(donation_id=victim.id), format="json",
+        )
+        self.assertEqual(resp.status_code, 200, resp.content)
+        create_session.assert_called_once()
+        used = create_session.call_args.args[0]
+        self.assertNotEqual(used.id, victim.id)
+        self.assertEqual(used.donor_email, "attacker@example.com")
+        self.assertEqual(resp.json()["donation_id"], used.id)
+
+    @mock.patch("payments.services.create_checkout_session", return_value="https://stripe.test/cs")
+    def test_nonpositive_or_invalid_amount_rejected(self, create_session):
+        for bad in ("0", "-5", "", "abc"):
+            resp = self.client.post(
+                "/api/payments/checkout/", data=self._payload(amount=bad), format="json",
+            )
+            self.assertEqual(resp.status_code, 400, f"amount={bad!r}")
+        create_session.assert_not_called()
+        self.assertEqual(Donation.objects.count(), 0)  # nothing persisted on bad input

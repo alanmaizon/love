@@ -6,6 +6,7 @@ Payment HTTP endpoints:
   POST /api/payments/webhook/    Stripe webhook (see webhooks.py)
 """
 import logging
+from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -53,25 +54,39 @@ def config(request):
 @authentication_classes([CsrfExemptSessionAuthentication])
 @permission_classes([AllowAny])
 def create_checkout(request):
-    """Create a Checkout Session for a donation (existing id, or create pending)."""
+    """Create a Checkout Session for a *new* pending donation.
+
+    We deliberately do NOT accept a caller-supplied donation id. Donation ids are
+    sequential and a Checkout Session prefills the donor's email on the Stripe-
+    hosted page, so honouring an arbitrary id would let anyone mint a session for
+    someone else's donation and read that donor's email (IDOR -> PII leak, which
+    would defeat the donor_email redaction the serializers enforce). Each call
+    creates a fresh donation owned by the caller (or anonymous).
+    """
     data = request.data
-    donation_id = data.get("donation_id")
-    if donation_id:
-        donation = get_object_or_404(Donation, id=donation_id)
-    else:
-        charity = get_object_or_404(Charity, id=data.get("charity"))
-        campaign = _resolve_campaign(data.get("campaign"))
-        donation = Donation.objects.create(
-            charity=charity,
-            campaign=campaign,
-            donor_name=data.get("donor_name", ""),
-            donor_email=data.get("donor_email", ""),
-            amount=data.get("amount") or 0,
-            message=data.get("message", ""),
-            is_anonymous=bool(data.get("is_anonymous", False)),
-            status="pending",
-            user=request.user if request.user.is_authenticated else None,
-        )
+
+    # Amount is validated here because this endpoint creates the Donation
+    # directly, bypassing DonationSerializer.validate_amount.
+    try:
+        amount = Decimal(str(data.get("amount", ""))).quantize(Decimal("0.01"))
+    except (InvalidOperation, ValueError, TypeError):
+        return Response({"error": "A valid donation amount is required."}, status=400)
+    if amount <= 0:
+        return Response({"error": "Donation amount must be greater than zero."}, status=400)
+
+    charity = get_object_or_404(Charity, id=data.get("charity"))
+    campaign = _resolve_campaign(data.get("campaign"))
+    donation = Donation.objects.create(
+        charity=charity,
+        campaign=campaign,
+        donor_name=data.get("donor_name", ""),
+        donor_email=data.get("donor_email", ""),
+        amount=amount,
+        message=data.get("message", ""),
+        is_anonymous=bool(data.get("is_anonymous", False)),
+        status="pending",
+        user=request.user if request.user.is_authenticated else None,
+    )
 
     try:
         url = services.create_checkout_session(donation)
