@@ -1,263 +1,107 @@
-# **❤️ Love That Gives Back**
+# Love That Gives Back 💛
 
-- [Concept Overview](#concept-overview)
-- [Front-End Features](#front-end-features)
-  - [Home Page (Landing Page)](#1-home-page-landing-page)
-  - [User Authentication](#2-user-authentication)
-  - [Dashboard](#3-dashboard)
-  - [Charity Pages (CRUD Features)](#4-charity-pages-crud-features)
-  - [Responsive Design](#5-responsive-design)
-  - [API Integration](#6-api-integration)
-- [Back-End Features](#back-end-features)
-  - [Django Server](#1-django-server)
-  - [Database](#2-database)
-  - [User Authentication & Authorization](#3-user-authentication--authorization)
-  - [Donation Management](#4-donation-management)
-  - [Automated Testing](#5-automated-testing)
-- [Tools & Technologies](#tools--technologies)
-  - [Front-End](#front-end)
-  - [Back-End](#back-end)
-  - [Version Control & Deployment](#version-control--deployment)
-- [ER Diagram](#er-diagram)
-- [Sitemap](#sitemap)
-- [User Flow](#user-flow)
-- [User Stories](#user-stories)
-  - [Guest User (Wedding Guest)](#guest-user-wedding-guest)
-  - [Wedding Couple (Profile Owner)](#wedding-couple-profile-owner)
-  - [Admin (Superuser)](#admin)
+> A social platform for charitable giving built around life's celebrations.
+> Anyone creates a verified registry (wedding, birthday, memorial); guests
+> donate to **real, verified charities**, leave a public message, and discover
+> causes worth supporting.
 
+This repo was rebuilt from a single-couple **wedding-donation prototype (v0)**
+into a multi-tenant **giving platform (v2)** — every euro now flows through
+Stripe to a *verified* charity, with an append-only ledger, content moderation,
+and row-level multitenancy. The real wedding it started as (27 gifts, **€3,780**,
+27 guest messages) is migrated in as the **flagship campaign**.
+
+📐 [SCHEMA_DESIGN.md](SCHEMA_DESIGN.md) · 🚀 [DEPLOY.md](DEPLOY.md) · 🤝 [CLAUDE.md](CLAUDE.md)
 
 ---
 
-## **Concept Overview**  
-**Theme:** A platform where users can explore and donate to various charity organizations tied to a couple's values.  
-**Objective:**  
-- Celebrate love by inspiring generosity.  
-- Provide a seamless user experience for exploring charities and donating.  
+## What changed v0 → v2
 
----
+| | v0 prototype | v2 platform |
+|---|---|---|
+| Tenancy | one hardcoded couple (`Profile`) | many **Campaigns** + **Charities**, row-scoped |
+| Money | manual Revolut/bank transfer, admin clicks "confirm" | **Stripe Connect** destination charges → verified charity |
+| Bank data | plaintext `bank_name`/`account_number` on a model | **never stored** — Stripe account id + capability flags only |
+| Split | 50% couple / 50% charity | **100% to charity** |
+| Source of truth | the `Donation` row | append-only **`LedgerEntry`**, reconcilable |
+| Guestbook | static CSV, unmoderated | moderated **`Message`** API (approved-only public) |
+| Charts | server-side matplotlib PNG (~8 heavy deps) | JSON `/api/stats/` + client-side rendering |
+| Webhooks | — | signature-verified, **idempotent** (deduped by event id) |
+| PII | donor email + bank in public responses | stripped for non-staff; JSON-only API |
 
-## **Front-End Features**  
+## Architecture
 
-### 1. **Home Page (Landing Page)**  
-- A hero section introducing the mission.  
-- Links/buttons for logging in, exploring charities, and donating.  
-- Display the wedding date with a countdown.  
-- Highlight charity statistics (e.g., total donations).  
+- **Backend** — Django 5 + DRF, modular monolith: `config/` + `apps/{core,
+  accounts,campaigns,donations,messaging,payments}`. Postgres in prod, SQLite
+  locally. gunicorn + WhiteNoise.
+- **Frontend** — React 19 + Vite, React Router, axios, Bootstrap (ported from v0).
+- **Payments** — Stripe-hosted Checkout + Connect (PCI **SAQ-A**; card data never
+  touches our backend).
+- **Reliable async** — an `OutboxEvent` row written in the same transaction as
+  the donation, drained by `manage.py drain_outbox` (receipts, emails).
 
-### 2. **User Authentication**   
-- Login/Logout: Use Django Rest Framework for token-based authentication.  
+## Run it locally
 
-### 3. **Dashboard**  
-- Display personalized greetings.  
-- Show donation history and progress.  
-- Enable users to set donation goals.  
-
-### 4. **Charity Pages (CRUD Features)**  
-- Explore three charities with descriptions, images, and goals.  
-- Allow users (admins) to create/update/delete charity profiles.  
-- Enable commenting or "likes" on charities as a bonus feature.  
-
-### 5. **Responsive Design**  
-- Use bootstrap and CSS for a modern, responsive design.
-- Ensure compatibility across devices.  
-
-### 6. **API Integration**
-
-- **External API:**  
-  Integrated with the **YouTube Data API v3** using **OAuth2** to securely retrieve metadata about a scheduled livestream video.
-
-- **Use Case:**  
-  Guests visiting the homepage will see a **countdown timer** that transitions to an embedded YouTube livestream video. This dynamic behavior is powered by real-time data retrieved from the YouTube API, such as:
-  - `scheduledStartTime`
-  - `actualStartTime`
-  - `actualEndTime`
-  - `liveBroadcastStatus`
-
-- **Backend Implementation:**  
-  - A Django view at `/api/youtube-proxy/?videoId=...` acts as a secure proxy.
-  - It uses a long-lived **refresh token** to generate an access token on the server, without requiring user interaction.
-  - Fetches metadata using the `youtube.videos().list(...)` endpoint.
-  - Handles API errors gracefully with detailed logging.
-
-- **Security:**  
-  - OAuth2 credentials and the refresh token are stored securely as environment variables.
-  - Tokens are never exposed to the frontend.
-  - The server refreshes the access token as needed, following Google’s best practices.
-
----
-
-## **Back-End Features**  
-
-### 1. **Django Server**  
-- RESTful API with Django Rest Framework.  
-- Serve data to the React front-end.  
-
-### 2. **Database**  
-- PostgreSQL for scalable and reliable data management.  
-- Store user profiles, charity data, and donation transactions.  
-
-### 3. **User Authentication & Authorization**  
-- Secure user login with hashed passwords.  
-- Assign roles (admin, authenticated user, guest).  
-
-### 4. **Donation Management**  
-- CRUD functionality for donations.  
-- Generate donation receipts.  
-
-### 5. **Automated Testing**  
-- Use Django's `unittest` framework to test API endpoints and functionality.  
-
----
-
-## **Tools & Technologies**  
-
-### **Front-End:**  
-- React with React Router.  
-- Axios for API calls.   
-
-### **Back-End:**  
-- Django with Django Rest Framework.  
-- PostgreSQL database.  
-
-### **Version Control & Deployment:**  
-- Git for version control.  
-- Deploy front-end and back-end with Render.  
-
----
-
-## ER Diagram
-
-```mermaid
-erDiagram
-    USER {
-      int id PK
-      string username
-      string email
-    }
-    PROFILE {
-      int id PK
-      date wedding_date
-      string bio
-      string location
-      string profile_picture
-      string bank
-      string bank_account
-      string revolut_username
-    }
-    CHARITY {
-      int id PK
-      string name
-      string description
-      string website
-      string logo
-    }
-    DONATION {
-      int id PK
-      int profile_id FK
-      string donor_name
-      string donor_email
-      decimal amount
-      string message
-      string status "pending/confirmed/failed"
-      datetime created_at
-      datetime updated_at
-    }
-    
-    USER ||--|| PROFILE : "has"
-    PROFILE }o--o{ CHARITY : "supports"
-    CHARITY ||--o{ DONATION : "receives"
+**Backend** (from `love_backend/`):
+```bash
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py import_donations --csv ../love_frontend/public/data/donations.csv  # seed flagship
+python manage.py createsuperuser           # for /admin
+python manage.py runserver                 # http://localhost:8000
 ```
 
----
-
-## Sitemap
-
-```mermaid
-mindmap
-  root((Love That Gives Back))
-      About / How It Works (About Us)
-      Login Page (Login / Logout)
-      Home Page (Home)
-        Select Cause (Charities)
-          Donation Form Page (Donate)
-            Payment Instructions Page
-           Donation Confirmation Page
-      Couple Dashboard (Dashboard)
-        Couple's Profile (Settings)
-          Edit Profile
-          Manage Supported Charities (Charities)
-            Add New Charity
-            View Supported Charities
-              Edit Selected Charities
-        View Donations (Donations)
-          List of Confirmed Donations
-          Donation Details Page
-      Admin Dashboard (Admin Panel)
-        Manage Donations
-          (Confirm / Fail)
-        View Overall Donation Statistics (Analytics/Reports)
-          Charts
-          Export
-        Manage Users
-        Manage Charities
+**Frontend** (from `love_frontend/`):
+```bash
+cp .env.example .env.local                 # VITE_API_URL=http://localhost:8000
+npm ci
+npm run dev                                # http://localhost:5173
 ```
 
----
-
-## User Flow
-
-```mermaid
-flowchart TD
-    A[Visit Home Page] --> B{User Type?}
-    B -- Guest --> C[Select Couple Profile]
-    C --> D[Choose Supported Charity]
-    D --> E[Fill Out Donation Form]
-    E --> F[Review Payment Instructions]
-    F --> G[Donation Confirmation]
-    
-    B -- Couple --> H[Register / Login]
-    H --> I[Manage Profile]
-    I --> J[Edit Profile Details]
-    J --> K[(Wedding Date, Bio, Location)]
-    I --> L[Manage Supported Charities]
-    L --> M[Add New Charity]
-    M --> N[(Name, Description, Website)]
-    L --> O[View/Update Selected Charities]
-    I --> P[View Donations]
-    P --> Q[List of Confirmed Donations]
-    Q --> R[Donation Details]
-    
-    B -- Admin --> S[Admin Login]
-    S --> T[Admin Dashboard]
-    T --> U[Manage Donations]
-    T --> V[View Statistics & Analytics]
-    V --> W[(Percentage Charts, Donation Trends)]
-    T --> X[Manage Users & Charities]
+**Payments (test mode, optional)** — put Stripe **test** keys in `love_backend/.env`
+(see `.env.example`), then forward webhooks:
+```bash
+stripe listen --forward-to localhost:8000/api/payments/webhook/
 ```
+The `whsec_…` it prints is your `STRIPE_WEBHOOK_SECRET`. A test donation then
+flows: Checkout → webhook → `LedgerEntry` + `Receipt` (via the outbox).
 
----
+## Tests
+```bash
+# backend — 34 tests: authz boundary, no-PII contract, idempotent webhook, ledger
+cd love_backend && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py test donations payments
 
-## User Stories
+# frontend — vitest (see note below)
+cd love_frontend && npm test
+```
+> **Frontend test note:** the backend suite is the source of truth for v2
+> behavior. Several React unit suites were inherited from v0 and assert old UI /
+> mock `axios` in a way that predates the shared axios instance; they need a
+> refresh. `DonationConfirmation` is updated for the Stripe flow; the others are
+> tracked as a known cleanup.
 
-### Guest User (Wedding Guest)
-- **As a guest, I want to view a couple’s profile and supported charities so that I can select one to donate to.**
-- **As a guest, I want to fill out a donation form with my name, email, donation amount, and a personal message so that I can contribute a gift.**
-- **As a guest, I want to review payment instructions and receive confirmation after submitting my donation so that I know my gift is acknowledged.**
+## Core invariants (do not violate)
+1. Money can only ever reach a **verified** `Charity`.
+2. **Never** store raw bank/card data — payout identity = a Stripe account id.
+3. `LedgerEntry` is the source of truth for money — append-only, reconciled.
+4. All public user content is **moderatable**; public display is consent-gated.
+5. Row-level multitenancy enforced in DRF `get_queryset`, not just serializers.
+6. No PII (donor email) in public API responses.
+7. PCI: stay **SAQ-A** — Stripe-hosted Checkout only.
+8. **Idempotency** on payment ops; verify + dedupe webhooks by event id.
 
-### Wedding Couple (Profile Owner)
-- **As a couple, I want to register and log in with a single user account so that I can manage my profile easily.**
-- **As a couple, I want to view my profile details (wedding date, bio, location, etc.) so that guests know more about us.**
-- **As a couple, I want to edit my profile details and update my supported charities so that I can choose which charities are displayed on my profile.**
-- **As a couple, I want to see a list of confirmed donations (filtered by the charities I support) so that I can track the contributions and share my gratitude.**
+## 📸 Screenshots for the write-up
 
-### Admin
-- **As an admin, I want to log in and view an admin dashboard so that I can manage all donations and user data.**
-- **As an admin, I want to update the status of donations (mark them as confirmed or failed) so that the system reflects the correct payment status.**
-- **As an admin, I want to view overall statistics and analytics (e.g., donation trends, percentages, reports) so that I can monitor platform performance.**
-- **As an admin, I want to manage users and charities so that I can ensure data integrity and handle disputes if necessary.**
+With both servers running and the flagship seeded, these are the money shots:
 
----
+| Page | URL | Shows |
+|---|---|---|
+| **Home** | `localhost:5173/` | hero, countdown, **guestbook carousel** (27 real messages) |
+| **Analytics** | `localhost:5173/analytics` | **€3,780 raised**, 27 gifts, per-charity bars, goal progress |
+| **Charities** | `localhost:5173/charities` | Mary's Meals · Operation Smile · Xingu Vivo (verified) |
+| **Donate** | `localhost:5173/donate` | the gift form → redirects to Stripe Checkout |
+| **Admin** | `localhost:8000/admin` | Donations, **Ledger entries** (read-only), Campaigns, Webhook events |
 
-## Module 6 - UCD PA - Alan Maizon
-**[Github (Public Repository)](https://github.com/alanmaizon/love/)**
+Tip for the post: the admin **Ledger entries** and **Webhook events** tables make
+the "real money plumbing" point visually; the analytics page proves the €3,780.
