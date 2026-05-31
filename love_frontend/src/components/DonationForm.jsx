@@ -1,10 +1,9 @@
 // src/components/DonationForm.jsx
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 function DonationForm() {
-  const navigate = useNavigate();
   const location = useLocation();
   const preselectedCharity = location.state?.selectedCharity || '';
 
@@ -20,7 +19,12 @@ function DonationForm() {
   useEffect(() => {
     axiosInstance.get('/charities/')
       .then(response => {
-        setCharities(response.data);
+        const charityList = Array.isArray(response.data)
+          ? response.data
+          : Array.isArray(response.data?.results)
+            ? response.data.results
+            : [];
+        setCharities(charityList);
       })
       .catch(error => {
         console.error('Error fetching charities:', error);
@@ -51,11 +55,22 @@ function DonationForm() {
     };
 
     try {
-      const response = await axiosInstance.post('/donations/', donationData);
-      navigate('/confirmation', { state: { donation: response.data } });
+      // v2: create donation + Stripe Checkout Session, then redirect to
+      // Stripe-hosted Checkout (we never touch card data — PCI SAQ-A).
+      setFeedback('Redirecting to secure checkout…');
+      const response = await axiosInstance.post('/payments/checkout/', donationData);
+      if (response.data?.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      } else {
+        setFeedback('Could not start checkout. Please try again.');
+      }
     } catch (error) {
-      console.error('Error submitting donation:', error);
-      setFeedback('Error submitting donation. Please try again.');
+      console.error('Error starting checkout:', error);
+      if (error.response?.status === 503) {
+        setFeedback('Payments are not configured yet. Please try again later.');
+      } else {
+        setFeedback(error.response?.data?.error || 'Error starting checkout. Please try again.');
+      }
     }
   };
 
@@ -134,7 +149,7 @@ function DonationForm() {
             required
           >
             <option value="">-- Select a Charity --</option>
-            {charities.map((charity) => (
+            {Array.isArray(charities) && charities.map((charity) => (
               <option key={charity.id} value={charity.id}>
                 {charity.name}
               </option>

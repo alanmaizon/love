@@ -11,7 +11,12 @@ function ExploreCharities() {
   useEffect(() => {
     axiosInstance.get('/charities/')
       .then(response => {
-        setCharities(response.data);
+        const charityList = Array.isArray(response.data)
+          ? response.data
+          : Array.isArray(response.data?.results)
+            ? response.data.results
+            : [];
+        setCharities(charityList);
         setLoading(false);
       })
       .catch(err => {
@@ -27,7 +32,7 @@ function ExploreCharities() {
         <p>Loading charities...</p>
       ) : error ? (
         <p>{error}</p>
-      ) : charities.length === 0 ? (
+      ) : !Array.isArray(charities) || charities.length === 0 ? (
         <p>No charities found.</p>
       ) : (
         <div className="row">

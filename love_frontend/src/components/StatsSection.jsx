@@ -1,11 +1,15 @@
 // src/components/StatsSection.jsx
 import React from 'react';
-import axiosInstance from '../api/axiosInstance';
 
-function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyticsError }) {
-  // Calculate current donation total and progress percentage.
-  const currentTotal = analytics ? analytics.total_amount : 0;
+function StatsSection({ analytics, donationGoal = 4000, analyticsLoading, analyticsError }) {
+  const currentTotal = Number(analytics?.total_amount ?? 0);
   const progressPercentage = Math.min((currentTotal / donationGoal) * 100, 100);
+
+  const perCharity = analytics?.count_per_charity ?? [];
+  const maxAllocated = perCharity.reduce(
+    (m, c) => Math.max(m, Number(c.total_allocated ?? 0)),
+    0,
+  );
 
   return (
     <section className="analytics-section text-center" style={{ padding: '4rem 1rem' }}>
@@ -18,44 +22,43 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
         ) : analytics ? (
           <>
             <p>
-              <strong>Total Donation Amount:</strong> €{analytics.total_amount.toLocaleString()}
+              <strong>Total Raised for Charity:</strong> €{currentTotal.toLocaleString()}
             </p>
             <p>
-              <strong>Total Donations:</strong> {analytics.donations_count.toLocaleString()}
+              <strong>Total Donations:</strong>{' '}
+              {Number(analytics.donations_count ?? 0).toLocaleString()}
             </p>
-            <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
-              {analytics.count_per_charity &&
-                analytics.count_per_charity.map((item) => (
-                <li key={item.charity__name}>
-                  <div>
-                    <strong>{item.charity__name}</strong>: {item.count} donations
-                  </div>
-                  <div>
-                    Total Allocated: €{item.total_allocated.toLocaleString()}
-                  </div>
-                </li>
-                
-                ))}
-            </ul>
 
+            {/* Per-charity breakdown as CSS bars (100% to charity). */}
+            <div className="mx-auto" style={{ maxWidth: 520, textAlign: 'left' }}>
+              {perCharity.map((item) => {
+                const total = Number(item.total_allocated ?? 0);
+                const width = maxAllocated ? (total / maxAllocated) * 100 : 0;
+                return (
+                  <div key={item.charity__name} className="mb-3">
+                    <div className="d-flex justify-content-between">
+                      <strong>{item.charity__name}</strong>
+                      <span>€{total.toLocaleString()} · {item.count} gifts</span>
+                    </div>
+                    <div className="progress" style={{ height: 14 }}>
+                      <div
+                        className="progress-bar"
+                        role="progressbar"
+                        style={{ width: `${width}%`, backgroundColor: '#A47864' }}
+                        aria-valuenow={width}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-            {/* Progress Bar Section */}
+            {/* Goal progress */}
             <div className="mt-4">
               <h4>Our Goal: €{donationGoal.toLocaleString()}</h4>
-              <div style={{ position: 'relative', width: '30vw', margin: '0 auto' }}>
-                <span
-                  style={{
-                    position: 'absolute',
-                    right: '100%',
-                    marginRight: '5px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    minWidth: '40px',
-                    textAlign: 'right',
-                  }}
-                >
-                  {progressPercentage.toFixed(0)}%
-                </span>
+              <div style={{ position: 'relative', maxWidth: 520, margin: '0 auto' }}>
                 <div className="progress" style={{ height: '25px' }}>
                   <div
                     className="progress-bar"
@@ -64,18 +67,11 @@ function StatsSection({ analytics, donationGoal = 1200, analyticsLoading, analyt
                     aria-valuenow={progressPercentage}
                     aria-valuemin="0"
                     aria-valuemax="100"
-                  ></div>
+                  >
+                    {progressPercentage.toFixed(0)}%
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Combined Analytics Chart */}
-            <div style={{ marginTop: '2rem' }}>
-              <img
-                src={`${axiosInstance.defaults.baseURL}/charts/`}
-                alt="Analytics Charts"
-                style={{ maxWidth: '100%', height: 'auto' }}
-              />
             </div>
           </>
         ) : null}

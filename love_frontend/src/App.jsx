@@ -19,12 +19,14 @@ import AdminDashboard from './components/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import GuestMessages from './components/GuestMessages';
 import About from './components/About';
+import AnalyticsPage from './components/AnalyticsPage';
 
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 
 function Header() {
-  const { authUser } = useContext(AuthContext);
+  const authContext = useContext(AuthContext) ?? {};
+  const { authUser } = authContext;
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation" aria-label="Main Navigation">
@@ -49,6 +51,12 @@ function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <Link className="nav-link" to="/charities">Charities</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/analytics">Analytics</Link>
+            </li>
             <li className="nav-item">
               <Link className="nav-link" to="/about">About Us</Link>
             </li>
@@ -89,6 +97,7 @@ function App() {
             <Route path="/logout" element={<Logout />} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/charities" element={<ExploreCharities />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/donate" element={<DonationForm />} />
             <Route path="/confirmation" element={<DonationConfirmation />} />
             <Route path="/dashboard" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />

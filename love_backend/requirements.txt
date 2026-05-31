@@ -1,31 +1,42 @@
-asgiref==3.8.1
-contourpy==1.3.1
-cycler==0.12.1
+# Core
 Django==5.1.6
-django-cors-headers==4.7.0
-djangorestframework==3.15.2
-dotenv==0.9.9
-fonttools==4.56.0
-kiwisolver==1.4.8
-matplotlib==3.10.1
-numpy==2.2.3
-packaging==24.2
-pillow==11.1.0
-psycopg2-binary==2.9.10
-pyparsing==3.2.1
-python-dateutil==2.9.0.post0
-django-environ
-requests
-six==1.17.0
+asgiref==3.8.1
 sqlparse==0.5.3
 tzdata==2025.1
+python-dateutil==2.9.0.post0
+
+# API
+djangorestframework==3.15.2
+django-cors-headers==4.7.0
+
+# Config / secrets
+dotenv==0.9.9
+django-environ
+
+# Database
+psycopg2-binary==2.9.10
 dj_database_url==0.5.0
+
+# Serving / static
 gunicorn==20.1.0
 whitenoise==6.0.0
-cloudinary 
-django-cloudinary-storage
-dotenv
+
+# Media: S3 via django-storages (pillow backs Django ImageField).
+# Local dev falls back to filesystem storage when AWS_STORAGE_BUCKET_NAME is unset.
+pillow==11.1.0
+django-storages>=1.14,<2
+boto3
+
+# Payments
+stripe>=12,<13
+
+# Integrations
+requests
 google-api-python-client
 google-auth
 google-auth-httplib2
 google-auth-oauthlib
+
+# NOTE: matplotlib/numpy/contourpy/cycler/fonttools/kiwisolver/pyparsing were
+# removed in v2 (CP3) — server-side chart rendering was replaced by the JSON
+# /api/stats/ endpoint consumed by client-side charts.

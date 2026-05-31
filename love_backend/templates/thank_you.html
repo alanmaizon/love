@@ -63,11 +63,10 @@
         <div class="content">
             <p><em>Dear {{ donor_name }},</em></p>
             <p>
-                Your generosity means the world to us! You have donated 
-                <strong>€{{ amount }}</strong>, and it has been allocated as follows:
+                Your generosity means the world to us! You have donated
+                <strong>€{{ amount }}</strong>, and 100% goes to support:
             </p>
-            <p><strong>💑 To the Couple:</strong> €{{ couple_allocation }}</p>
-            <p><strong>🎗️ To Charity:</strong> €{{ charity_allocation }} ({{ charity_name }})</p>
+            <p><strong>🎗️ Charity:</strong> {{ charity_name }} — €{{ amount }}</p>
             <p>Your donation reference ID is: <strong>{{ reference_id }}</strong></p>
             <p>If you have any questions or need assistance, feel free to contact us.</p>
         </div>

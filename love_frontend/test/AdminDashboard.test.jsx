@@ -1,174 +1,73 @@
-// src/components/AdminDashboard.test.jsx
+// test/AdminDashboard.test.jsx
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import axios from 'axios';
-import AdminDashboard from '../src/components/AdminDashboard';
 import '@testing-library/jest-dom';
+import AdminDashboard from '../src/components/AdminDashboard';
+import axiosInstance from '../src/api/axiosInstance';
 
-vi.mock('axios');
+vi.mock('../src/api/axiosInstance', () => ({
+  default: { get: vi.fn(), patch: vi.fn() },
+}));
+
+const pending = {
+  id: 1,
+  donor_name: 'John Doe',
+  donor_email: 'john@example.com',
+  amount: 50,
+  message: 'Great cause!',
+  status: 'pending',
+};
 
 describe('AdminDashboard', () => {
-  afterEach(() => {
-    vi.clearAllMocks();
+  beforeEach(() => vi.clearAllMocks());
+
+  // NOTE: exact button names — `/fail/i` would also match the "Confirmed / Failed"
+  // tab, and `/confirm/i` the "Confirmed / Failed" tab, clicking the wrong control.
+  test('renders pending donations with Confirm/Fail actions', async () => {
+    axiosInstance.get.mockResolvedValueOnce({ data: [pending] });
+    render(<AdminDashboard />);
+    await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Fail' })).toBeInTheDocument();
   });
 
-  const setupAxiosGetMock = (donationData, analyticsData) => {
-    // This mock implementation handles any axios.get call.
-    axios.get.mockImplementation((url) => {
-      if (url.includes('/api/analytics/')) {
-        return Promise.resolve({ data: analyticsData });
-      } else if (url.includes('/api/donations/')) {
-        return Promise.resolve({ data: donationData });
-      }
-      return Promise.resolve({ data: {} });
-    });
-  };
-
-  test('renders admin dashboard with donation data', async () => {
-    const donationData = [
-      {
-        id: 1,
-        donor_name: 'John Doe',
-        donor_email: 'john@example.com',
-        amount: 50,
-        message: 'Great cause!',
-        status: 'pending'
-      }
-    ];
-    const analyticsData = { total_amount: 0, donations_count: 0, count_per_charity: [] };
-
-    setupAxiosGetMock(donationData, analyticsData);
-
+  test('unwraps a paginated {results: [...]} response', async () => {
+    axiosInstance.get.mockResolvedValueOnce({ data: { results: [pending] } });
     render(<AdminDashboard />);
-    await waitFor(() => expect(screen.getByText(/John Doe/i)).toBeInTheDocument());
-    expect(screen.getByText(/pending/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
   });
 
-  test('confirm donation button updates status', async () => {
-    let statusUpdated = false;
-    const donationDataInitial = [
-      {
-        id: 1,
-        donor_name: 'John Doe',
-        donor_email: 'john@example.com',
-        amount: 50,
-        message: 'Great cause!',
-        status: 'pending'
-      }
-    ];
-    const donationDataUpdated = [{ ...donationDataInitial[0], status: 'confirmed' }];
-    const analyticsDataInitial = { total_amount: 0, donations_count: 0, count_per_charity: [] };
-    const analyticsDataUpdated = { total_amount: 50, donations_count: 1, count_per_charity: [{ charity: 1, count: 1 }] };
-
-    axios.get.mockImplementation((url) => {
-      if (url.includes('/api/analytics/')) {
-        return Promise.resolve({ data: statusUpdated ? analyticsDataUpdated : analyticsDataInitial });
-      } else if (url.includes('/api/donations/')) {
-        return Promise.resolve({ data: statusUpdated ? donationDataUpdated : donationDataInitial });
-      }
-      return Promise.resolve({ data: {} });
-    });
-
-    axios.patch.mockResolvedValueOnce({});
+  test('confirm button PATCHes the confirm endpoint', async () => {
+    axiosInstance.get
+      .mockResolvedValueOnce({ data: [pending] })                                  // initial load
+      .mockResolvedValueOnce({ data: [{ ...pending, status: 'confirmed' }] });     // refetch
+    axiosInstance.patch.mockResolvedValueOnce({});
 
     render(<AdminDashboard />);
-    await waitFor(() => expect(screen.getByText(/John Doe/i)).toBeInTheDocument());
-    const confirmButton = screen.getByRole('button', { name: /Confirm/i });
-    fireEvent.click(confirmButton);
-    // Simulate the update.
-    statusUpdated = true;
+    await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
-      expect(screen.getByTestId('donation-status-1')).toHaveTextContent(/^Confirmed$/i)
+      expect(axiosInstance.patch).toHaveBeenCalledWith('/donations/1/confirm/', {})
     );
   });
 
-  test('fail donation button updates status', async () => {
-    let statusUpdated = false;
-    const donationDataInitial = [
-      {
-        id: 1,
-        donor_name: 'John Doe',
-        donor_email: 'john@example.com',
-        amount: 50,
-        message: 'Great cause!',
-        status: 'pending'
-      }
-    ];
-    const donationDataUpdated = [{ ...donationDataInitial[0], status: 'failed' }];
-    const analyticsDataInitial = { total_amount: 0, donations_count: 0, count_per_charity: [] };
-    // For failed donation, analytics may remain zero.
-    const analyticsDataUpdated = { total_amount: 0, donations_count: 0, count_per_charity: [] };
-
-    axios.get.mockImplementation((url) => {
-      if (url.includes('/api/analytics/')) {
-        return Promise.resolve({ data: statusUpdated ? analyticsDataUpdated : analyticsDataInitial });
-      } else if (url.includes('/api/donations/')) {
-        return Promise.resolve({ data: statusUpdated ? donationDataUpdated : donationDataInitial });
-      }
-      return Promise.resolve({ data: {} });
-    });
-
-    axios.patch.mockResolvedValueOnce({});
+  test('fail button PATCHes the fail endpoint', async () => {
+    axiosInstance.get
+      .mockResolvedValueOnce({ data: [pending] })
+      .mockResolvedValueOnce({ data: [{ ...pending, status: 'failed' }] });
+    axiosInstance.patch.mockResolvedValueOnce({});
 
     render(<AdminDashboard />);
-    await waitFor(() => expect(screen.getByText(/John Doe/i)).toBeInTheDocument());
-    const failButton = screen.getByRole('button', { name: /Fail/i });
-    fireEvent.click(failButton);
-    statusUpdated = true;
+    await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: 'Fail' }));
     await waitFor(() =>
-      expect(screen.getByTestId('donation-status-1')).toHaveTextContent(/^Failed$/i)
+      expect(axiosInstance.patch).toHaveBeenCalledWith('/donations/1/fail/', {})
     );
   });
 
-  test('displays error message if donation fetch fails', async () => {
-    axios.get.mockRejectedValueOnce(new Error('API Error'));
+  test('shows an error message if the fetch fails', async () => {
+    axiosInstance.get.mockRejectedValueOnce(new Error('API Error'));
     render(<AdminDashboard />);
-    await waitFor(() => expect(screen.getByText(/Error fetching donations/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/error fetching donations/i)).toBeInTheDocument());
   });
-});
-
-test('renders analytics section with only confirmed donation data', async () => {
-  // Simulate donation data with mixed statuses.
-  const donationData = [
-    {
-      id: 1,
-      donor_name: 'John Doe',
-      donor_email: 'john@example.com',
-      amount: 50,
-      message: 'Great cause!',
-      status: 'confirmed'
-    },
-    {
-      id: 2,
-      donor_name: 'Jane Smith',
-      donor_email: 'jane@example.com',
-      amount: 100,
-      message: 'Keep it up!',
-      status: 'pending'
-    }
-  ];
-  const analyticsData = {
-    total_amount: 50,        // Only confirmed donation (John Doe)
-    donations_count: 1,
-    count_per_charity: [{ charity: 1, count: 1 }]
-  };
-
-  axios.get.mockImplementation((url) => {
-    if (url.includes('/api/analytics/')) {
-      return Promise.resolve({ data: analyticsData });
-    } else if (url.includes('/api/donations/')) {
-      return Promise.resolve({ data: donationData });
-    }
-    return Promise.resolve({ data: {} });
-  });
-
-  render(<AdminDashboard />);
-  // Wait for the donations to load.
-  await waitFor(() => expect(screen.getByText(/John Doe/i)).toBeInTheDocument());
-  // Wait for the analytics heading to appear.
-  await waitFor(() => expect(screen.getByRole('heading', { name: /Analytics/i })).toBeInTheDocument());
-  // Now check the total donation amount.
-  expect(screen.getByTestId('total-amount-value')).toHaveTextContent(/\$50/i);
-  expect(screen.getByTestId('donations-count')).toHaveTextContent('1');
-  expect(screen.getByText(/Charity 1: 1 donations/i)).toBeInTheDocument();
 });

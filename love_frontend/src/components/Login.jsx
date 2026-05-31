@@ -24,9 +24,13 @@ function Login() {
       await axiosInstance.post('/login/', { username, password });
       localStorage.removeItem('loggedOut');
 
-      const profileRes = await axiosInstance.get('/profile/');
-      const displayName = `${profileRes.data.bride_name} & ${profileRes.data.groom_name}`;
-      const newAuthUser = { username: displayName, ...profileRes.data };
+      // v2: identity from /me/ (no Profile/bride-groom).
+      const meRes = await axiosInstance.get('/me/');
+      const newAuthUser = {
+        username: meRes.data.username,
+        displayName: meRes.data.display_name,
+        isAdmin: meRes.data.isAdmin,
+      };
 
       setAuthUser(newAuthUser);
 

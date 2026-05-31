@@ -1,0 +1,67 @@
+name: deploy-backend
+
+# Build the Django image, push to ECR, and roll the ECS service.
+# Set these as GitHub repo Variables (Settings > Secrets and variables > Actions):
+#   AWS_REGION, ECR_REPOSITORY, ECS_CLUSTER, ECS_SERVICE, AWS_ROLE_ARN
+# AWS_ROLE_ARN is an IAM role this repo can assume via OIDC (preferred over keys).
+
+on:
+  push:
+    branches: [main]
+    paths: ["love_backend/**", ".github/workflows/deploy.yml"]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # for AWS OIDC
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        working-directory: love_backend
+        run: pip install -r requirements.txt
+      - name: Django checks (deploy hardening)
+        working-directory: love_backend
+        env:
+          SECRET_KEY: ci-temporary-key-not-used-in-prod
+          DEBUG: "False"
+          ALLOWED_HOSTS: '["*"]'
+        # --deploy surfaces prod-readiness warnings; don't fail the build on them yet.
+        run: |
+          python manage.py check
+          python manage.py check --deploy || true
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build, tag, push image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPO: ${{ vars.ECR_REPOSITORY }}
+        run: |
+          IMAGE="$REGISTRY/$REPO:${GITHUB_SHA::8}"
+          docker build -t "$IMAGE" -t "$REGISTRY/$REPO:latest" love_backend/
+          docker push "$IMAGE"
+          docker push "$REGISTRY/$REPO:latest"
+      - name: Roll ECS service
+        run: |
+          aws ecs update-service \
+            --cluster "${{ vars.ECS_CLUSTER }}" \
+            --service "${{ vars.ECS_SERVICE }}" \
+            --force-new-deployment

@@ -1,64 +1,31 @@
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { SiRevolut, SiVisa, SiMastercard, SiApplepay, SiGooglepay } from 'react-icons/si';
-import { FaLock } from 'react-icons/fa';
+import React from 'react';
+import { useLocation, Link } from 'react-router-dom';
 
+// v2: donors return here from Stripe-hosted Checkout (success_url carries
+// ?session_id=...). Payment already happened on Stripe — no Revolut links, no
+// further action. Render a safe thank-you that works with or without state.
 function DonationConfirmation() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get('session_id');
   const donation = location.state?.donation;
 
-  const presetPaymentLinks = {
-    20: import.meta.env.VITE_REVOLUT_LINK_20,
-    50: import.meta.env.VITE_REVOLUT_LINK_50,
-    100: import.meta.env.VITE_REVOLUT_LINK_100,
-    200: import.meta.env.VITE_REVOLUT_LINK_200,
-  };
-
-  const customPaymentLink = import.meta.env.VITE_REVOLUT_LINK_CUSTOM;
-
-  const donationAmount = parseFloat(donation.amount);
-  const presetLink = presetPaymentLinks[donationAmount];
-  const paymentLink = presetLink || customPaymentLink;
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      window.location.href = paymentLink;
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, [paymentLink]);
-
   return (
-    <div className="container d-flex justify-content-center align-items-center">
-      <div className="text-center p-5">
-        <h2>Gift Confirmation</h2>
-        <p className="mt-4">You are being securely redirected to complete your payment.</p>
-
-        <div className="my-3 d-flex justify-content-center align-items-center gap-3 text-success">
-          <FaLock size={32} />
-          <span className="fw-semibold">Secure Payment</span>
-        </div>
-
-        <div className="my-3 d-flex justify-content-center align-items-center gap-4">
-          <SiRevolut size={36} />
-          <SiVisa size={36} />
-          <SiMastercard size={36} />
-          <SiApplepay size={36} />
-          <SiGooglepay size={36} />
-        </div>
-
-        <a href={paymentLink} className="btn btn-primary my-3" target="_blank" rel="noopener noreferrer">
-          Click here if you're not redirected automatically.
-        </a>
-
-        <small className="d-block mt-4">
-          You will receive a confirmation email once your payment is processed.
-        </small>
-
-        <button className="btn btn-secondary mt-3" onClick={() => navigate('/')}>
-          Return Home
-        </button>
+    <div className="container mt-5 text-center">
+      <h2>Thank you! 💛</h2>
+      <p className="lead">
+        Your donation has been received and goes 100% to the charity you chose.
+      </p>
+      {donation?.amount && (
+        <p><strong>Amount:</strong> €{donation.amount}</p>
+      )}
+      {sessionId && (
+        <p className="text-muted"><small>Payment reference: {sessionId}</small></p>
+      )}
+      <p>A receipt will be emailed to you shortly.</p>
+      <div className="mt-4">
+        <Link to="/" className="btn btn-primary me-2">Back to Home</Link>
+        <Link to="/messages" className="btn btn-outline-secondary">Read the guestbook</Link>
       </div>
     </div>
   );
