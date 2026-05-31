@@ -96,8 +96,12 @@ def create_checkout_session(donation: Donation) -> str:
     currency = (donation.currency or settings.STRIPE_CURRENCY).lower()
     fee_minor = _application_fee_minor(amount_minor)
 
+    # Destination charge: the platform is merchant of record and Stripe transfers
+    # the funds to the charity's connected account. We deliberately do NOT also set
+    # on_behalf_of — Stripe rejects combining it with transfer_data.destination when
+    # the destination uses its own charges, and the destination already routes the
+    # money to the verified charity (the invariant we care about).
     payment_intent_data = {
-        "on_behalf_of": payout.stripe_account_id,
         "transfer_data": {"destination": payout.stripe_account_id},
         "metadata": {"donation_id": str(donation.id)},
     }
