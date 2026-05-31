@@ -12,6 +12,7 @@ from .views import (
     donation_stats,
     login_view,
     logout_view,
+    csrf_token,
     me,
     public_campaign,
 )
@@ -25,6 +26,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
+    path("csrf/", csrf_token, name="csrf"),
     path("me/", me, name="me"),
     # Public campaign (flagship by default, or by slug) + guestbook
     path("campaign/", public_campaign, name="public-campaign"),

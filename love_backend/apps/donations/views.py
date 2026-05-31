@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from rest_framework import status as drf_status
@@ -25,16 +25,18 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
     SAFE_METHODS,
 )
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import OrgMembership
+from accounts.permissions import ADMIN_ROLES, CONTENT_ROLES, charity_ids_for_user
+from core.security import expose_error_details
 from campaigns.models import Campaign, CampaignBeneficiary
 from core.models import AuditLog
 from messaging.models import Message
 
 from .helpers import send_donation_confirmation_email
-from .mixins import CsrfExemptMixin
 from .models import Charity, Donation
 from .serializers import (
     CampaignSerializer,
@@ -43,9 +45,16 @@ from .serializers import (
     DonationSerializer,
     MessageSerializer,
 )
-from .utils import CsrfExemptSessionAuthentication
-
 logger = logging.getLogger(__name__)
+
+
+@api_view(["GET"])
+@ensure_csrf_cookie
+@authentication_classes([])
+@permission_classes([AllowAny])
+def csrf_token(request):
+    """Prime the csrftoken cookie for SPA clients (send as X-CSRFToken on POST)."""
+    return Response({"detail": "CSRF cookie set"})
 
 
 # ---------------------------------------------------------------------------
@@ -144,7 +153,7 @@ def donation_stats(request):
 # Auth (session)
 # ---------------------------------------------------------------------------
 @api_view(["GET"])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([AllowAny])
 def me(request):
     """Lightweight identity for the frontend AuthContext (no Profile/PII).
@@ -176,7 +185,6 @@ def me(request):
     })
 
 
-@csrf_exempt
 def login_view(request):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
@@ -191,7 +199,6 @@ def login_view(request):
     return JsonResponse({"error": "Invalid credentials"}, status=400)
 
 
-@csrf_exempt
 def logout_view(request):
     if request.method == "POST":
         logout(request)
@@ -202,15 +209,14 @@ def logout_view(request):
 # ---------------------------------------------------------------------------
 # ViewSets
 # ---------------------------------------------------------------------------
-class DonationViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
+class DonationViewSet(viewsets.ModelViewSet):
+    """Admin-only. Public giving uses POST /api/payments/checkout/ (Stripe)."""
+
     queryset = Donation.objects.all().order_by("-created_at")
     serializer_class = DonationSerializer
-    authentication_classes = [CsrfExemptSessionAuthentication]
+    authentication_classes = [SessionAuthentication]
 
     def get_permissions(self):
-        # Public may create (donate) and read; mutating state is admin-only.
-        if self.request.method in ("GET", "POST", "OPTIONS", "HEAD"):
-            return [AllowAny()]
         return [IsAdminUser()]
 
     @action(detail=True, methods=["patch"], permission_classes=[IsAdminUser])
@@ -232,7 +238,7 @@ class DonationViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(donation).data, status=drf_status.HTTP_200_OK)
 
 
-class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
+class CharityViewSet(viewsets.ModelViewSet):
     """Public discovery (verified only) + self-serve charity registration.
 
     - list/retrieve: anonymous sees verified charities; a signed-in user also sees
@@ -243,32 +249,50 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
     """
 
     serializer_class = CharitySerializer
-    authentication_classes = [CsrfExemptSessionAuthentication]
+    authentication_classes = [SessionAuthentication]
 
     def get_permissions(self):
+        if self.action in ("pending", "verify", "reject"):
+            return [IsAdminUser()]
         if self.request.method in SAFE_METHODS:
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    def _member_charity_ids(self, user):
-        return OrgMembership.objects.filter(user=user).values_list("charity_id", flat=True)
-
     def get_queryset(self):
         user = self.request.user
         base = Charity.objects.filter(is_active=True)
-        if self.action in ("update", "partial_update", "destroy"):
+        if self.action == "destroy":
             if user.is_authenticated and user.is_staff:
                 return base
             if user.is_authenticated:
-                return base.filter(id__in=self._member_charity_ids(user))
+                return base.filter(id__in=charity_ids_for_user(user, ADMIN_ROLES))
+            return base.none()
+        if self.action in ("update", "partial_update"):
+            if user.is_authenticated and user.is_staff:
+                return base
+            if user.is_authenticated:
+                return base.filter(id__in=charity_ids_for_user(user, CONTENT_ROLES))
             return base.none()
         if user.is_authenticated and user.is_staff:
             return base
         if user.is_authenticated:
             return base.filter(
-                Q(verification_status=Charity.VERIFIED) | Q(id__in=self._member_charity_ids(user))
+                Q(verification_status=Charity.VERIFIED)
+                | Q(id__in=charity_ids_for_user(user))
             ).distinct()
         return base.filter(verification_status=Charity.VERIFIED)
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft-deactivate — never hard-delete charities (donations are PROTECT)."""
+        charity = self.get_object()
+        charity.is_active = False
+        charity.save(update_fields=["is_active"])
+        AuditLog.objects.create(
+            actor=request.user, action="charity.deactivate",
+            target_type="charity", target_id=str(charity.id),
+            metadata={"name": charity.name},
+        )
+        return Response(status=drf_status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
         name = serializer.validated_data.get("name", "")
@@ -322,10 +346,10 @@ class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
         return Response(CharitySerializer(charity, context={"request": request}).data)
 
 
-class CampaignViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
+class CampaignViewSet(viewsets.ModelViewSet):
     """Public discovery (anonymous read) + host self-serve create/edit/moderate."""
 
-    authentication_classes = [CsrfExemptSessionAuthentication]
+    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "slug"
 
@@ -335,8 +359,11 @@ class CampaignViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
         return CampaignWriteSerializer
 
     def get_queryset(self):
-        if self.action in ("update", "partial_update", "destroy", "mine"):
-            return Campaign.objects.for_user(self.request.user)
+        user = self.request.user
+        if self.action == "destroy":
+            return Campaign.objects.owned_by_user(user)
+        if self.action in ("update", "partial_update", "mine", "guestbook", "moderate"):
+            return Campaign.objects.for_user(user)
         return Campaign.objects.filter(visibility=Campaign.PUBLIC).order_by("-created_at")
 
     def perform_create(self, serializer):
@@ -400,8 +427,11 @@ def youtube_video_details(request):
     try:
         response = requests.get(url)
         return JsonResponse(response.json(), safe=False)
-    except requests.RequestException as e:
-        return JsonResponse({"error": "Failed to fetch video details", "details": str(e)}, status=500)
+    except requests.RequestException:
+        body = {"error": "Failed to fetch video details"}
+        if expose_error_details():
+            body["details"] = "upstream request failed"
+        return JsonResponse(body, status=500)
 
 
 class YouTubeProxyView(APIView):
@@ -436,9 +466,12 @@ class YouTubeProxyView(APIView):
             access_token = token_response.json().get("access_token")
             if not access_token:
                 return Response({"error": "Token exchange failed"}, status=500)
-        except Exception as e:
+        except Exception:
             logger.exception("Error refreshing token")
-            return Response({"error": "Token refresh error", "details": str(e)}, status=500)
+            body = {"error": "Token refresh error"}
+            if expose_error_details():
+                body["details"] = "token exchange failed"
+            return Response(body, status=500)
 
         try:
             credentials = Credentials(token=access_token)
@@ -448,6 +481,9 @@ class YouTubeProxyView(APIView):
             ).execute()
             cache.set(cache_key, response, timeout=60)
             return Response(response)
-        except Exception as e:
+        except Exception:
             logger.exception("YouTube API call failed")
-            return Response({"error": "YouTube API error", "details": str(e)}, status=500)
+            body = {"error": "YouTube API error"}
+            if expose_error_details():
+                body["details"] = "youtube api call failed"
+            return Response(body, status=500)

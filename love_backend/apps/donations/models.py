@@ -78,7 +78,9 @@ class PayoutAccount(models.Model):
 
 class Donation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donations', null=True, blank=True)
-    charity = models.ForeignKey('Charity', on_delete=models.CASCADE, related_name='donations')
+    charity = models.ForeignKey(
+        'Charity', on_delete=models.PROTECT, related_name='donations',
+    )
     # v2: every donation belongs to a campaign (nullable until CP2 backfill,
     # then tightened to NOT NULL in CP3). PROTECT: never cascade-delete money.
     campaign = models.ForeignKey(

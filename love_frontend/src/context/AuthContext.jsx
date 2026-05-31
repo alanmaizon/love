@@ -25,19 +25,22 @@ export function AuthProvider({ children }) {
       setAuthUser(null);
       return;
     }
-    axiosInstance.get('/me/')
-      .then((res) => {
-        if (res.data?.authenticated) {
-          setAuthUser({
-            username: res.data.username,
-            displayName: res.data.display_name,
-            isAdmin: res.data.isAdmin,
-          });
-        } else {
-          setAuthUser(null);
-        }
-      })
-      .catch(() => setAuthUser(null));
+    const loadMe = () =>
+      axiosInstance.get('/me/')
+        .then((res) => {
+          if (res.data?.authenticated) {
+            setAuthUser({
+              username: res.data.username,
+              displayName: res.data.display_name,
+              isAdmin: res.data.isAdmin,
+            });
+          } else {
+            setAuthUser(null);
+          }
+        })
+        .catch(() => setAuthUser(null));
+
+    axiosInstance.get('/csrf/').catch(() => {}).finally(loadMe);
   }, []);
 
   // Public flagship campaign (v2: /campaign/, not /public_profile/).

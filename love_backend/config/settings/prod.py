@@ -1,28 +1,36 @@
 """Production settings: HTTPS hardening behind a TLS-terminating proxy (ALB/CloudFront)."""
 import os
 import json
+from django.core.exceptions import ImproperlyConfigured
 from .base import *  # noqa: F401,F403
 
 DEBUG = False
 
+_insecure_keys = ('', 'dev-only-insecure-key', 'fallback-secret-key', 'change-me-generate-a-long-random-string')
+if not SECRET_KEY or SECRET_KEY in _insecure_keys:
+    raise ImproperlyConfigured(
+        'SECRET_KEY must be set to a strong random value in production (SSM / env).'
+    )
+
 # Explicit allow-lists from env (JSON arrays).
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv("CORS_ALLOWED_ORIGINS", '[]'))
-# Django 4+: frontend origin(s) must be trusted for CSRF-protected POSTs.
 CSRF_TRUSTED_ORIGINS = json.loads(os.getenv("CSRF_TRUSTED_ORIGINS", '[]'))
 
-# The proxy speaks HTTPS to the browser and HTTP to Django; trust the header so
-# request.is_secure(), secure cookies, HSTS, and redirects behave correctly.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 SECURE_SSL_REDIRECT = True
 
-# Secure, cross-site cookies (frontend and API on different origins, over HTTPS).
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
 
-# HSTS — 1 year, includeSubDomains, preload.
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
+
+# Transactional email via Amazon SES (boto3 uses the ECS task role).
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django_ses.SESBackend')
+AWS_SES_REGION_NAME = os.environ.get(
+    'AWS_SES_REGION_NAME', os.environ.get('AWS_S3_REGION_NAME', 'eu-west-1'),
+)

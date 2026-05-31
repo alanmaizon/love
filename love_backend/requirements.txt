@@ -30,6 +30,9 @@ boto3
 # Payments
 stripe>=12,<13
 
+# Email (prod: Amazon SES)
+django-ses>=4,<5
+
 # Integrations
 requests
 google-api-python-client

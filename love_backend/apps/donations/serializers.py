@@ -11,6 +11,19 @@ class CharitySerializer(serializers.ModelSerializer):
 
     logo_url = serializers.SerializerMethodField()
 
+    def validate_name(self, value):
+        value = (value or "").strip()
+        if not value:
+            raise serializers.ValidationError("Name is required.")
+        qs = Charity.objects.filter(name__iexact=value, is_active=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                "A charity with this name is already registered (pending verification)."
+            )
+        return value
+
     class Meta:
         model = Charity
         fields = [
@@ -149,21 +162,35 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class DonationSerializer(serializers.ModelSerializer):
     """
-    Donor email is stripped for non-staff (PII). `status` and money fields are
-    server-controlled — only set via the payment/webhook flow, never by the client.
+    Donor PII is stripped for non-staff. Anonymous donations never expose
+    donor_name, donor_email, or message in API responses.
     """
+
+    display_name = serializers.SerializerMethodField()
+
+    def get_display_name(self, obj):
+        if obj.is_anonymous:
+            return "Anonymous"
+        return obj.donor_name
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         request = self.context.get("request")
-        if not request or not (request.user and request.user.is_staff):
+        is_staff = request and request.user and request.user.is_staff
+        if instance.is_anonymous:
+            ret.pop("donor_name", None)
+            ret.pop("message", None)
+            ret.pop("user", None)
+            if not is_staff:
+                ret.pop("donor_email", None)
+        elif not is_staff:
             ret.pop("donor_email", None)
         return ret
 
     class Meta:
         model = Donation
         fields = [
-            "id", "user", "charity", "campaign",
+            "id", "user", "charity", "campaign", "display_name",
             "donor_name", "donor_email", "amount", "currency",
             "message", "is_anonymous", "status", "created_at", "updated_at",
         ]

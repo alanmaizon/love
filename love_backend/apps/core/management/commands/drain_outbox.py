@@ -7,8 +7,11 @@ Run on a schedule (cron / ECS scheduled task / Lambda):
 Each event is processed at most once; failures are recorded and retried on the
 next run (up to --max-attempts).
 """
+import secrets
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 from core.models import OutboxEvent
@@ -46,7 +49,7 @@ class Command(BaseCommand):
             except Exception as exc:  # noqa: BLE001
                 OutboxEvent.objects.filter(pk=event.pk).update(
                     status=OutboxEvent.FAILED,
-                    attempts=event.attempts + 1,
+                    attempts=F("attempts") + 1,
                     last_error=str(exc),
                 )
                 failed += 1
@@ -64,8 +67,9 @@ class Command(BaseCommand):
     def _ensure_receipt(donation):
         if hasattr(donation, "receipt"):
             return
+        year = donation.created_at.year if donation.created_at else timezone.now().year
         Receipt.objects.create(
             donation=donation,
-            number=f"GIFT-{donation.id}",
-            tax_year=donation.created_at.year if donation.created_at else None,
+            number=f"GIFT-{year}-{secrets.token_hex(8).upper()}",
+            tax_year=year,
         )

@@ -1,10 +1,12 @@
 // src/components/DonationForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useLocation } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 function DonationForm() {
   const location = useLocation();
+  const { campaign } = useContext(AuthContext);
   const preselectedCharity = location.state?.selectedCharity || '';
 
   const [charities, setCharities] = useState([]);
@@ -17,6 +19,7 @@ function DonationForm() {
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
+    axiosInstance.get('/csrf/').catch(() => {});
     axiosInstance.get('/charities/')
       .then(response => {
         const charityList = Array.isArray(response.data)
@@ -46,12 +49,18 @@ function DonationForm() {
       return;
     }
 
+    if (!campaign?.slug) {
+      setFeedback('Campaign is not loaded yet. Please refresh and try again.');
+      return;
+    }
+
     const donationData = {
       donor_name: donorName,
       donor_email: donorEmail,
       amount: amountValue,
       message: message,
       charity: selectedCharity,
+      campaign: campaign.slug,
     };
 
     try {

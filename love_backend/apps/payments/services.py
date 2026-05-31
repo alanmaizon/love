@@ -96,6 +96,13 @@ def create_checkout_session(donation: Donation) -> str:
     currency = (donation.currency or settings.STRIPE_CURRENCY).lower()
     fee_minor = _application_fee_minor(amount_minor)
 
+    # Persist fee breakdown at checkout time so webhooks match Stripe even if
+    # PLATFORM_FEE_BPS changes before the event is delivered.
+    from decimal import Decimal
+    donation.platform_fee = (Decimal(fee_minor) / Decimal(100)).quantize(Decimal("0.01"))
+    donation.net_amount = (donation.amount - donation.platform_fee).quantize(Decimal("0.01"))
+    donation.save(update_fields=["platform_fee", "net_amount", "updated_at"])
+
     # Destination charge: the platform is merchant of record and Stripe transfers
     # the funds to the charity's connected account. We deliberately do NOT also set
     # on_behalf_of — Stripe rejects combining it with transfer_data.destination when

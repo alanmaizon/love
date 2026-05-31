@@ -19,6 +19,14 @@ class CampaignManager(TenantScopedManager):
         # Hosts see their own campaigns; co-hosts see ones they help run.
         return self.filter(Q(owner=user) | Q(cohosts=user)).distinct()
 
+    def owned_by_user(self, user):
+        """Campaigns the user owns (excludes cohosts) — required for destructive actions."""
+        if user is None or not getattr(user, "is_authenticated", False):
+            return self.none()
+        if user.is_staff:
+            return self.all()
+        return self.filter(owner=user)
+
 
 class Campaign(TimeStampedModel):
     WEDDING = "wedding"

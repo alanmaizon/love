@@ -1,39 +1,44 @@
 """Account endpoints: self-serve registration.
 
-POST /api/register/  -> create a user, start a session, return the identity shape
-the frontend AuthContext expects (same fields as donations.views.me).
+POST /api/register/  -> create a user (no auto-login; client must POST /api/login/).
 """
-from django.contrib.auth import login
+from django.db import IntegrityError
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
     renderer_classes,
+    throttle_classes,
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
-from donations.utils import CsrfExemptSessionAuthentication
+from donations.throttles import RegisterRateThrottle
 from .serializers import RegisterSerializer
 
 
 @api_view(["POST"])
 @renderer_classes([JSONRenderer])
-@authentication_classes([CsrfExemptSessionAuthentication])
+@authentication_classes([SessionAuthentication])
 @permission_classes([AllowAny])
+@throttle_classes([RegisterRateThrottle])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = serializer.save()
-    # Log the new user straight in (session cookie), same as a fresh login.
-    login(request, user)
+    try:
+        user = serializer.save()
+    except IntegrityError:
+        return Response(
+            {"username": ["That username is already taken."]},
+            status=400,
+        )
     return Response(
         {
-            "authenticated": True,
+            "authenticated": False,
+            "message": "Account created. Please log in.",
             "username": user.username,
-            "display_name": (user.get_full_name() or user.first_name or user.username),
-            "isAdmin": user.is_staff,
         },
         status=201,
     )

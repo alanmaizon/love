@@ -39,7 +39,7 @@ def _make_donation():
     )
 
 
-def _fake_event(donation_id, event_id="evt_1"):
+def _fake_event(donation_id, event_id="evt_1", payment_status="paid"):
     return {
         "id": event_id,
         "type": "checkout.session.completed",
@@ -47,6 +47,7 @@ def _fake_event(donation_id, event_id="evt_1"):
             "metadata": {"donation_id": str(donation_id)},
             "currency": "eur",
             "payment_intent": "pi_test_123",
+            "payment_status": payment_status,
         }},
     }
 
@@ -82,7 +83,8 @@ class WebhookProcessingTests(TestCase):
                 HTTP_STRIPE_SIGNATURE="t=1,v1=fake",
             )
 
-    def test_checkout_completed_confirms_and_writes_ledger(self):
+    @mock.patch("payments.webhooks._platform_fee_from_stripe", return_value=Decimal("0"))
+    def test_checkout_completed_confirms_and_writes_ledger(self, _fee):
         resp = self._post_event(_fake_event(self.donation.id))
         self.assertEqual(resp.status_code, 200, resp.content)
         self.donation.refresh_from_db()
@@ -96,7 +98,8 @@ class WebhookProcessingTests(TestCase):
             OutboxEvent.objects.filter(event_type="donation.confirmed").count(), 1
         )
 
-    def test_webhook_is_idempotent_on_replay(self):
+    @mock.patch("payments.webhooks._platform_fee_from_stripe", return_value=Decimal("0"))
+    def test_webhook_is_idempotent_on_replay(self, _fee):
         ev = _fake_event(self.donation.id, event_id="evt_dup")
         self._post_event(ev)
         resp2 = self._post_event(ev)  # replay SAME event id
@@ -105,11 +108,19 @@ class WebhookProcessingTests(TestCase):
         self.assertEqual(WebhookEvent.objects.filter(stripe_event_id="evt_dup").count(), 1)
         self.assertEqual(OutboxEvent.objects.count(), 1)
 
-    def test_distinct_events_same_donation_guarded(self):
+    @mock.patch("payments.webhooks._platform_fee_from_stripe", return_value=Decimal("0"))
+    def test_distinct_events_same_donation_guarded(self, _fee):
         self._post_event(_fake_event(self.donation.id, event_id="evt_a"))
         self._post_event(_fake_event(self.donation.id, event_id="evt_b"))
         # donation-level "already confirmed" guard prevents a second ledger write
         self.assertEqual(LedgerEntry.objects.filter(donation=self.donation).count(), 1)
+
+    @mock.patch("payments.webhooks._platform_fee_from_stripe", return_value=Decimal("0"))
+    def test_checkout_unpaid_does_not_confirm(self, _fee):
+        self._post_event(_fake_event(self.donation.id, payment_status="unpaid"))
+        self.donation.refresh_from_db()
+        self.assertEqual(self.donation.status, "pending")
+        self.assertEqual(LedgerEntry.objects.filter(donation=self.donation).count(), 0)
 
 
 class OutboxDrainTests(TestCase):
@@ -142,16 +153,35 @@ class CheckoutAuthorizationTests(TestCase):
         PayoutAccount.objects.create(
             charity=self.charity, stripe_account_id="acct_test", charges_enabled=True,
         )
+        host = User.objects.create_user(username="h2", password="x")
+        self.campaign = Campaign.objects.create(
+            owner=host, type=Campaign.WEDDING, title="T2", slug="t2",
+            visibility=Campaign.PUBLIC, status=Campaign.ACTIVE, event_date=date(2025, 4, 26),
+        )
+
+    def _checkout_headers(self):
+        from django.conf import settings
+        origin = getattr(settings, "FRONTEND_URL", "http://localhost:5173")
+        return {"HTTP_ORIGIN": origin}
 
     def _payload(self, **over):
         data = {
             "charity": self.charity.id,
+            "campaign": self.campaign.slug,
             "donor_name": "Attacker",
             "donor_email": "attacker@example.com",
             "amount": "25",
         }
         data.update(over)
         return data
+
+    def _post_checkout(self, data):
+        return self.client.post(
+            "/api/payments/checkout/",
+            data=data,
+            format="json",
+            **self._checkout_headers(),
+        )
 
     def _victim(self):
         return Donation.objects.create(
@@ -163,11 +193,8 @@ class CheckoutAuthorizationTests(TestCase):
     def test_donation_id_alone_buys_nothing(self, create_session):
         """An id with no charity (the IDOR payload) must never reach Stripe."""
         victim = self._victim()
-        resp = self.client.post(
-            "/api/payments/checkout/",
-            data={"donation_id": victim.id, "amount": "25"}, format="json",
-        )
-        self.assertEqual(resp.status_code, 404)
+        resp = self._post_checkout({"donation_id": victim.id, "amount": "25", "charity": self.charity.id})
+        self.assertIn(resp.status_code, (400, 404))
         create_session.assert_not_called()
         victim.refresh_from_db()
         self.assertEqual(victim.status, "pending")  # untouched
@@ -177,9 +204,7 @@ class CheckoutAuthorizationTests(TestCase):
         """A smuggled id is ignored: a new donation is created for the caller and
         the victim's donation (and email) is never used for the session."""
         victim = self._victim()
-        resp = self.client.post(
-            "/api/payments/checkout/", data=self._payload(donation_id=victim.id), format="json",
-        )
+        resp = self._post_checkout(self._payload(donation_id=victim.id))
         self.assertEqual(resp.status_code, 200, resp.content)
         create_session.assert_called_once()
         used = create_session.call_args.args[0]
@@ -190,9 +215,24 @@ class CheckoutAuthorizationTests(TestCase):
     @mock.patch("payments.services.create_checkout_session", return_value="https://stripe.test/cs")
     def test_nonpositive_or_invalid_amount_rejected(self, create_session):
         for bad in ("0", "-5", "", "abc"):
-            resp = self.client.post(
-                "/api/payments/checkout/", data=self._payload(amount=bad), format="json",
-            )
+            resp = self._post_checkout(self._payload(amount=bad))
             self.assertEqual(resp.status_code, 400, f"amount={bad!r}")
         create_session.assert_not_called()
         self.assertEqual(Donation.objects.count(), 0)  # nothing persisted on bad input
+
+    @mock.patch("payments.services.create_checkout_session", return_value="https://stripe.test/cs")
+    def test_checkout_requires_campaign(self, create_session):
+        resp = self._post_checkout({
+            "charity": self.charity.id,
+            "donor_name": "A",
+            "donor_email": "a@example.com",
+            "amount": "10",
+        })
+        self.assertEqual(resp.status_code, 400)
+        create_session.assert_not_called()
+
+    @mock.patch("payments.services.create_checkout_session", return_value="https://stripe.test/cs")
+    def test_checkout_rejects_empty_email(self, create_session):
+        resp = self._post_checkout(self._payload(donor_email=""))
+        self.assertEqual(resp.status_code, 400)
+        create_session.assert_not_called()
