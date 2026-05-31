@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from .models import Donation, Charity
 from campaigns.models import Campaign
 from messaging.models import Message
+from accounts.models import OrgMembership
 
 # -------------------------
 # Login Endpoint Tests
@@ -341,3 +342,123 @@ class V2ApiTests(APITestCase):
         for r in rows:
             self.assertNotIn("contact_email", r)
             self.assertNotIn("registration_number", r)
+
+
+# -------------------------
+# Plan C: self-serve onboarding
+# -------------------------
+class OnboardingFlowTests(APITestCase):
+    """register -> create/publish campaign -> guest-message moderation; charity
+    self-serve registration + platform-admin verification queue + Connect scope."""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def _verified_payout_charity(self):
+        from donations.models import PayoutAccount
+        c = Charity.objects.create(name="Verified Co", slug="verified-co",
+                                   verification_status=Charity.VERIFIED)
+        PayoutAccount.objects.create(charity=c, stripe_account_id="acct_v", charges_enabled=True)
+        return c
+
+    # --- registration ---
+    def test_register_creates_and_logs_in(self):
+        r = self.client.post("/api/register/", {
+            "username": "newhost", "password": "Sup3rSecret!42", "display_name": "Sam & Lee",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertTrue(r.json()["authenticated"])
+        self.assertTrue(User.objects.filter(username="newhost").exists())
+        self.assertTrue(self.client.get("/api/me/").json()["authenticated"])
+
+    def test_register_rejects_duplicate_and_weak_password(self):
+        User.objects.create_user(username="taken", password="x")
+        dup = self.client.post("/api/register/", {"username": "taken", "password": "Sup3rSecret!42"}, format="json")
+        self.assertEqual(dup.status_code, 400)
+        weak = self.client.post("/api/register/", {"username": "fresh", "password": "123"}, format="json")
+        self.assertEqual(weak.status_code, 400)
+
+    # --- host campaign create + publish gate + ownership ---
+    def test_campaign_create_publish_gate_and_owner_scope(self):
+        self.client.post("/api/register/", {"username": "host", "password": "Sup3rSecret!42"}, format="json")
+        r = self.client.post("/api/campaigns/", {"title": "Our Day", "type": "wedding"}, format="json")
+        self.assertEqual(r.status_code, 201, r.content)
+        slug = r.json()["slug"]
+
+        unv = Charity.objects.create(name="Unverified", slug="unverified")
+        bad = self.client.patch(f"/api/campaigns/{slug}/", {"status": "active", "charity": unv.id}, format="json")
+        self.assertEqual(bad.status_code, 400)
+
+        mm = self._verified_payout_charity()
+        ok = self.client.patch(f"/api/campaigns/{slug}/", {"status": "active", "charity": mm.id}, format="json")
+        self.assertEqual(ok.status_code, 200, ok.content)
+        self.assertEqual(ok.json()["status"], "active")
+
+        self.assertEqual(len(self.client.get("/api/campaigns/mine/").json()), 1)
+
+        other = APIClient()
+        other.post("/api/register/", {"username": "intruder", "password": "Sup3rSecret!42"}, format="json")
+        self.assertEqual(other.patch(f"/api/campaigns/{slug}/", {"title": "Hijack"}, format="json").status_code, 404)
+
+    # --- guest message moderation ---
+    def test_guest_message_pending_then_host_approves(self):
+        host = User.objects.create_user(username="mhost", password="x")
+        mm = self._verified_payout_charity()
+        camp = Campaign.objects.create(owner=host, type="wedding", title="M", slug="m-camp",
+                                       visibility="public", status="active")
+        from campaigns.models import CampaignBeneficiary
+        CampaignBeneficiary.objects.create(campaign=camp, charity=mm, split_percent=100)
+        d = Donation.objects.create(charity=mm, campaign=camp, donor_name="Guest",
+                                    donor_email="g@example.com", amount=Decimal("10"), status="pending")
+        msg = Message.objects.create(campaign=camp, donation=d, display_name="Guest",
+                                     body="Congrats!", moderation_status=Message.PENDING)
+        self.assertEqual(len(self.client.get(f"/api/messages/?campaign={camp.slug}").json()), 0)
+
+        other = APIClient(); other.force_authenticate(User.objects.create_user(username="nothost", password="x"))
+        self.assertEqual(other.patch(f"/api/campaigns/{camp.slug}/moderate/",
+                                     {"message_id": msg.id, "action": "approve"}, format="json").status_code, 404)
+
+        self.client.force_authenticate(host)
+        ok = self.client.patch(f"/api/campaigns/{camp.slug}/moderate/",
+                               {"message_id": msg.id, "action": "approve"}, format="json")
+        self.assertEqual(ok.status_code, 200, ok.content)
+        self.assertEqual(len(self.client.get(f"/api/messages/?campaign={camp.slug}").json()), 1)
+
+    # --- charity self-serve + verification queue ---
+    def test_charity_self_serve_and_verify_queue(self):
+        self.client.post("/api/register/", {"username": "charityowner", "password": "Sup3rSecret!42"}, format="json")
+        r = self.client.post("/api/charities/", {"name": "Helping Hands", "description": "We help"}, format="json")
+        self.assertEqual(r.status_code, 201, r.content)
+        cid = r.json()["id"]
+        charity = Charity.objects.get(id=cid)
+        self.assertEqual(charity.verification_status, Charity.UNVERIFIED)
+        self.assertTrue(OrgMembership.objects.filter(charity=charity, role=OrgMembership.OWNER).exists())
+        self.assertTrue(charity.slug)
+
+        self.assertEqual(self.client.get("/api/charities/pending/").status_code, 403)
+
+        staff = APIClient()
+        staff.force_authenticate(User.objects.create_user(username="boss", password="x", is_staff=True))
+        self.assertIn(cid, [c["id"] for c in staff.get("/api/charities/pending/").json()])
+        v = staff.patch(f"/api/charities/{cid}/verify/", {}, format="json")
+        self.assertEqual(v.status_code, 200, v.content)
+        charity.refresh_from_db()
+        self.assertEqual(charity.verification_status, Charity.VERIFIED)
+
+    def test_connect_onboarding_scoped_to_charity_owner(self):
+        from unittest import mock
+        owner = User.objects.create_user(username="cowner", password="x")
+        charity = Charity.objects.create(name="Conn Co", slug="conn-co")
+        OrgMembership.objects.create(user=owner, charity=charity, role=OrgMembership.OWNER)
+
+        intruder = APIClient()
+        intruder.force_authenticate(User.objects.create_user(username="nope", password="x"))
+        self.assertEqual(
+            intruder.post("/api/payments/connect/", {"charity": charity.id}, format="json").status_code, 403
+        )
+
+        self.client.force_authenticate(owner)
+        with mock.patch("payments.services.create_account_link", return_value="https://connect.stripe.test/x"):
+            ok = self.client.post("/api/payments/connect/", {"charity": charity.id}, format="json")
+        self.assertEqual(ok.status_code, 200, ok.content)
+        self.assertIn("onboarding_url", ok.json())

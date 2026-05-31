@@ -18,6 +18,10 @@ class CharitySerializer(serializers.ModelSerializer):
             "verification_status", "is_verified",
         ]
         # contact_email / registration_number are intentionally NOT exposed.
+        # verification_status/slug are server-controlled: a charity owner must
+        # never be able to self-verify or change their slug via the API. Only a
+        # platform admin moves verification (the verify-queue endpoints).
+        read_only_fields = ["slug", "verification_status", "is_verified"]
 
     def get_logo_url(self, obj):
         return obj.get_logo_url() or ""
@@ -53,6 +57,81 @@ class CampaignSerializer(serializers.ModelSerializer):
     def get_host_display_name(self, obj):
         # A friendly label only — never the owner's email/username for PII safety.
         return (obj.owner.get_full_name() or obj.owner.first_name or "Host").strip()
+
+
+class CampaignWriteSerializer(serializers.ModelSerializer):
+    """Host-facing create/update. `owner` is set from the request (never trusted
+    from input); a single beneficiary `charity` id is accepted and mirrored into a
+    CampaignBeneficiary at 100% (single-charity UI; model supports splits)."""
+
+    charity = serializers.PrimaryKeyRelatedField(
+        queryset=Charity.objects.filter(is_active=True), write_only=True, required=False
+    )
+
+    class Meta:
+        model = Campaign
+        fields = [
+            "id", "type", "title", "story", "cover_image", "event_date",
+            "location", "goal_amount", "currency", "visibility", "status", "charity",
+        ]
+
+    def validate(self, attrs):
+        # Publish gate: a campaign can only go active once it benefits a charity
+        # that is verified AND payout-ready — same invariant the checkout enforces.
+        status = attrs.get("status", getattr(self.instance, "status", Campaign.DRAFT))
+        if status == Campaign.ACTIVE:
+            charity = attrs.get("charity") or self._current_beneficiary()
+            if charity is None:
+                raise serializers.ValidationError(
+                    {"charity": "Choose a beneficiary charity before publishing."}
+                )
+            payout = getattr(charity, "payout_account", None)
+            if not charity.is_verified or not (payout and payout.charges_enabled):
+                raise serializers.ValidationError(
+                    {"status": "This charity is not yet verified and payout-ready, "
+                               "so the campaign cannot be published."}
+                )
+        return attrs
+
+    def _current_beneficiary(self):
+        if not self.instance:
+            return None
+        link = self.instance.beneficiaries.first()
+        return link.charity if link else None
+
+    def _unique_slug(self, title):
+        from django.utils.text import slugify
+        base = slugify(title) or "campaign"
+        slug, n = base, 2
+        qs = Campaign.objects.all()
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        while qs.filter(slug=slug).exists():
+            slug = f"{base}-{n}"
+            n += 1
+        return slug
+
+    def create(self, validated_data):
+        charity = validated_data.pop("charity", None)
+        request = self.context.get("request")
+        validated_data["owner"] = request.user
+        validated_data["slug"] = self._unique_slug(validated_data["title"])
+        campaign = super().create(validated_data)
+        if charity is not None:
+            CampaignBeneficiary.objects.create(campaign=campaign, charity=charity, split_percent=100)
+        return campaign
+
+    def update(self, instance, validated_data):
+        charity = validated_data.pop("charity", None)
+        campaign = super().update(instance, validated_data)
+        if charity is not None:
+            campaign.beneficiaries.all().delete()
+            CampaignBeneficiary.objects.create(campaign=campaign, charity=charity, split_percent=100)
+        return campaign
+
+    def to_representation(self, instance):
+        # Echo back the full public shape after a write.
+        return CampaignSerializer(instance, context=self.context).data
 
 
 class MessageSerializer(serializers.ModelSerializer):

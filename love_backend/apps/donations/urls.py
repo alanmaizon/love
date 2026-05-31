@@ -18,7 +18,7 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r"donations", DonationViewSet)
-router.register(r"charities", CharityViewSet)
+router.register(r"charities", CharityViewSet, basename="charity")
 router.register(r"campaigns", CampaignViewSet, basename="campaign")
 
 urlpatterns = [
