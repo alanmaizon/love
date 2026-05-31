@@ -6,21 +6,31 @@ from datetime import timedelta
 import requests
 from django.contrib.auth import authenticate, login, logout
 from django.core.cache import cache
-from django.db.models import Count, Sum
+from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from rest_framework import status as drf_status
 from rest_framework import viewsets
 from rest_framework.decorators import action, api_view, authentication_classes, permission_classes
-from rest_framework.permissions import AllowAny, IsAdminUser, SAFE_METHODS
+from rest_framework.permissions import (
+    AllowAny,
+    IsAdminUser,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+    SAFE_METHODS,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from campaigns.models import Campaign
+from accounts.models import OrgMembership
+from campaigns.models import Campaign, CampaignBeneficiary
+from core.models import AuditLog
 from messaging.models import Message
 
 from .helpers import send_donation_confirmation_email
@@ -28,6 +38,7 @@ from .mixins import CsrfExemptMixin
 from .models import Charity, Donation
 from .serializers import (
     CampaignSerializer,
+    CampaignWriteSerializer,
     CharitySerializer,
     DonationSerializer,
     MessageSerializer,
@@ -136,15 +147,32 @@ def donation_stats(request):
 @authentication_classes([CsrfExemptSessionAuthentication])
 @permission_classes([AllowAny])
 def me(request):
-    """Lightweight identity for the frontend AuthContext (no Profile/PII)."""
+    """Lightweight identity for the frontend AuthContext (no Profile/PII).
+
+    Also lists the charities the user can act for (via OrgMembership) with role +
+    payout flags, so the UI knows whether to show charity tools.
+    """
     u = request.user
     if not u.is_authenticated:
         return Response({"authenticated": False})
+
+    charities = []
+    for m in u.org_memberships.select_related("charity", "charity__payout_account"):
+        c = m.charity
+        payout = getattr(c, "payout_account", None)
+        charities.append({
+            "id": c.id, "slug": c.slug, "name": c.name, "role": m.role,
+            "verification_status": c.verification_status,
+            "is_verified": c.is_verified,
+            "charges_enabled": bool(payout and payout.charges_enabled),
+        })
+
     return Response({
         "authenticated": True,
         "username": u.username,
         "display_name": (u.get_full_name() or u.first_name or u.username),
         "isAdmin": u.is_staff,
+        "charities": charities,
     })
 
 
@@ -205,26 +233,156 @@ class DonationViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
 
 
 class CharityViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
-    queryset = Charity.objects.filter(is_active=True)
+    """Public discovery (verified only) + self-serve charity registration.
+
+    - list/retrieve: anonymous sees verified charities; a signed-in user also sees
+      their own member charities (any status) so they can manage a pending one.
+    - create: any authenticated user registers a charity and becomes its OWNER
+      (OrgMembership); it starts unverified until a platform admin verifies it.
+    - update/destroy: scoped to the user's member charities (or staff).
+    """
+
     serializer_class = CharitySerializer
     authentication_classes = [CsrfExemptSessionAuthentication]
 
     def get_permissions(self):
         if self.request.method in SAFE_METHODS:
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAuthenticated()]
 
-
-class CampaignViewSet(CsrfExemptMixin, viewsets.ReadOnlyModelViewSet):
-    """Read-only public discovery of public campaigns; lookup by slug."""
-
-    serializer_class = CampaignSerializer
-    authentication_classes = [CsrfExemptSessionAuthentication]
-    permission_classes = [AllowAny]
-    lookup_field = "slug"
+    def _member_charity_ids(self, user):
+        return OrgMembership.objects.filter(user=user).values_list("charity_id", flat=True)
 
     def get_queryset(self):
+        user = self.request.user
+        base = Charity.objects.filter(is_active=True)
+        if self.action in ("update", "partial_update", "destroy"):
+            if user.is_authenticated and user.is_staff:
+                return base
+            if user.is_authenticated:
+                return base.filter(id__in=self._member_charity_ids(user))
+            return base.none()
+        if user.is_authenticated and user.is_staff:
+            return base
+        if user.is_authenticated:
+            return base.filter(
+                Q(verification_status=Charity.VERIFIED) | Q(id__in=self._member_charity_ids(user))
+            ).distinct()
+        return base.filter(verification_status=Charity.VERIFIED)
+
+    def perform_create(self, serializer):
+        name = serializer.validated_data.get("name", "")
+        base = slugify(name) or "charity"
+        slug, n = base, 2
+        while Charity.objects.filter(slug=slug).exists():
+            slug = f"{base}-{n}"
+            n += 1
+        charity = serializer.save(verification_status=Charity.UNVERIFIED, slug=slug)
+        OrgMembership.objects.get_or_create(
+            user=self.request.user, charity=charity,
+            defaults={"role": OrgMembership.OWNER},
+        )
+        AuditLog.objects.create(
+            actor=self.request.user, action="charity.register",
+            target_type="charity", target_id=str(charity.id),
+            metadata={"name": charity.name},
+        )
+
+    # --- Platform-admin verification queue (staff only) ---
+    @action(detail=False, methods=["get"], permission_classes=[IsAdminUser], url_path="pending")
+    def pending(self, request):
+        qs = Charity.objects.filter(is_active=True).exclude(
+            verification_status=Charity.VERIFIED
+        ).order_by("name")
+        return Response(CharitySerializer(qs, many=True, context={"request": request}).data)
+
+    @action(detail=True, methods=["patch"], permission_classes=[IsAdminUser])
+    def verify(self, request, pk=None):
+        charity = get_object_or_404(Charity, pk=pk)
+        charity.verification_status = Charity.VERIFIED
+        charity.verified_at = timezone.now()
+        charity.save(update_fields=["verification_status", "verified_at"])
+        AuditLog.objects.create(
+            actor=request.user, action="charity.verify",
+            target_type="charity", target_id=str(charity.id),
+            metadata={"name": charity.name},
+        )
+        return Response(CharitySerializer(charity, context={"request": request}).data)
+
+    @action(detail=True, methods=["patch"], permission_classes=[IsAdminUser])
+    def reject(self, request, pk=None):
+        charity = get_object_or_404(Charity, pk=pk)
+        charity.verification_status = Charity.REJECTED
+        charity.save(update_fields=["verification_status"])
+        AuditLog.objects.create(
+            actor=request.user, action="charity.reject",
+            target_type="charity", target_id=str(charity.id),
+            metadata={"name": charity.name},
+        )
+        return Response(CharitySerializer(charity, context={"request": request}).data)
+
+
+class CampaignViewSet(CsrfExemptMixin, viewsets.ModelViewSet):
+    """Public discovery (anonymous read) + host self-serve create/edit/moderate."""
+
+    authentication_classes = [CsrfExemptSessionAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    lookup_field = "slug"
+
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return CampaignSerializer
+        return CampaignWriteSerializer
+
+    def get_queryset(self):
+        if self.action in ("update", "partial_update", "destroy", "mine"):
+            return Campaign.objects.for_user(self.request.user)
         return Campaign.objects.filter(visibility=Campaign.PUBLIC).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        campaign = serializer.save()
+        AuditLog.objects.create(
+            actor=self.request.user, action="campaign.create",
+            target_type="campaign", target_id=str(campaign.id),
+            metadata={"slug": campaign.slug, "status": campaign.status},
+        )
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def mine(self, request):
+        qs = Campaign.objects.for_user(request.user).order_by("-created_at")
+        return Response(CampaignSerializer(qs, many=True, context={"request": request}).data)
+
+    def _owned_campaign_or_404(self, request, slug):
+        return get_object_or_404(Campaign.objects.for_user(request.user), slug=slug)
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated], url_path="guestbook")
+    def guestbook(self, request, slug=None):
+        """Host view of ALL guestbook messages (incl. pending) for moderation."""
+        campaign = self._owned_campaign_or_404(request, slug)
+        msgs = campaign.messages.all().order_by("-created_at")
+        return Response(MessageSerializer(msgs, many=True, context={"request": request}).data)
+
+    @action(detail=True, methods=["patch"], permission_classes=[IsAuthenticated], url_path="moderate")
+    def moderate(self, request, slug=None):
+        """Host approves or hides a single guestbook message on their campaign."""
+        campaign = self._owned_campaign_or_404(request, slug)
+        message = get_object_or_404(Message, id=request.data.get("message_id"), campaign=campaign)
+        decision = request.data.get("action")
+        if decision == "approve":
+            message.moderation_status = Message.APPROVED
+            message.published_at = timezone.now()
+        elif decision == "hide":
+            message.moderation_status = Message.REJECTED
+            message.published_at = None
+        else:
+            return Response({"error": "action must be 'approve' or 'hide'"}, status=400)
+        message.save(update_fields=["moderation_status", "published_at", "updated_at"])
+        AuditLog.objects.create(
+            actor=request.user, action=f"message.{decision}",
+            target_type="message", target_id=str(message.id),
+            metadata={"campaign": campaign.slug},
+        )
+        return Response(MessageSerializer(message, context={"request": request}).data)
 
 
 # ---------------------------------------------------------------------------

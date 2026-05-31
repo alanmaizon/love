@@ -16,13 +16,15 @@ from rest_framework.decorators import (
     permission_classes,
     renderer_classes,
 )
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
+from accounts.models import OrgMembership
 from campaigns.models import Campaign
 from donations.models import Charity, Donation
 from donations.utils import CsrfExemptSessionAuthentication
+from messaging.models import Message
 from . import services
 
 logger = logging.getLogger(__name__)
@@ -101,10 +103,17 @@ def create_checkout(request):
 @api_view(["POST"])
 @renderer_classes([JSONRenderer])
 @authentication_classes([CsrfExemptSessionAuthentication])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def start_connect_onboarding(request):
-    """Admin-only: begin Stripe Connect onboarding for a charity."""
+    """Begin Stripe Connect onboarding for a charity. Allowed for the charity's
+    owner/admin (via OrgMembership) or platform staff — not any logged-in user."""
     charity = get_object_or_404(Charity, id=request.data.get("charity"))
+    is_member = OrgMembership.objects.filter(
+        user=request.user, charity=charity,
+        role__in=[OrgMembership.OWNER, OrgMembership.ADMIN],
+    ).exists()
+    if not (request.user.is_staff or is_member):
+        return Response({"error": "You don't manage this charity."}, status=403)
     try:
         url = services.create_account_link(charity)
     except RuntimeError as exc:
