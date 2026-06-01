@@ -56,6 +56,8 @@ Response: `{ "checkout_url": "...", "donation_id": 123 }` — redirect the brows
 
 Confirmation is **webhook-driven** (`checkout.session.completed` with `payment_status=paid`, or `payment_intent.succeeded`). Do not rely on admin `PATCH .../confirm/` for Stripe gifts.
 
+Non-empty checkout `message` creates a **pending** guestbook `Message` on confirm (hosts approve via `PATCH /api/campaigns/<slug>/moderate/`). Public `GET /api/messages/` shows approved entries only.
+
 ## Donation serializer (PII)
 
 - Non-staff never receive `donor_email`.

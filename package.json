@@ -1,0 +1,14 @@
+{
+  "name": "love-monorepo",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test -c playwright.config.cjs",
+    "e2e:ui": "playwright test -c playwright.config.cjs --ui",
+    "e2e:prepare": "cd love_backend && . .venv/bin/activate && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py e2e_prepare",
+    "e2e:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "dotenv": "^16.4.7"
+  }
+}

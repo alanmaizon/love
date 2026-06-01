@@ -1,6 +1,7 @@
 import React from 'react';
-import image1 from '../../public/image1.png';
-import image2 from '../../public/image2.png';
+
+const image1 = '/image1.png';
+const image2 = '/image2.png';
 
 function Bio() {
   return (

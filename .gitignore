@@ -14,6 +14,12 @@ staticfiles/
 node_modules/
 love_frontend/dist/
 
+# Playwright E2E
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Personal, machine-local Claude Code settings (do not commit)
 .claude/settings.local.json
 

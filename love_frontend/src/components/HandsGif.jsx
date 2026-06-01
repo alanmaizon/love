@@ -1,6 +1,6 @@
 // src/components/HandsGif.jsx
 import React, { useRef, useState, useEffect } from 'react';
-import hands from '../../public/hands.gif';
+const hands = '/hands.gif';
 
 function HandsGif() {
   const [visible, setVisible] = useState(false);

@@ -9,7 +9,8 @@
     "postbuild": "cp dist/index.html dist/404.html && cp static.json dist/",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "test:guestbook": "vitest run test/DonationForm.test.jsx test/DonationConfirmation.test.jsx test/CampaignManage.test.jsx test/HomeGuestbookSection.test.jsx test/GuestMessages.test.jsx test/CampaignPage.test.jsx test/usePublicCampaign.test.js"
   },
   "dependencies": {
     "axios": "^1.8.4",

@@ -29,6 +29,7 @@ from rest_framework.response import Response
 from core.models import OutboxEvent
 from core.security import sanitize_stripe_event_payload
 from donations.models import Donation, LedgerEntry
+from messaging.models import Message
 from . import services
 from .models import WebhookEvent
 from .services import _stripe_value
@@ -59,6 +60,24 @@ def _platform_fee_from_stripe(payment_intent_id):
     except Exception:
         logger.exception("Failed to read application fee from Stripe pi=%s", payment_intent_id)
         return None
+
+
+def _ensure_guestbook_message(donation):
+    """Create a pending guestbook entry from the donation message (idempotent)."""
+    body = (donation.message or "").strip()
+    if not body or not donation.campaign_id:
+        return
+    display = "Anonymous" if donation.is_anonymous else (donation.donor_name or "Guest")
+    Message.objects.get_or_create(
+        donation=donation,
+        defaults={
+            "campaign_id": donation.campaign_id,
+            "display_name": display,
+            "body": body,
+            "is_anonymous": donation.is_anonymous,
+            "moderation_status": Message.PENDING,
+        },
+    )
 
 
 def _confirm_donation(donation, session_or_pi, currency=None):
@@ -104,6 +123,7 @@ def _confirm_donation(donation, session_or_pi, currency=None):
         event_type="donation.confirmed",
         payload={"donation_id": donation.id},
     )
+    _ensure_guestbook_message(donation)
 
 
 @csrf_exempt

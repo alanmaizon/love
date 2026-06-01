@@ -162,7 +162,10 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ["id", "display_name", "body", "created_at", "published_at"]
+        fields = [
+            "id", "display_name", "body", "moderation_status",
+            "created_at", "published_at",
+        ]
 
     def get_display_name(self, obj):
         return "Anonymous" if obj.is_anonymous else obj.display_name

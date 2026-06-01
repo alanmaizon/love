@@ -73,6 +73,7 @@ describe('DonationForm (v2: Stripe Checkout)', () => {
 
     fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value: 'John Doe' } });
     fireEvent.change(screen.getByLabelText(/^email$/i), { target: { value: 'john@example.com' } });
+    fireEvent.change(screen.getByLabelText(/message/i), { target: { value: 'Best wishes!' } });
     fireEvent.click(screen.getByLabelText('€50'));
     fireEvent.change(screen.getByLabelText(/select one charity/i), { target: { value: '1' } });
 
@@ -85,6 +86,7 @@ describe('DonationForm (v2: Stripe Checkout)', () => {
       donor_name: 'John Doe',
       donor_email: 'john@example.com',
       amount: 50,
+      message: 'Best wishes!',
       charity: '1',
       campaign: 'anna-and-alan',
     });

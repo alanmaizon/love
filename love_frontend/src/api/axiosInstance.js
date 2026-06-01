@@ -1,7 +1,15 @@
 // src/api/axiosInstance.js
 import axios from 'axios';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const configured = import.meta.env.VITE_API_URL;
+let apiRoot;
+if (configured && configured !== '') {
+  apiRoot = `${configured.replace(/\/$/, '')}/api`;
+} else if (import.meta.env.DEV) {
+  apiRoot = '/api';
+} else {
+  apiRoot = 'http://127.0.0.1:8000/api';
+}
 
 function getCsrfToken() {
   const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
@@ -9,7 +17,7 @@ function getCsrfToken() {
 }
 
 const axiosInstance = axios.create({
-  baseURL: `${apiBaseUrl}/api`,
+  baseURL: apiRoot,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
