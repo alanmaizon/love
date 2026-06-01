@@ -9,6 +9,8 @@ export async function loginHost(
   username = process.env.E2E_HOST_USERNAME || 'anna_alan',
   password = process.env.E2E_HOST_PASSWORD || 'e2e-test-pass-12!'
 ) {
+  await page.evaluate(() => localStorage.removeItem('loggedOut'));
+
   const csrfRes = await page.request.get(`${API_URL}/api/csrf/`);
   expect(csrfRes.ok()).toBeTruthy();
 

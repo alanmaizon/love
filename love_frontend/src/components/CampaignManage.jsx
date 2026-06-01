@@ -51,6 +51,7 @@ function CampaignManage() {
 
   const moderate = async (messageId, action) => {
     try {
+      await axiosInstance.get('/csrf/').catch(() => {});
       await axiosInstance.patch(`/campaigns/${slug}/moderate/`, { message_id: messageId, action });
       load();
     } catch {

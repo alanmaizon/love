@@ -4,9 +4,11 @@ import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const { authUser } = useContext(AuthContext);
+  const { authUser, authReady } = useContext(AuthContext);
 
-  // If authUser is null (not authenticated), redirect to the login page.
+  if (!authReady) {
+    return <div className="container mt-5">Loading…</div>;
+  }
   return authUser ? children : <Navigate to="/login" replace />;
 };
 

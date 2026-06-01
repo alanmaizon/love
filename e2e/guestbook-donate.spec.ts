@@ -56,23 +56,23 @@ test.describe('Guestbook donate (live Stripe)', () => {
 
     await page.goto(`/dashboard/campaigns/${CAMPAIGN_SLUG}`);
     await expect(page).toHaveURL(new RegExp(`/dashboard/campaigns/${CAMPAIGN_SLUG}`));
+    await expect(page.getByRole('heading', { name: /manage registry/i })).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.getByRole('heading', { name: /guestbook moderation/i })).toBeVisible();
-    await expect(page.getByText(uniqueMessage)).toBeVisible();
-    await page.getByRole('button', { name: /^approve$/i }).click();
-
-    await expect.poll(
-      async () => {
-        const res = await request.get(
-          `${API_URL}/api/messages/?campaign=${encodeURIComponent(CAMPAIGN_SLUG)}`
-        );
-        if (!res.ok()) return false;
-        const list = await res.json();
-        return Array.isArray(list) && list.some((m: { body?: string }) => m.body === uniqueMessage);
-      },
-      { timeout: 30_000 }
-    ).toBe(true);
+    const messageRow = page.getByRole('listitem').filter({ hasText: uniqueMessage });
+    await expect(messageRow).toBeVisible();
+    const moderateDone = page.waitForResponse(
+      (res) =>
+        res.url().includes(`/campaigns/${CAMPAIGN_SLUG}/moderate/`) &&
+        res.request().method() === 'PATCH' &&
+        res.ok()
+    );
+    await messageRow.getByRole('button', { name: /^approve$/i }).click();
+    await moderateDone;
+    await expect(messageRow.locator('.badge')).toHaveText('approved', { timeout: 15_000 });
 
     await page.goto(`/c/${CAMPAIGN_SLUG}`);
-    await expect(page.getByText(uniqueMessage)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(uniqueMessage)).toBeVisible({ timeout: 30_000 });
   });
 });

@@ -6,6 +6,8 @@ export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [authUser, setAuthUser] = useState(null);
+  /** False until the initial /me/ check finishes (avoids PrivateRoute flash to /login). */
+  const [authReady, setAuthReady] = useState(false);
   // The flagship (default public) campaign — replaces the old single Profile.
   const [campaign, setCampaign] = useState(null);
 
@@ -23,6 +25,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (localStorage.getItem('loggedOut')) {
       setAuthUser(null);
+      setAuthReady(true);
       return;
     }
     const loadMe = () =>
@@ -42,7 +45,8 @@ export function AuthProvider({ children }) {
             setAuthUser(null);
           }
         })
-        .catch(() => setAuthUser(null));
+        .catch(() => setAuthUser(null))
+        .finally(() => setAuthReady(true));
 
     axiosInstance.get('/csrf/').catch(() => {}).finally(loadMe);
   }, []);
@@ -73,7 +77,7 @@ export function AuthProvider({ children }) {
     : null;
 
   return (
-    <AuthContext.Provider value={{ authUser, setAuthUser, campaign, publicProfile }}>
+    <AuthContext.Provider value={{ authUser, authReady, setAuthUser, campaign, publicProfile }}>
       {children}
     </AuthContext.Provider>
   );
