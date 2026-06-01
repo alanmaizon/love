@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 
 function CountdownTimer({ targetDate }) {
   const [timeLeft, setTimeLeft] = useState({});
@@ -45,7 +45,7 @@ function CountdownTimer({ targetDate }) {
       }
 
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/youtube-proxy/`, {
+        const response = await axiosInstance.get('/youtube-proxy/', {
           params: { videoId: youtubeVideoId },
         });
 

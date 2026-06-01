@@ -21,7 +21,7 @@ vi.mock('react-router-dom', async (importOriginal) => ({
 
 const renderLogin = (ctx = {}) =>
   render(
-    <AuthContext.Provider value={{ authUser: null, setAuthUser: vi.fn(), ...ctx }}>
+    <AuthContext.Provider value={{ authUser: null, authReady: true, setAuthUser: vi.fn(), ...ctx }}>
       <BrowserRouter><Login /></BrowserRouter>
     </AuthContext.Provider>
   );

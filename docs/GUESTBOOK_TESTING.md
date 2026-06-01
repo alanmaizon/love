@@ -83,7 +83,15 @@ E2E_SKIP_WEBSERVER=1 npm run e2e
 
 Artifacts: `playwright-report/`, `test-results/` (gitignored).
 
+## CI (optional)
+
+Workflow [`.github/workflows/e2e-guestbook.yml`](../.github/workflows/e2e-guestbook.yml) runs on **workflow_dispatch** when these repository secrets are set:
+
+- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`
+- Optional: `E2E_STRIPE_ACCOUNT_ID`, `E2E_HOST_PASSWORD`
+
+`e2e_prepare` deletes prior rows whose body starts with `E2E guestbook ` so the manage UI stays uncluttered.
+
 ## Not automated
 
 - Email receipt content.
-- Playwright in CI (needs secrets + Stripe; run locally).

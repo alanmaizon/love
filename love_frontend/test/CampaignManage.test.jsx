@@ -38,6 +38,7 @@ describe('CampaignManage guestbook', () => {
 
   test('loads pending messages from guestbook endpoint', async () => {
     axiosInstance.get
+      .mockResolvedValueOnce({ data: {} }) // /csrf/
       .mockResolvedValueOnce({ data: campaign })
       .mockResolvedValueOnce({ data: [pendingMessage] });
 
@@ -50,8 +51,10 @@ describe('CampaignManage guestbook', () => {
 
   test('approve calls moderate endpoint and reloads', async () => {
     axiosInstance.get
+      .mockResolvedValueOnce({ data: {} }) // /csrf/ on mount
       .mockResolvedValueOnce({ data: campaign })
       .mockResolvedValueOnce({ data: [pendingMessage] })
+      .mockResolvedValueOnce({ data: {} }) // /csrf/ in moderate()
       .mockResolvedValueOnce({ data: campaign })
       .mockResolvedValueOnce({
         data: [{ ...pendingMessage, moderation_status: 'approved' }],

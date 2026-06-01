@@ -1,3 +1,4 @@
+/** API-only approve helper (debug / scripts). E2E spec uses UI Approve + PATCH assertion. */
 import { expect, type Page } from '@playwright/test';
 
 const WEB_ORIGIN = process.env.E2E_BASE_URL || 'http://localhost:5173';

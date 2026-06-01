@@ -18,6 +18,7 @@ from django.core.management.base import BaseCommand, CommandError
 from campaigns.models import Campaign
 from donations.models import Charity, PayoutAccount
 from donations.stripe_payout import wire_stripe_account_to_charities
+from messaging.models import Message
 
 User = get_user_model()
 HOST_USERNAME = "anna_alan"
@@ -62,6 +63,10 @@ class Command(BaseCommand):
 
         call_command("migrate", verbosity=0)
         cache.clear()
+
+        removed, _ = Message.objects.filter(body__startswith="E2E guestbook ").delete()
+        if removed:
+            self.stdout.write(self.style.SUCCESS(f"Removed {removed} prior E2E guestbook message(s)"))
 
         csv = os.path.join(
             settings.BASE_DIR.parent, "love_frontend", "public", "data", "donations.csv"

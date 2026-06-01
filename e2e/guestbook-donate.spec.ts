@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { loginHost } from './auth';
 import { ensureDonationConfirmed } from './checkout-sync';
-import { approveGuestbookMessage } from './moderate';
 import { completeStripeCheckout } from './stripe-checkout';
 
 const CAMPAIGN_SLUG = process.env.E2E_CAMPAIGN_SLUG || 'anna-and-alan';
@@ -10,7 +9,7 @@ const HOST_PASS = process.env.E2E_HOST_PASSWORD || 'e2e-test-pass-12!';
 const API_URL = process.env.E2E_API_URL || process.env.E2E_BASE_URL || 'http://localhost:5173';
 
 test.describe('Guestbook donate (live Stripe)', () => {
-  test('donate with message → host approves → public guestbook', async ({ page, request }) => {
+  test('donate with message → host approves → public guestbook', async ({ page }) => {
     const uniqueMessage = `E2E guestbook ${Date.now()}`;
     const donorEmail = `e2e-donor-${Date.now()}@example.com`;
 
@@ -63,17 +62,15 @@ test.describe('Guestbook donate (live Stripe)', () => {
     await expect(page.getByRole('heading', { name: /guestbook moderation/i })).toBeVisible();
     const messageRow = page.getByRole('listitem').filter({ hasText: uniqueMessage });
     await expect(messageRow).toBeVisible();
+    const moderatePatch = page.waitForResponse(
+      (res) =>
+        res.url().includes(`/campaigns/${CAMPAIGN_SLUG}/moderate/`) &&
+        res.request().method() === 'PATCH'
+    );
     await messageRow.getByRole('button', { name: /^approve$/i }).click();
-    await expect
-      .poll(async () => {
-        const badge = messageRow.locator('.badge');
-        if ((await badge.textContent())?.trim() === 'approved') return true;
-        await approveGuestbookMessage(page, CAMPAIGN_SLUG, uniqueMessage);
-        await page.reload();
-        const row = page.getByRole('listitem').filter({ hasText: uniqueMessage });
-        return (await row.locator('.badge').textContent())?.trim() === 'approved';
-      }, { timeout: 20_000 })
-      .toBeTruthy();
+    const patchRes = await moderatePatch;
+    expect(patchRes.ok(), `moderate failed: ${patchRes.status()} ${await patchRes.text()}`).toBeTruthy();
+    await expect(messageRow.locator('.badge')).toHaveText('approved', { timeout: 15_000 });
 
     await page.goto(`/c/${CAMPAIGN_SLUG}`);
     await expect(page.getByText(uniqueMessage)).toBeVisible({ timeout: 30_000 });
