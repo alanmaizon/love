@@ -362,6 +362,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if self.action == "destroy":
             return Campaign.objects.owned_by_user(user)
+        if self.action == "retrieve":
+            if user.is_authenticated:
+                return Campaign.objects.for_user(user)
+            return Campaign.objects.filter(visibility=Campaign.PUBLIC)
         if self.action in ("update", "partial_update", "mine", "guestbook", "moderate"):
             return Campaign.objects.for_user(user)
         return Campaign.objects.filter(visibility=Campaign.PUBLIC).order_by("-created_at")

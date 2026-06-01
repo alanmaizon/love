@@ -1,33 +1,35 @@
-# Phase 2 — per-campaign public UI
+# Phase 2 — per-campaign UI & onboarding
 
-**Prerequisite:** [Phase 0](PHASE0.md) local donate path; [Phase 1](PHASE1.md) when deploying.
+**Prerequisite:** [Phase 0](PHASE0.md) local donate path; [Phase 1](PHASE1.md) for production deploy.
 
-**Goal:** Multiple celebration registries on the public site, not only the flagship wedding homepage.
+**Goal:** Multi-registry platform UX — public campaign pages, self-serve host & charity onboarding, remade home.
 
 ---
 
-## Shipped in this slice
+## Public site
 
 | Route | Purpose |
 |--------|---------|
-| `/` | Flagship campaign (first active public), unchanged wedding layout |
-| `/c/:slug` | Public campaign page (title, story, donate, guestbook) |
-| `/campaigns` | Directory of public campaigns (`GET /api/campaigns/`) |
-| `/donate?campaign=<slug>` | Checkout scoped to that campaign |
-| `/messages?campaign=<slug>` | Guestbook for that campaign |
-
-API used: `GET /api/campaign/<slug>/`, `GET /api/messages/?campaign=`, `POST /api/payments/checkout/` with `campaign` slug.
-
-**Flagship example:** `/c/anna-and-alan` (after seed import).
+| `/` | Platform landing (not wedding-only) |
+| `/get-started` | Choose host vs charity path |
+| `/register` | Standalone signup (`?next=` optional) |
+| `/onboarding/couple` | Host registry wizard |
+| `/onboarding/charity` | Charity registration + Stripe Connect |
+| `/c/:slug` | Public campaign page |
+| `/campaigns` | Directory of public campaigns |
+| `/donate?campaign=<slug>` | Checkout for that campaign |
 
 ---
 
-## Not in this slice (later)
+## Signed-in tools
 
-- Host dashboard: create/edit campaign, `GET /api/campaigns/mine/`, guestbook moderation UI
-- Analytics/stats filtered by campaign in the SPA
-- Dynamic couple section / cover images per campaign (CampaignPage uses API text; Home still uses static BioShort/CoupleSection)
-- Campaign-type-specific layouts (wedding vs birthday vs memorial)
+| Route | Purpose |
+|--------|---------|
+| `/dashboard` | My registries + my charities (+ admin donations table) |
+| `/dashboard/campaigns/:slug` | Edit registry + moderate guestbook |
+| `/login` | Session login |
+
+API: `POST /api/register/`, `POST /api/campaigns/`, `PATCH /api/campaigns/:slug/`, `GET /api/campaigns/mine/`, `POST /api/charities/`, `POST /api/payments/connect/`, guestbook `moderate` action.
 
 ---
 
@@ -35,17 +37,29 @@ API used: `GET /api/campaign/<slug>/`, `GET /api/messages/?campaign=`, `POST /ap
 
 ```bash
 cd love_frontend && npm run dev
+# Terminal: love_backend runserver
 ```
 
-1. http://localhost:5173/campaigns — list loads
-2. http://localhost:5173/c/anna-and-alan — page + guestbook
-3. Donate from that page — checkout payload includes `campaign: "anna-and-alan"`
-4. http://localhost:5173/donate?campaign=anna-and-alan — same
+1. `/` — landing with two onboarding cards
+2. `/onboarding/couple` — register → create draft → pick verified charity → publish
+3. `/c/<slug>` — public page; donate with correct `campaign` in checkout
+4. `/onboarding/charity` — register charity → Stripe Connect link
+5. `/dashboard` — lists campaigns and charity Connect status
+
+---
+
+## Still later
+
+- Cover image upload in wizard
+- Co-host invites UI
+- Platform admin verify queue in SPA (staff use Django admin today)
+- Analytics filtered by campaign in UI
 
 ---
 
 ## Done when
 
-- [ ] `/campaigns` lists public campaigns
-- [ ] `/c/<slug>` loads for seeded flagship
-- [ ] Donate from campaign URL confirms correct `campaign` in Stripe metadata (after webhook/sync)
+- [ ] New host can publish a registry end-to-end
+- [ ] New charity can register and start Connect
+- [ ] Home is platform-focused, not hardcoded to one couple
+- [ ] Guestbook moderation works from dashboard manage page

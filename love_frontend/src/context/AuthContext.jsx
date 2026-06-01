@@ -33,6 +33,7 @@ export function AuthProvider({ children }) {
               username: res.data.username,
               displayName: res.data.display_name,
               isAdmin: res.data.isAdmin,
+              charities: res.data.charities || [],
             });
           } else {
             setAuthUser(null);

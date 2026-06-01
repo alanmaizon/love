@@ -1,7 +1,7 @@
 // src/components/Login.jsx
 import React, { useState, useContext, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 function Login() {
@@ -31,6 +31,7 @@ function Login() {
         username: meRes.data.username,
         displayName: meRes.data.display_name,
         isAdmin: meRes.data.isAdmin,
+        charities: meRes.data.charities || [],
       };
 
       setAuthUser(newAuthUser);
@@ -83,6 +84,11 @@ function Login() {
         </div>
         <button type="submit" className="btn btn-primary">Login</button>
       </form>
+      <p className="mt-3">
+        New here? <Link to="/register">Create an account</Link>
+        {' · '}
+        <Link to="/get-started">Get started</Link>
+      </p>
     </div>
   );
 }

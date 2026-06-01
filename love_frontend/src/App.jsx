@@ -7,6 +7,11 @@ import ScrollToTopButton from "./components/ScrollToTopButton";
 import Home from './components/Home';
 import CampaignPage from './components/CampaignPage';
 import ExploreCampaigns from './components/ExploreCampaigns';
+import GetStarted from './components/GetStarted';
+import Register from './components/Register';
+import CoupleOnboarding from './components/onboarding/CoupleOnboarding';
+import CharityOnboarding from './components/onboarding/CharityOnboarding';
+import CampaignManage from './components/CampaignManage';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import Profile from './components/Profile';
@@ -29,6 +34,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 function Header() {
   const authContext = useContext(AuthContext) ?? {};
   const { authUser } = authContext;
+  const authed = Boolean(authUser);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation" aria-label="Main Navigation">
@@ -53,6 +59,16 @@ function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+            {!authed && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/get-started">Get started</Link>
+              </li>
+            )}
+            {authed && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/dashboard">Dashboard</Link>
+              </li>
+            )}
             <li className="nav-item">
               <Link className="nav-link" to="/campaigns">Campaigns</Link>
             </li>
@@ -98,6 +114,10 @@ function App() {
         <main className="main-content" role="main">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/get-started" element={<GetStarted />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/onboarding/couple" element={<CoupleOnboarding />} />
+            <Route path="/onboarding/charity" element={<CharityOnboarding />} />
             <Route path="/c/:slug" element={<CampaignPage />} />
             <Route path="/campaigns" element={<ExploreCampaigns />} />
             <Route path="/login" element={<Login />} />
@@ -108,6 +128,7 @@ function App() {
             <Route path="/donate" element={<DonationForm />} />
             <Route path="/confirmation" element={<DonationConfirmation />} />
             <Route path="/dashboard" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
+            <Route path="/dashboard/campaigns/:slug" element={<PrivateRoute><CampaignManage /></PrivateRoute>} />
             <Route path="/dashboard/add-charity" element={<PrivateRoute><AddCharity /></PrivateRoute>} />
             <Route path="/dashboard/charities" element={<PrivateRoute><ManageCharities /></PrivateRoute>} />
             <Route path="/dashboard/charities/edit/:id" element={<PrivateRoute><EditCharity /></PrivateRoute>} />
