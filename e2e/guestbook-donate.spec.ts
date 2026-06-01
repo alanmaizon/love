@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { loginHost } from './auth';
 import { ensureDonationConfirmed } from './checkout-sync';
+import { submitDonationAndReachStripe } from './start-checkout';
 import { completeStripeCheckout } from './stripe-checkout';
 
 const CAMPAIGN_SLUG = process.env.E2E_CAMPAIGN_SLUG || 'anna-and-alan';
@@ -19,11 +20,14 @@ test.describe('Guestbook donate (live Stripe)', () => {
     await page.locator('#donorName').fill('E2E Donor');
     await page.locator('#donorEmail').fill(donorEmail);
     await page.getByRole('radio', { name: '€20', exact: true }).check();
-    await page.locator('#charity').selectOption({ index: 1 });
+    const charityValue = await page
+      .locator('#charity option[value]:not([value=""])')
+      .first()
+      .getAttribute('value');
+    await page.locator('#charity').selectOption(charityValue!);
     await page.locator('#message').fill(uniqueMessage);
 
-    await page.getByRole('button', { name: /send gift/i }).click();
-
+    await submitDonationAndReachStripe(page);
     await completeStripeCheckout(page, donorEmail);
 
     await expect(page.getByText(/thank you/i)).toBeVisible();
