@@ -9,6 +9,7 @@ an application fee (PLATFORM_FEE_BPS; default 0 -> 100% to the charity).
 All money-moving calls pass an idempotency key so retries never double-charge.
 """
 import logging
+import os
 
 import stripe
 from django.conf import settings
@@ -167,6 +168,7 @@ def create_checkout_session(donation: Donation) -> str:
 
     session = s.checkout.Session.create(
         mode="payment",
+        locale=os.environ.get("STRIPE_CHECKOUT_LOCALE", "en"),
         success_url=f"{settings.FRONTEND_URL}/confirmation?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{settings.FRONTEND_URL}/donate?canceled=1",
         customer_email=donation.donor_email or None,

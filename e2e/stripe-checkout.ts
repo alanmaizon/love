@@ -15,6 +15,7 @@ export async function completeStripeCheckout(page: Page, email: string) {
   const cardRow = page.getByRole('listitem').filter({
     has: page.getByRole('radio', { name: /^card$/i }),
   });
+  await cardRow.waitFor({ state: 'visible', timeout: 45_000 });
   await cardRow.click();
   await page.getByRole('radio', { name: /^card$/i }).check();
 

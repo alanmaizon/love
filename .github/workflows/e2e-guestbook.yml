@@ -1,7 +1,11 @@
 # Optional: live Stripe guestbook E2E (Playwright).
-# Run manually after configuring repository secrets:
-#   STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY
-# Optional: E2E_STRIPE_ACCOUNT_ID, E2E_HOST_PASSWORD
+#
+# Repository SECRETS (not variables):
+#   STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY  — required
+#   E2E_STRIPE_ACCOUNT_ID, E2E_HOST_PASSWORD    — optional (e2e_prepare can discover acct_)
+#
+# VITE_API_URL is NOT a secret — Playwright sets it when starting Vite:
+#   VITE_API_URL=http://localhost:5173 npm run dev
 
 name: e2e-guestbook
 
@@ -61,10 +65,10 @@ jobs:
         working-directory: love_frontend
         run: npm ci
 
-      - name: Install Playwright
+      - name: Install Playwright (Chromium + OS deps)
         run: |
           npm ci
-          npm run e2e:install
+          npx playwright install --with-deps chromium
 
       - name: Run guestbook E2E
         run: npm run e2e

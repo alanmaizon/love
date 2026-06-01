@@ -75,20 +75,32 @@ npm run e2e
 
 `e2e_prepare` runs in global setup (migrate, seed, wire Connect, reset `anna_alan` password). The spec donates with message `4242…` on `checkout.stripe.com`, syncs via thank-you (`DEBUG`), host approves on manage, asserts public API + campaign page.
 
-Skip bundled servers if Django and Vite are already up:
+Skip bundled servers only if you start them with the same settings Playwright uses:
 
 ```bash
+# Terminal A
+cd love_backend && python manage.py runserver 127.0.0.1:8000
+
+# Terminal B (proxy + CSRF same-origin — required for Approve in the browser)
+cd love_frontend && VITE_API_URL=http://localhost:5173 npm run dev -- --port 5173
+
 E2E_SKIP_WEBSERVER=1 npm run e2e
 ```
+
+Do **not** reuse a plain `npm run dev` on port 5173 without `VITE_API_URL` and the Vite `/api` proxy — Approve will hang and the test will run until timeout (~4 min).
+
+By default Playwright starts fresh servers (`E2E_REUSE_SERVERS=1` only if you intentionally want reuse).
 
 Artifacts: `playwright-report/`, `test-results/` (gitignored).
 
 ## CI (optional)
 
-Workflow [`.github/workflows/e2e-guestbook.yml`](../.github/workflows/e2e-guestbook.yml) runs on **workflow_dispatch** when these repository secrets are set:
+Workflow [`.github/workflows/e2e-guestbook.yml`](../.github/workflows/e2e-guestbook.yml) runs on **workflow_dispatch** when these **repository secrets** are set:
 
-- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` (required)
 - Optional: `E2E_STRIPE_ACCOUNT_ID`, `E2E_HOST_PASSWORD`
+
+`VITE_API_URL` is **not** a secret — CI sets it in the Playwright `webServer` command (`http://localhost:5173`) so the Vite `/api` proxy and CSRF work. Checkout uses `locale=en` by default (`STRIPE_CHECKOUT_LOCALE`) for a stable Stripe UI in headless CI.
 
 `e2e_prepare` deletes prior rows whose body starts with `E2E guestbook ` so the manage UI stays uncluttered.
 

@@ -62,15 +62,28 @@ test.describe('Guestbook donate (live Stripe)', () => {
     await expect(page.getByRole('heading', { name: /guestbook moderation/i })).toBeVisible();
     const messageRow = page.getByRole('listitem').filter({ hasText: uniqueMessage });
     await expect(messageRow).toBeVisible();
-    const moderatePatch = page.waitForResponse(
-      (res) =>
-        res.url().includes(`/campaigns/${CAMPAIGN_SLUG}/moderate/`) &&
-        res.request().method() === 'PATCH'
-    );
-    await messageRow.getByRole('button', { name: /^approve$/i }).click();
-    const patchRes = await moderatePatch;
-    expect(patchRes.ok(), `moderate failed: ${patchRes.status()} ${await patchRes.text()}`).toBeTruthy();
-    await expect(messageRow.locator('.badge')).toHaveText('approved', { timeout: 15_000 });
+    const approveBtn = messageRow.getByRole('button', { name: /^approve$/i });
+
+    const [patchRes] = await Promise.all([
+      page.waitForResponse(
+        (res) => res.url().includes('/moderate/') && res.request().method() === 'PATCH',
+        { timeout: 45_000 }
+      ),
+      approveBtn.click(),
+    ]);
+    expect(
+      patchRes.ok(),
+      `Approve PATCH failed (${patchRes.status()}): ${await patchRes.text()}. ` +
+        'If using E2E_SKIP_WEBSERVER=1, start Vite with: ' +
+        'VITE_API_URL=http://localhost:5173 npm run dev -- --port 5173'
+    ).toBeTruthy();
+
+    await expect
+      .poll(async () => {
+        const row = page.getByRole('listitem').filter({ hasText: uniqueMessage });
+        return (await row.locator('.badge').textContent())?.trim() === 'approved';
+      }, { timeout: 15_000 })
+      .toBeTruthy();
 
     await page.goto(`/c/${CAMPAIGN_SLUG}`);
     await expect(page.getByText(uniqueMessage)).toBeVisible({ timeout: 30_000 });
