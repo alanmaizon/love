@@ -1,0 +1,8 @@
+aws_region      = "eu-west-1"
+project         = "love"
+db_username     = "loveadmin"
+db_password     = "CHANGE_ME_STRONG_PASSWORD"
+db_name         = "love"
+frontend_domain = "" # e.g. lovethatgivesback.com — optional until DNS ready
+api_desired_count = 1
+# api_acm_certificate_arn = "arn:aws:acm:eu-west-1:ACCOUNT:certificate/UUID" # HTTPS API (required for CloudFront → API)

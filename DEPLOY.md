@@ -88,9 +88,10 @@ docker push $REGISTRY/love-api:latest
 ```
 
 ## Step 3 — Compute + DB + ALB (the infra layer)
-This is the VPC / RDS / ECS / ALB layer. It will be codified as Terraform in
-`infra/` (next deliverable) so it is reproducible and tear-down-able in one
-command — important for protecting credits. Until then, the AWS Console
+
+**Preferred:** Terraform in [`infra/README.md`](infra/README.md) (`terraform apply`).
+
+**Manual:** The VPC / RDS / ECS / ALB layer can still be built in the AWS Console
 **ECS > "Create cluster" (Fargate)** wizard + **RDS > Create (PostgreSQL,
 db.t4g.micro, NOT publicly accessible)** will stand it up. Key settings:
 - Tasks: **public subnets, "Assign public IP: ENABLED", no NAT.**
