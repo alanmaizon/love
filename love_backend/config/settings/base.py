@@ -110,6 +110,14 @@ REST_FRAMEWORK = {
     },
 }
 
+# Phase 4 — trust & compliance (overridden in dev.py / prod.py)
+REQUIRE_EMAIL_VERIFICATION = os.environ.get("REQUIRE_EMAIL_VERIFICATION", "False") == "True"
+_max_checkout = os.environ.get("MAX_CHECKOUT_AMOUNT", "10000")
+MAX_CHECKOUT_AMOUNT = None if _max_checkout == "" else _max_checkout
+
+WEBHOOK_PAYLOAD_RETENTION_DAYS = int(os.environ.get("WEBHOOK_PAYLOAD_RETENTION_DAYS", "90"))
+ADMIN_REQUIRE_2FA = os.environ.get("ADMIN_REQUIRE_2FA", "False") == "True"
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [

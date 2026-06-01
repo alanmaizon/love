@@ -77,6 +77,9 @@ def create_checkout(request):
         return Response({"error": "A valid donation amount is required."}, status=400)
     if amount <= 0:
         return Response({"error": "Donation amount must be greater than zero."}, status=400)
+    max_amount = getattr(settings, "MAX_CHECKOUT_AMOUNT", None)
+    if max_amount is not None and amount > Decimal(str(max_amount)):
+        return Response({"error": "Donation amount exceeds the allowed maximum."}, status=400)
 
     donor_email = (data.get("donor_email") or "").strip()
     if not donor_email:

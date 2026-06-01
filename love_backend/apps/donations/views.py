@@ -30,7 +30,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import OrgMembership
-from accounts.permissions import ADMIN_ROLES, CONTENT_ROLES, charity_ids_for_user
+from accounts.permissions import (
+    ADMIN_ROLES,
+    CONTENT_ROLES,
+    EmailVerifiedRequired,
+    charity_ids_for_user,
+)
 from core.security import expose_error_details
 from campaigns.models import Campaign, CampaignBeneficiary
 from core.models import AuditLog
@@ -176,9 +181,14 @@ def me(request):
             "charges_enabled": bool(payout and payout.charges_enabled),
         })
 
+    from accounts.verification import email_verified, require_email_verification_enabled
+
     return Response({
         "authenticated": True,
         "username": u.username,
+        "email": u.email or "",
+        "email_verified": email_verified(u),
+        "email_verification_required": require_email_verification_enabled(),
         "display_name": (u.get_full_name() or u.first_name or u.username),
         "isAdmin": u.is_staff,
         "charities": charities,
@@ -188,6 +198,10 @@ def me(request):
 def login_view(request):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
+    from accounts.ratelimit import too_many_attempts
+
+    if too_many_attempts(request, scope="login", limit=30, window_seconds=3600):
+        return JsonResponse({"error": "Too many login attempts. Try again later."}, status=429)
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
@@ -254,6 +268,8 @@ class CharityViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ("pending", "verify", "reject"):
             return [IsAdminUser()]
+        if self.action == "create":
+            return [IsAuthenticated(), EmailVerifiedRequired()]
         if self.request.method in SAFE_METHODS:
             return [AllowAny()]
         return [IsAuthenticated()]

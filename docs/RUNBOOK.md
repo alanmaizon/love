@@ -98,6 +98,18 @@ python manage.py check_stripe_webhook
 
 ---
 
+## Phase 4 — trust & compliance
+
+See [PHASE4.md](PHASE4.md).
+
+- **Email verification:** prod `REQUIRE_EMAIL_VERIFICATION=True`; users verify via `/verify-email?token=…`
+- **GDPR:** `gdpr_export_user` / `gdpr_erase_user USER --confirm` (staff only)
+- **Webhook retention:** `purge_webhook_payloads` weekly
+- **Stripe Radar:** Dashboard → Fraud & risk → Rules
+- **Admin 2FA:** `ADMIN_REQUIRE_2FA=True` + staff enroll TOTP at `/admin/`
+
+---
+
 ## Deploy checklist (short)
 
 1. `terraform apply` / image push / ECS roll

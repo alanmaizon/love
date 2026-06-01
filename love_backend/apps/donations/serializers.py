@@ -93,6 +93,14 @@ class CampaignWriteSerializer(serializers.ModelSerializer):
         # that is verified AND payout-ready — same invariant the checkout enforces.
         status = attrs.get("status", getattr(self.instance, "status", Campaign.DRAFT))
         if status == Campaign.ACTIVE:
+            request = self.context.get("request")
+            if request and request.user.is_authenticated:
+                from accounts.verification import email_verified
+
+                if not email_verified(request.user):
+                    raise serializers.ValidationError(
+                        {"status": "Verify your email before publishing (check your inbox)."}
+                    )
             charity = attrs.get("charity") or self._current_beneficiary()
             if charity is None:
                 raise serializers.ValidationError(

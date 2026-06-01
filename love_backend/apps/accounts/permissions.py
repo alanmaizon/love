@@ -1,5 +1,8 @@
-"""OrgMembership role helpers — single source for content vs money powers."""
+"""OrgMembership role helpers and Phase 4 email-verification permission."""
+from rest_framework import permissions
+
 from accounts.models import OrgMembership
+from .verification import email_verified
 
 CONTENT_ROLES = (OrgMembership.OWNER, OrgMembership.ADMIN, OrgMembership.EDITOR)
 MONEY_ROLES = (OrgMembership.OWNER, OrgMembership.ADMIN)
@@ -27,3 +30,10 @@ def user_manages_charity(user, charity, roles=ADMIN_ROLES):
 
 def user_can_edit_charity_profile(user, charity):
     return user_manages_charity(user, charity, roles=CONTENT_ROLES)
+
+
+class EmailVerifiedRequired(permissions.BasePermission):
+    message = "Verify your email before performing this action."
+
+    def has_permission(self, request, view):
+        return email_verified(request.user)

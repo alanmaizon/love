@@ -13,6 +13,19 @@ function Dashboard() {
 
   const charities = authUser?.charities || [];
   const isAdmin = authUser?.isAdmin;
+  const needsEmailVerify = authUser?.emailVerificationRequired && !authUser?.emailVerified;
+  const [verifyMsg, setVerifyMsg] = useState('');
+
+  const resendVerification = async () => {
+    setVerifyMsg('');
+    try {
+      await axiosInstance.get('/csrf/').catch(() => {});
+      const res = await axiosInstance.post('/verify-email/resend/');
+      setVerifyMsg(res.data?.message || 'Email sent.');
+    } catch (err) {
+      setVerifyMsg(err.response?.data?.error || 'Could not send email.');
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -27,6 +40,9 @@ function Dashboard() {
             displayName: meRes.data.display_name,
             isAdmin: meRes.data.isAdmin,
             charities: meRes.data.charities || [],
+            email: meRes.data.email || '',
+            emailVerified: meRes.data.email_verified,
+            emailVerificationRequired: meRes.data.email_verification_required,
           });
         }
         const campRes = await axiosInstance.get('/campaigns/mine/');
@@ -62,6 +78,16 @@ function Dashboard() {
       <h2 className="text-center">
         Welcome{authUser?.displayName ? `, ${authUser.displayName}` : ''}
       </h2>
+
+      {needsEmailVerify && (
+        <div className="alert alert-warning mt-3">
+          <strong>Verify your email</strong> before publishing a registry or registering a charity.
+          <button type="button" className="btn btn-sm btn-outline-dark ms-2" onClick={resendVerification}>
+            Resend email
+          </button>
+          {verifyMsg && <span className="ms-2">{verifyMsg}</span>}
+        </div>
+      )}
 
       <div className="dashboard-grid mt-4">
         <section className="dashboard-card">

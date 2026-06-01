@@ -5,6 +5,7 @@ from django.db.backends.signals import connection_created
 from .base import *  # noqa: F401,F403
 
 DEBUG = True
+REQUIRE_EMAIL_VERIFICATION = os.environ.get("REQUIRE_EMAIL_VERIFICATION", "False") == "True"
 
 
 def _configure_sqlite(connection, **kwargs):

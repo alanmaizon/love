@@ -34,6 +34,9 @@ stripe>=12,<13
 # Email (prod: Amazon SES)
 django-ses>=4,<5
 
+# Admin 2FA (optional; enable with ADMIN_REQUIRE_2FA=True)
+django-otp>=1.5,<2
+
 # Integrations
 requests
 google-api-python-client

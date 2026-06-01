@@ -9,6 +9,7 @@ function Register() {
   const [searchParams] = useSearchParams();
   const { authUser, setAuthUser } = useContext(AuthContext);
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
@@ -26,7 +27,12 @@ function Register() {
     setBusy(true);
     try {
       await axiosInstance.get('/csrf/').catch(() => {});
-      await axiosInstance.post('/register/', { username, password, display_name: displayName });
+      const regRes = await axiosInstance.post('/register/', {
+        username,
+        email,
+        password,
+        display_name: displayName,
+      });
       await axiosInstance.post('/login/', { username, password });
       localStorage.removeItem('loggedOut');
       const meRes = await axiosInstance.get('/me/');
@@ -35,9 +41,16 @@ function Register() {
         displayName: meRes.data.display_name,
         isAdmin: meRes.data.isAdmin,
         charities: meRes.data.charities || [],
+        email: meRes.data.email || email,
+        emailVerified: meRes.data.email_verified,
+        emailVerificationRequired: meRes.data.email_verification_required,
       };
       setAuthUser(payload);
-      navigate(nextPath, { replace: true });
+      if (regRes.data?.message?.includes('Check your email')) {
+        navigate('/dashboard', { replace: true, state: { verifyEmail: true } });
+      } else {
+        navigate(nextPath, { replace: true });
+      }
     } catch (err) {
       const data = err.response?.data;
       if (typeof data === 'object' && data !== null) {
@@ -62,6 +75,17 @@ function Register() {
             className="form-control"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+          />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
         <div className="mb-3">

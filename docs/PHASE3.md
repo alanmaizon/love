@@ -69,11 +69,6 @@ Optional: set `alarm_sns_topic_arn` for a CloudWatch alarm on log pattern `Webho
 
 ---
 
-## Next (Phase 4 — trust & compliance)
+## Next
 
-- GDPR export/erasure, webhook payload TTL
-- Email verification before publish
-- Stripe Radar / velocity limits
-- Staff 2FA on Django admin
-
-See original roadmap in project history; product polish (cover upload, co-host invites, verify queue SPA) can run in parallel when needed.
+- [Phase 4](PHASE4.md) — trust, compliance & fraud (email verify, GDPR commands, admin 2FA)

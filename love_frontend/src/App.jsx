@@ -9,6 +9,7 @@ import CampaignPage from './components/CampaignPage';
 import ExploreCampaigns from './components/ExploreCampaigns';
 import GetStarted from './components/GetStarted';
 import Register from './components/Register';
+import VerifyEmail from './components/VerifyEmail';
 import CoupleOnboarding from './components/onboarding/CoupleOnboarding';
 import CharityOnboarding from './components/onboarding/CharityOnboarding';
 import CampaignManage from './components/CampaignManage';
@@ -116,6 +117,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/get-started" element={<GetStarted />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/onboarding/couple" element={<CoupleOnboarding />} />
             <Route path="/onboarding/charity" element={<CharityOnboarding />} />
             <Route path="/c/:slug" element={<CampaignPage />} />

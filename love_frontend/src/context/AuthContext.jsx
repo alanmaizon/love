@@ -34,6 +34,9 @@ export function AuthProvider({ children }) {
               displayName: res.data.display_name,
               isAdmin: res.data.isAdmin,
               charities: res.data.charities || [],
+              email: res.data.email || '',
+              emailVerified: res.data.email_verified,
+              emailVerificationRequired: res.data.email_verification_required,
             });
           } else {
             setAuthUser(null);

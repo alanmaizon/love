@@ -521,6 +521,70 @@ class OnboardingFlowTests(APITestCase):
         self.assertIn("onboarding_url", ok.json())
 
 
+class Phase4TrustTests(APITestCase):
+    def _login(self, client, username, password):
+        return client.post("/api/login/", {"username": username, "password": password}, format="json")
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.mm = Charity.objects.create(
+            name="MM", slug="mm-p4", verification_status=Charity.VERIFIED,
+        )
+        from donations.models import PayoutAccount
+        PayoutAccount.objects.create(
+            charity=cls.mm, stripe_account_id="acct_p4", charges_enabled=True,
+        )
+
+    def test_email_verification_gates_publish_and_charity(self):
+        from django.test import override_settings
+        from accounts.models import UserProfile
+
+        with override_settings(REQUIRE_EMAIL_VERIFICATION=True):
+            self.client.post(
+                "/api/register/",
+                {
+                    "username": "unverified_host",
+                    "password": "Sup3rSecret!42",
+                    "email": "host@example.com",
+                },
+                format="json",
+            )
+            self._login(self.client, "unverified_host", "Sup3rSecret!42")
+            me = self.client.get("/api/me/").json()
+            self.assertFalse(me["email_verified"])
+
+            created = self.client.post(
+                "/api/campaigns/",
+                {"type": "wedding", "title": "P4 Wedding", "charity": self.mm.id},
+                format="json",
+            )
+            self.assertEqual(created.status_code, 201, created.content)
+            slug = created.json()["slug"]
+            bad = self.client.patch(
+                f"/api/campaigns/{slug}/",
+                {"status": "active", "charity": self.mm.id},
+                format="json",
+            )
+            self.assertEqual(bad.status_code, 400)
+            self.assertIn("Verify your email", str(bad.json()))
+
+            charity_denied = self.client.post(
+                "/api/charities/",
+                {"name": "Blocked Org", "description": "x"},
+                format="json",
+            )
+            self.assertEqual(charity_denied.status_code, 403)
+
+            profile = UserProfile.objects.get(user__username="unverified_host")
+            profile.clear_verification_token()
+            ok = self.client.patch(
+                f"/api/campaigns/{slug}/",
+                {"status": "active", "charity": self.mm.id},
+                format="json",
+            )
+            self.assertEqual(ok.status_code, 200, ok.content)
+
+
 class WireStripeAccountTests(APITestCase):
     def test_same_acct_id_on_multiple_charities(self):
         from donations.stripe_payout import wire_stripe_account_to_charities

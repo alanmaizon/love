@@ -34,3 +34,16 @@ EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django_ses.SESBackend')
 AWS_SES_REGION_NAME = os.environ.get(
     'AWS_SES_REGION_NAME', os.environ.get('AWS_S3_REGION_NAME', 'eu-west-1'),
 )
+
+REQUIRE_EMAIL_VERIFICATION = os.environ.get("REQUIRE_EMAIL_VERIFICATION", "True") == "True"
+
+if ADMIN_REQUIRE_2FA:
+    INSTALLED_APPS += [
+        "django_otp",
+        "django_otp.plugins.otp_totp",
+        "django_otp.plugins.otp_static",
+    ]
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+        "django_otp.middleware.OTPMiddleware",
+    )
