@@ -50,3 +50,15 @@ variable "api_acm_certificate_arn" {
   default     = ""
   description = "ACM certificate ARN in the same region (eu-west-1) for HTTPS on the API ALB. Required before the HTTPS CloudFront SPA can call the API (mixed content)."
 }
+
+variable "enable_scheduled_tasks" {
+  type        = bool
+  default     = true
+  description = "EventBridge → ECS RunTask for drain_outbox (5m) and daily reconcile/ops_health"
+}
+
+variable "alarm_sns_topic_arn" {
+  type        = string
+  default     = ""
+  description = "Optional SNS topic ARN for webhook-failure CloudWatch alarm"
+}

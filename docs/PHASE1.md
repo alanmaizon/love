@@ -121,5 +121,5 @@ Without Terraform: follow [DEPLOY.md](../DEPLOY.md) (Console ECS + RDS + S3).
 ## Next
 
 - [Phase 2](PHASE2.md) — onboarding & multi-campaign UI (shipped in app)
+- [Phase 3](PHASE3.md) — reconciliation, `drain_outbox` schedule, ops runbook
 - ACM custom domain on ALB + CloudFront (DEPLOY Step 5)
-- Scheduled `drain_outbox` for receipts (EventBridge rule)

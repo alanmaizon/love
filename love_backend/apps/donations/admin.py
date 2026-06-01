@@ -29,8 +29,13 @@ class DonationAdmin(admin.ModelAdmin):
 
     def mark_as_confirmed(self, request, queryset):
         updated_count = queryset.update(status='confirmed')
-        self.message_user(request, f"{updated_count} donations marked as confirmed.")
-    mark_as_confirmed.short_description = "Mark selected as Confirmed"
+        self.message_user(
+            request,
+            f"{updated_count} donation(s) marked confirmed — legacy only; does NOT write "
+            "LedgerEntry or trigger receipts. Use Stripe webhooks for real money.",
+            level="WARNING",
+        )
+    mark_as_confirmed.short_description = "Mark as Confirmed (legacy — no ledger)"
 
     def mark_as_failed(self, request, queryset):
         updated_count = queryset.update(status='failed')

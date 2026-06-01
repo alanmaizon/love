@@ -84,13 +84,24 @@ export VITE_API_URL="$API_URL"   # or https://api.yourdomain.com after ACM
 # python manage.py import_donations --csv ...
 ```
 
-## 6. Stripe webhook (required)
+## 6. Scheduled money ops (Phase 3)
+
+Terraform enables by default (`enable_scheduled_tasks = true`):
+
+- `drain_outbox` every 5 minutes
+- `reconcile_stripe` + `ops_health` daily at 06:00 UTC
+
+Optional: `alarm_sns_topic_arn` in `terraform.tfvars` for webhook failure emails.
+
+See [docs/PHASE3.md](../docs/PHASE3.md) and [docs/RUNBOOK.md](../docs/RUNBOOK.md).
+
+## 7. Stripe webhook (required)
 
 Dashboard → Webhooks → `https://api.YOUR_DOMAIN/api/payments/webhook/`  
 Events: `checkout.session.completed`, `payment_intent.succeeded`, `account.updated`  
 Put signing secret in SSM `/love/STRIPE_WEBHOOK_SECRET`, restart ECS.
 
-## Tear down
+## 8. Tear down
 
 ```bash
 cd infra/terraform && terraform destroy

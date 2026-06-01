@@ -32,3 +32,7 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 if DATABASES["default"]["ENGINE"].endswith("sqlite3"):
     DATABASES["default"].setdefault("OPTIONS", {})
     DATABASES["default"]["OPTIONS"]["timeout"] = 30
+
+# Avoid SMTP auth failures blocking drain_outbox / ops_health locally.
+if not os.environ.get("EMAIL_BACKEND") and not os.environ.get("EMAIL_HOST_USER"):
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

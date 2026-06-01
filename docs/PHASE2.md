@@ -48,12 +48,14 @@ cd love_frontend && npm run dev
 
 ---
 
-## Still later
+## Still later (product polish)
 
 - Cover image upload in wizard
 - Co-host invites UI
-- Platform admin verify queue in SPA (staff use Django admin today)
+- Platform admin verify queue in SPA (staff use Django admin today — see [RUNBOOK.md](RUNBOOK.md))
 - Analytics filtered by campaign in UI
+
+**Money ops:** [Phase 3](PHASE3.md) — reconciliation, scheduled outbox, monitoring.
 
 ---
 

@@ -11,7 +11,7 @@ Stripe to a *verified* charity, with an append-only ledger, content moderation,
 and row-level multitenancy. The real wedding it started as (27 gifts, **€3,780**,
 27 guest messages) is migrated in as the **flagship campaign**.
 
-📐 [SCHEMA_DESIGN.md](SCHEMA_DESIGN.md) · 🚀 [DEPLOY.md](DEPLOY.md) · 🤝 [CLAUDE.md](CLAUDE.md) · 📋 [Phase 0](docs/PHASE0.md) · 🚢 [Phase 1](docs/PHASE1.md) · 🎉 [Phase 2](docs/PHASE2.md) · 🔌 [API v2](docs/API_V2.md)
+📐 [SCHEMA_DESIGN.md](SCHEMA_DESIGN.md) · 🚀 [DEPLOY.md](DEPLOY.md) · 🤝 [CLAUDE.md](CLAUDE.md) · 📋 [Phase 0](docs/PHASE0.md) · 🚢 [Phase 1](docs/PHASE1.md) · 🎉 [Phase 2](docs/PHASE2.md) · 💰 [Phase 3](docs/PHASE3.md) · 📖 [Runbook](docs/RUNBOOK.md) · 🔌 [API v2](docs/API_V2.md)
 
 ---
 

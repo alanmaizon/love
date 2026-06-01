@@ -20,6 +20,7 @@ from donations.models import Charity, Donation, LedgerEntry, PayoutAccount, Rece
 from payments.models import WebhookEvent
 from payments import services
 from payments import webhooks as webhooks_module
+from payments.reconciliation import check_donation_ledger, reconcile_donations
 
 
 def _make_donation():
@@ -282,3 +283,47 @@ class CheckoutAuthorizationTests(TestCase):
         resp = self._post_checkout(self._payload(donor_email=""))
         self.assertEqual(resp.status_code, 400)
         create_session.assert_not_called()
+
+
+class ReconciliationTests(TestCase):
+    def test_confirmed_without_ledger_flags_issue(self):
+        donation = _make_donation()
+        donation.status = "confirmed"
+        donation.net_amount = donation.amount
+        donation.save()
+        issues = check_donation_ledger(donation)
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0].code, "missing_ledger")
+
+    def test_ledger_matches_after_webhook(self):
+        donation = _make_donation()
+        webhooks_module._confirm_donation(
+            donation,
+            {"metadata": {"donation_id": str(donation.id)}, "currency": "eur", "payment_intent": "pi_x"},
+        )
+        donation.refresh_from_db()
+        self.assertEqual(check_donation_ledger(donation), [])
+
+    def test_legacy_import_skipped_by_default(self):
+        donation = _make_donation()
+        donation.status = "confirmed"
+        donation.save()
+        summary = reconcile_donations([donation], fetch_stripe=False, stripe_client=None)
+        self.assertEqual(summary.checked, 0)
+
+    @mock.patch("stripe.PaymentIntent.retrieve")
+    def test_stripe_amount_mismatch_detected(self, retrieve):
+        donation = _make_donation()
+        webhooks_module._confirm_donation(
+            donation,
+            {"metadata": {"donation_id": str(donation.id)}, "currency": "eur", "payment_intent": "pi_live"},
+        )
+        donation.refresh_from_db()
+        donation.stripe_payment_intent_id = "pi_live"
+        donation.save(update_fields=["stripe_payment_intent_id"])
+        retrieve.return_value = {"amount": 5000}  # €50 vs €100
+        mock_stripe = mock.Mock()
+        mock_stripe.PaymentIntent.retrieve = retrieve
+        summary = reconcile_donations([donation], fetch_stripe=True, stripe_client=mock_stripe)
+        codes = [i.code for i in summary.issues]
+        self.assertIn("stripe_amount_mismatch", codes)
