@@ -8,6 +8,8 @@ an application fee (PLATFORM_FEE_BPS; default 0 -> 100% to the charity).
 
 All money-moving calls pass an idempotency key so retries never double-charge.
 """
+import hashlib
+import json
 import logging
 import os
 
@@ -93,6 +95,43 @@ def _application_fee_minor(amount_minor: int) -> int:
     return (amount_minor * settings.PLATFORM_FEE_BPS) // 10000
 
 
+def _checkout_idempotency_key(
+    donation: Donation,
+    *,
+    amount_minor: int,
+    currency: str,
+    destination: str,
+    fee_minor: int,
+    locale: str,
+    success_url: str,
+    cancel_url: str,
+) -> str:
+    """
+    Stripe idempotency keys are scoped to the exact request body.
+
+    Using only donation.pk collides in CI: e2e_prepare imports a fixed CSV so each
+    run often creates donation id=28, while Stripe remembers checkout-donation-28
+    from an earlier job with different session params (locale, URLs, fees).
+    """
+    payload = {
+        "donation_id": donation.pk,
+        "created_at": donation.created_at.isoformat() if donation.created_at else "",
+        "amount_minor": amount_minor,
+        "currency": currency,
+        "charity_id": donation.charity_id,
+        "destination": destination,
+        "fee_minor": fee_minor,
+        "locale": locale,
+        "success_url": success_url,
+        "cancel_url": cancel_url,
+        "customer_email": donation.donor_email or "",
+    }
+    digest = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()[:24]
+    return f"checkout-donation-{donation.pk}-{digest}"
+
+
 def _resolve_payout_for_checkout(charity: Charity) -> PayoutAccount:
     """Return a payout row that exists in Stripe and can receive destination charges."""
     payout = getattr(charity, "payout_account", None)
@@ -166,11 +205,25 @@ def create_checkout_session(donation: Donation) -> str:
     if fee_minor > 0:
         payment_intent_data["application_fee_amount"] = fee_minor
 
+    locale = os.environ.get("STRIPE_CHECKOUT_LOCALE", "en")
+    success_url = f"{settings.FRONTEND_URL}/confirmation?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{settings.FRONTEND_URL}/donate?canceled=1"
+    idempotency_key = _checkout_idempotency_key(
+        donation,
+        amount_minor=amount_minor,
+        currency=currency,
+        destination=payout.stripe_account_id,
+        fee_minor=fee_minor,
+        locale=locale,
+        success_url=success_url,
+        cancel_url=cancel_url,
+    )
+
     session = s.checkout.Session.create(
         mode="payment",
-        locale=os.environ.get("STRIPE_CHECKOUT_LOCALE", "en"),
-        success_url=f"{settings.FRONTEND_URL}/confirmation?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{settings.FRONTEND_URL}/donate?canceled=1",
+        locale=locale,
+        success_url=success_url,
+        cancel_url=cancel_url,
         customer_email=donation.donor_email or None,
         line_items=[{
             "quantity": 1,
@@ -185,6 +238,6 @@ def create_checkout_session(donation: Donation) -> str:
         }],
         payment_intent_data=payment_intent_data,
         metadata={"donation_id": str(donation.id), "campaign": donation.campaign.slug if donation.campaign else ""},
-        idempotency_key=f"checkout-donation-{donation.id}",
+        idempotency_key=idempotency_key,
     )
     return session.url

@@ -507,6 +507,52 @@ class CheckoutAuthorizationTests(TestCase):
         create_session.assert_not_called()
 
 
+class CheckoutIdempotencyKeyTests(TestCase):
+    def setUp(self):
+        charity = Charity.objects.create(
+            name="C", slug="c-idem", verification_status=Charity.VERIFIED,
+        )
+        self.donation = Donation.objects.create(
+            charity=charity,
+            donor_name="D",
+            donor_email="d@example.com",
+            amount=Decimal("20.00"),
+            message="hi",
+        )
+
+    def _key(self, **overrides):
+        defaults = dict(
+            donation=self.donation,
+            amount_minor=2000,
+            currency="eur",
+            destination="acct_test",
+            fee_minor=0,
+            locale="en",
+            success_url="http://localhost:5173/confirmation?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="http://localhost:5173/donate?canceled=1",
+        )
+        defaults.update(overrides)
+        return services._checkout_idempotency_key(**defaults)
+
+    def test_same_params_same_key(self):
+        self.assertEqual(self._key(), self._key())
+
+    def test_locale_change_changes_key(self):
+        self.assertNotEqual(self._key(locale="en"), self._key(locale="es"))
+
+    def test_different_donation_rows_differ_even_if_pk_reused(self):
+        other = Donation.objects.create(
+            charity=self.donation.charity,
+            donor_name="D2",
+            donor_email="d2@example.com",
+            amount=Decimal("20.00"),
+        )
+        self.assertNotEqual(
+            self._key(donation=self.donation),
+            self._key(donation=other),
+        )
+
+
 class ReconciliationTests(TestCase):
     def test_confirmed_without_ledger_flags_issue(self):
         donation = _make_donation()
