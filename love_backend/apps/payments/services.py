@@ -125,6 +125,7 @@ def _checkout_idempotency_key(
         "success_url": success_url,
         "cancel_url": cancel_url,
         "customer_email": donation.donor_email or "",
+        "payment_method_types": "card",
     }
     digest = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
@@ -221,6 +222,7 @@ def create_checkout_session(donation: Donation) -> str:
 
     session = s.checkout.Session.create(
         mode="payment",
+        payment_method_types=["card"],
         locale=locale,
         success_url=success_url,
         cancel_url=cancel_url,
