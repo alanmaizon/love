@@ -1,4 +1,4 @@
-import { expect, type FrameLocator, type Page } from '@playwright/test';
+import { expect, type FrameLocator, type Locator, type Page } from '@playwright/test';
 
 const TEST_CARD = '4242 4242 4242 4242';
 const TEST_EXP = '12 / 34';
@@ -6,7 +6,6 @@ const TEST_CVC = '123';
 
 /**
  * Complete Stripe-hosted Checkout in test mode (card 4242…).
- * EU accordion: expand Card via listitem / "Pay with card", then page textboxes or iframes.
  */
 export async function completeStripeCheckout(page: Page, email: string) {
   await expect(page).toHaveURL(/checkout\.stripe\.com/);
@@ -22,8 +21,8 @@ export async function completeStripeCheckout(page: Page, email: string) {
     await fillStripeIframeFields(page);
   }
 
-  await submitStripeCheckout(page);
-  await page.waitForURL(/\/confirmation/, { timeout: 120_000 });
+  await fillBillingAddress(page);
+  await payAndWaitForConfirmation(page);
 }
 
 async function expandCardPaymentForm(page: Page) {
@@ -67,6 +66,31 @@ async function fillAccessibleCardFields(page: Page, timeout = 15_000): Promise<b
     await cardholder.fill('E2E Donor');
   }
   return true;
+}
+
+async function fillBillingAddress(page: Page) {
+  const country = page.getByRole('combobox', { name: /country or region/i });
+  if (await country.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    const selected = await country.inputValue().catch(() => '');
+    if (!selected) {
+      for (const code of ['IE', 'ES', 'US']) {
+        try {
+          await country.selectOption(code);
+          break;
+        } catch {
+          /* try next */
+        }
+      }
+    }
+  }
+
+  const postal = page.getByRole('textbox', { name: /postal|zip|eircode/i });
+  if (await postal.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    const current = await postal.inputValue().catch(() => '');
+    if (!current.trim()) {
+      await postal.fill('D02 X285');
+    }
+  }
 }
 
 async function fillStripeIframeFields(page: Page) {
@@ -169,11 +193,33 @@ async function fillInFrame(frame: FrameLocator, selectors: string[], value: stri
   throw new Error(`No matching field in frame for ${selectors.join(', ')}`);
 }
 
-async function submitStripeCheckout(page: Page) {
-  const submit = page.getByTestId('hosted-payment-submit-button');
-  if (await submit.isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await submit.click();
-    return;
+function payButton(page: Page): Locator {
+  return page
+    .getByTestId('hosted-payment-submit-button')
+    .or(page.getByRole('button', { name: /^pay$/i }));
+}
+
+async function payAndWaitForConfirmation(page: Page) {
+  const pay = payButton(page);
+  await expect(pay).toBeVisible({ timeout: 15_000 });
+  await expect(pay).toBeEnabled({ timeout: 45_000 });
+
+  try {
+    await Promise.all([
+      page.waitForURL(/\/confirmation/, { timeout: 120_000, waitUntil: 'commit' }),
+      pay.click(),
+    ]);
+  } catch (err) {
+    if (page.url().includes('checkout.stripe.com')) {
+      const messages = await page
+        .locator('[role="alert"], [class*="Error"], [class*="error"]')
+        .allTextContents();
+      const text = messages.map((s) => s.trim()).filter(Boolean).join(' | ');
+      throw new Error(
+        `Stripe Checkout did not redirect to confirmation (${page.url()}). ` +
+          (text ? `Messages: ${text}` : 'No error text on page.')
+      );
+    }
+    throw err;
   }
-  await page.getByRole('button', { name: /^pay$/i }).click();
 }
