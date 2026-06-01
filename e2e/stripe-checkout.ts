@@ -5,7 +5,7 @@ import { expect, type Page } from '@playwright/test';
  * EU accordion UI exposes Card number / Expiration / CVC as page textboxes when Card is expanded.
  */
 export async function completeStripeCheckout(page: Page, email: string) {
-  await expect(page).toHaveURL(/checkout\.stripe\.com/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/checkout\.stripe\.com/);
 
   const emailField = page.locator('input[type="email"], input[name="email"]').first();
   if (await emailField.isVisible().catch(() => false)) {
