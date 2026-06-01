@@ -1,5 +1,6 @@
 # Core
-Django==5.1.6
+# 5.1.x breaks Python 3.14 admin (BaseContext.__copy__ / 'dicts'); use 5.2.14+
+Django>=5.2.14,<5.3
 asgiref==3.8.1
 sqlparse==0.5.3
 tzdata==2025.1
@@ -13,8 +14,8 @@ django-cors-headers==4.7.0
 dotenv==0.9.9
 django-environ
 
-# Database
-psycopg2-binary==2.9.10
+# Database (Postgres/RDS). 2.9.10 has no py3.14 wheels — pip would try to compile C extensions.
+psycopg2-binary>=2.9.12,<3
 dj_database_url==0.5.0
 
 # Serving / static
@@ -23,7 +24,7 @@ whitenoise==6.0.0
 
 # Media: S3 via django-storages (pillow backs Django ImageField).
 # Local dev falls back to filesystem storage when AWS_STORAGE_BUCKET_NAME is unset.
-pillow==11.1.0
+Pillow>=12,<13
 django-storages>=1.14,<2
 boto3
 

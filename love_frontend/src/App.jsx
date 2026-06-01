@@ -5,6 +5,8 @@ import logo from '../public/brand-logo.svg';
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Home from './components/Home';
+import CampaignPage from './components/CampaignPage';
+import ExploreCampaigns from './components/ExploreCampaigns';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import Profile from './components/Profile';
@@ -52,6 +54,9 @@ function Header() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
+              <Link className="nav-link" to="/campaigns">Campaigns</Link>
+            </li>
+            <li className="nav-item">
               <Link className="nav-link" to="/charities">Charities</Link>
             </li>
             <li className="nav-item">
@@ -93,6 +98,8 @@ function App() {
         <main className="main-content" role="main">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/c/:slug" element={<CampaignPage />} />
+            <Route path="/campaigns" element={<ExploreCampaigns />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />

@@ -14,3 +14,12 @@ globalThis.BroadcastChannel = class {
   close() {}
   set onmessage(_) {}
 };
+
+// jsdom + vitest can ship a broken localStorage (see --localstorage-file warning).
+const storage = new Map();
+globalThis.localStorage = {
+  getItem: (key) => storage.get(key) ?? null,
+  setItem: (key, value) => storage.set(key, String(value)),
+  removeItem: (key) => storage.delete(key),
+  clear: () => storage.clear(),
+};

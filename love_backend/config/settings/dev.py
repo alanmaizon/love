@@ -1,9 +1,22 @@
 """Local development settings: DEBUG on, relaxed cookies, permissive CORS."""
 import json
 import os
+from django.db.backends.signals import connection_created
 from .base import *  # noqa: F401,F403
 
 DEBUG = True
+
+
+def _configure_sqlite(connection, **kwargs):
+    """Reduce 'database is locked' when sync-checkout and webhooks overlap."""
+    if connection.vendor != "sqlite":
+        return
+    with connection.cursor() as cursor:
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.execute("PRAGMA busy_timeout=30000;")
+
+
+connection_created.connect(_configure_sqlite)
 
 CORS_ALLOW_ALL_ORIGINS = True
 CSRF_TRUSTED_ORIGINS = json.loads(os.getenv(
@@ -15,3 +28,7 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
+
+if DATABASES["default"]["ENGINE"].endswith("sqlite3"):
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["timeout"] = 30

@@ -14,6 +14,7 @@ import stripe
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import (
     api_view,
@@ -30,6 +31,7 @@ from core.security import sanitize_stripe_event_payload
 from donations.models import Donation, LedgerEntry
 from . import services
 from .models import WebhookEvent
+from .services import _stripe_value
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +50,11 @@ def _platform_fee_from_stripe(payment_intent_id):
         return None
     try:
         pi = s.PaymentIntent.retrieve(payment_intent_id)
-        charge_id = pi.get("latest_charge")
+        charge_id = _stripe_value(pi, "latest_charge")
         if not charge_id:
             return None
         charge = s.Charge.retrieve(charge_id)
-        fee_minor = charge.get("application_fee_amount") or 0
+        fee_minor = _stripe_value(charge, "application_fee_amount") or 0
         return (Decimal(fee_minor) / Decimal(100)).quantize(Decimal("0.01"))
     except Exception:
         logger.exception("Failed to read application fee from Stripe pi=%s", payment_intent_id)
@@ -64,10 +66,10 @@ def _confirm_donation(donation, session_or_pi, currency=None):
     if donation.status == "confirmed":
         return
 
-    if isinstance(session_or_pi, dict):
-        pi = session_or_pi.get("payment_intent")
-        payment_intent_id = pi if isinstance(pi, str) else (pi or {}).get("id")
-        currency = (session_or_pi.get("currency") or donation.currency or "eur").upper()
+    if not isinstance(session_or_pi, str):
+        pi = _stripe_value(session_or_pi, "payment_intent")
+        payment_intent_id = pi if isinstance(pi, str) else _stripe_value(pi, "id")
+        currency = (_stripe_value(session_or_pi, "currency") or donation.currency or "eur").upper()
     else:
         payment_intent_id = session_or_pi
         currency = (currency or donation.currency or "eur").upper()
@@ -104,6 +106,7 @@ def _confirm_donation(donation, session_or_pi, currency=None):
     )
 
 
+@csrf_exempt
 @api_view(["POST"])
 @renderer_classes([JSONRenderer])
 @authentication_classes([])
@@ -118,8 +121,11 @@ def stripe_webhook(request):
 
     try:
         event = stripe.Webhook.construct_event(payload, sig, secret)
-    except (ValueError, stripe.error.SignatureVerificationError):
-        logger.warning("Invalid Stripe webhook signature")
+    except (ValueError, stripe.SignatureVerificationError):
+        logger.warning(
+            "Invalid Stripe webhook signature — if using Stripe CLI, copy the "
+            "whsec_ from `stripe listen` into STRIPE_WEBHOOK_SECRET and restart runserver"
+        )
         return Response({"error": "invalid signature"}, status=400)
 
     sanitized = sanitize_stripe_event_payload(event.to_dict())
@@ -152,6 +158,7 @@ def stripe_webhook(request):
         wh.status = WebhookEvent.PROCESSED
         wh.processed_at = timezone.now()
         wh.save(update_fields=["status", "processed_at", "payload", "event_type", "error"])
+        logger.info("Stripe webhook processed: %s %s", event["type"], event["id"])
     except Exception as exc:  # noqa: BLE001
         logger.exception("Webhook handler failed")
         wh.status = WebhookEvent.FAILED
@@ -164,11 +171,12 @@ def stripe_webhook(request):
 
 @transaction.atomic
 def _handle_checkout_completed(session):
-    donation_id = (session.get("metadata") or {}).get("donation_id")
+    donation_id = _stripe_value(_stripe_value(session, "metadata"), "donation_id")
     if not donation_id:
+        logger.warning("checkout.session.completed missing metadata.donation_id")
         return
 
-    payment_status = session.get("payment_status")
+    payment_status = _stripe_value(session, "payment_status")
     if payment_status == "unpaid":
         logger.info("checkout.session.completed unpaid — waiting for payment_intent.succeeded")
         return
@@ -187,22 +195,24 @@ def _handle_checkout_completed(session):
 
 @transaction.atomic
 def _handle_payment_intent_succeeded(payment_intent):
-    donation_id = (payment_intent.get("metadata") or {}).get("donation_id")
+    donation_id = _stripe_value(_stripe_value(payment_intent, "metadata"), "donation_id")
     if not donation_id:
         return
     donation = Donation.objects.select_for_update().filter(id=donation_id).first()
     if donation is None:
         return
-    currency = (payment_intent.get("currency") or donation.currency or "eur").upper()
-    _confirm_donation(donation, payment_intent.get("id"), currency=currency)
+    currency = (_stripe_value(payment_intent, "currency") or donation.currency or "eur").upper()
+    _confirm_donation(donation, _stripe_value(payment_intent, "id"), currency=currency)
 
 
 def _handle_account_updated(account):
     from donations.models import PayoutAccount
-    payout = PayoutAccount.objects.filter(stripe_account_id=account.get("id")).first()
-    if payout is None:
+    payouts = PayoutAccount.objects.filter(stripe_account_id=account.get("id"))
+    if not payouts.exists():
         return
-    payout.charges_enabled = bool(account.get("charges_enabled"))
-    payout.payouts_enabled = bool(account.get("payouts_enabled"))
-    payout.details_submitted = bool(account.get("details_submitted"))
-    payout.save(update_fields=["charges_enabled", "payouts_enabled", "details_submitted", "updated_at"])
+    fields = {
+        "charges_enabled": bool(account.get("charges_enabled")),
+        "payouts_enabled": bool(account.get("payouts_enabled")),
+        "details_submitted": bool(account.get("details_submitted")),
+    }
+    payouts.update(**fields)

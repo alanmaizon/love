@@ -6,8 +6,11 @@ import { AuthContext } from '../context/AuthContext';
 
 function DonationForm() {
   const location = useLocation();
-  const { campaign } = useContext(AuthContext);
+  const { campaign: flagshipCampaign } = useContext(AuthContext);
   const preselectedCharity = location.state?.selectedCharity || '';
+  const slugFromQuery = new URLSearchParams(location.search).get('campaign');
+  const [campaign, setCampaign] = useState(null);
+  const [campaignLoading, setCampaignLoading] = useState(!!slugFromQuery);
 
   const [charities, setCharities] = useState([]);
   const [donorName, setDonorName] = useState('');
@@ -17,6 +20,25 @@ function DonationForm() {
   const [message, setMessage] = useState('');
   const [selectedCharity, setSelectedCharity] = useState(preselectedCharity);
   const [feedback, setFeedback] = useState('');
+
+  useEffect(() => {
+    const slug = slugFromQuery || flagshipCampaign?.slug;
+    if (!slug) {
+      setCampaign(null);
+      setCampaignLoading(false);
+      return undefined;
+    }
+    if (!slugFromQuery && flagshipCampaign?.slug === slug) {
+      setCampaign(flagshipCampaign);
+      setCampaignLoading(false);
+      return undefined;
+    }
+    setCampaignLoading(true);
+    axiosInstance.get(`/campaign/${slug}/`)
+      .then((res) => setCampaign(res.data))
+      .catch(() => setCampaign(null))
+      .finally(() => setCampaignLoading(false));
+  }, [slugFromQuery, flagshipCampaign]);
 
   useEffect(() => {
     axiosInstance.get('/csrf/').catch(() => {});
@@ -49,8 +71,12 @@ function DonationForm() {
       return;
     }
 
+    if (campaignLoading) {
+      setFeedback('Campaign is still loading. Please wait a moment.');
+      return;
+    }
     if (!campaign?.slug) {
-      setFeedback('Campaign is not loaded yet. Please refresh and try again.');
+      setFeedback('Missing campaign. Open donate from a campaign page or add ?campaign=slug to the URL.');
       return;
     }
 
@@ -92,6 +118,9 @@ function DonationForm() {
       )}
       <form onSubmit={handleSubmit} noValidate role="form">
         <h2>Make a Gift</h2>
+        {campaign?.title && (
+          <p className="text-muted">Supporting: <strong>{campaign.title}</strong></p>
+        )}
         <div className="mb-3">
           <label htmlFor="donorName" className="form-label">Name</label>
           <input

@@ -63,6 +63,12 @@ put DATABASE_URL         SecureString "postgres://loveadmin:CHANGEME@<rds-endpoi
 put GOOGLE_APP_PASS      SecureString "<gmail app password>"
 put AWS_STORAGE_BUCKET_NAME String    "love-media-yourname"   # S3 bucket for uploads
 put AWS_S3_REGION_NAME      String    "$REGION"
+put STRIPE_SECRET_KEY        SecureString "sk_test_..."       # or sk_live_ when ready
+put STRIPE_PUBLISHABLE_KEY   SecureString "pk_test_..."
+put STRIPE_WEBHOOK_SECRET    SecureString "whsec_..."          # Dashboard webhook signing secret
+put FRONTEND_URL             String       "https://yourdomain.com"
+put PLATFORM_FEE_BPS         String       "0"
+put STRIPE_CURRENCY          String       "eur"
 # COOKIE_DOMAIN: leave unset, or set to ".yourdomain.com" if API+web share it.
 # Media uploads go to S3 via django-storages; boto3 uses the ECS task role for
 # auth (grant it s3:PutObject/GetObject on the media bucket) — no keys in env.
@@ -120,6 +126,11 @@ python manage.py createsuperuser
 ```
 Verify: `https://api.yourdomain.com/api/analytics/` returns total_amount = 3780,
 admin loads, a test donation flows end to end.
+
+**Stripe webhook (required for confirmed donations):** Dashboard → Webhooks →
+`https://api.yourdomain.com/api/payments/webhook/` with events
+`checkout.session.completed`, `payment_intent.succeeded`, `account.updated`.
+See [docs/PHASE1.md](docs/PHASE1.md).
 
 ---
 

@@ -1,55 +1,25 @@
 // src/components/Home.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance';
 import poppy from '../../public/poppy.svg';
 import rose from '../../public/rose.svg';
-import { FaPhoneAlt, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 
-// Import existing components
 import CountdownTimer from './CountdownTimer';
 import HomeGuestbookSection from './HomeGuestbookSection';
 import BioShort from './BioShort';
 import CoupleSection from './CoupleSection';
+import { usePublicCampaign } from '../hooks/usePublicCampaign';
 
 function Home() {
-  // -------------------------------
-  // 1) State for Public Profile
-  // -------------------------------
-  const [profile, setProfile] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(true);
-  const [profileError, setProfileError] = useState('');
+  const { campaign, profile, loading: profileLoading, error: profileError } = usePublicCampaign();
 
-  // -------------------------------
-  // 2) Fetch Data on Mount
-  // -------------------------------
-  useEffect(() => {
-    // v2: flagship campaign drives the wedding display (was /public_profile/).
-    axiosInstance.get('/campaign/')
-      .then((res) => {
-        const c = res.data;
-        setProfile({
-          bride_name: (c.host_display_name || '').split(' & ')[0] || '',
-          groom_name: (c.host_display_name || '').split(' & ')[1] || '',
-          bio: c.story || '',
-          location: c.location || '',
-          wedding_date: c.event_date,
-        });
-      })
-      .catch(() => {
-        setProfileError('Failed to load campaign data.');
-      })
-      .finally(() => {
-        setProfileLoading(false);
-      });
-  }, []);
-
-  // -------------------------------
-  // 3) Wedding Date (Memo)
-  // -------------------------------
   const weddingDate = useMemo(() => {
     return profile?.wedding_date || '2025-04-26T13:00:00+01:00';
   }, [profile]);
+
+  const donateTo = campaign?.slug
+    ? `/donate?campaign=${encodeURIComponent(campaign.slug)}`
+    : '/donate';
 
   // -------------------------------
   // 4) Render
@@ -62,12 +32,14 @@ function Home() {
         <div className="container">
           <h1>Welcome to Our Wedding Celebration</h1>
           <p>We're excited to share our special day with you!</p>
-          <Link
-            to="/donate"
-            className="btn btn-primary mt-3"
-          >
-            Donate
-          </Link>
+          <Link to={donateTo} className="btn btn-primary mt-3">Donate</Link>
+          {campaign?.slug && (
+            <p className="mt-2">
+              <Link to={`/c/${campaign.slug}`}>Shareable campaign link</Link>
+              {' · '}
+              <Link to="/campaigns">More registries</Link>
+            </p>
+          )}
         </div>
       </section>
 
@@ -103,7 +75,7 @@ function Home() {
       <section className="guestbook-section text-center" style={{ padding: '4rem 1rem' }}>
         <div className="container">
           <h2>Guestbook Messages</h2>
-          <HomeGuestbookSection />
+          <HomeGuestbookSection campaignSlug={campaign?.slug} />
         </div>
       </section>
 

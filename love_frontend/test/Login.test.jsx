@@ -38,26 +38,36 @@ describe('Login', () => {
 
   test('logs in, sets auth user from /me/, and navigates to the dashboard', async () => {
     const setAuthUser = vi.fn();
-    axiosInstance.post.mockResolvedValueOnce({ data: { message: 'Login successful' } });
-    axiosInstance.get.mockResolvedValueOnce({
-      data: { username: 'anna_alan', display_name: 'Anna & Alan', isAdmin: false },
+    axiosInstance.get.mockImplementation((url) => {
+      if (url === '/csrf/') return Promise.resolve({ data: {} });
+      if (url === '/me/') {
+        return Promise.resolve({
+          data: { authenticated: true, username: 'anna_alan', display_name: 'Anna & Alan', isAdmin: false },
+        });
+      }
+      return Promise.reject(new Error(`unexpected GET ${url}`));
     });
+    axiosInstance.post.mockResolvedValueOnce({ data: { message: 'Login successful' } });
 
     renderLogin({ setAuthUser });
+    const form = screen.getByRole('button', { name: /login/i }).closest('form');
     fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'anna_alan' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'pw' } });
-    fireEvent.click(screen.getByRole('button', { name: /login/i }));
+    fireEvent.submit(form);
 
     await waitFor(() =>
       expect(setAuthUser).toHaveBeenCalledWith(
         expect.objectContaining({ username: 'anna_alan', displayName: 'Anna & Alan', isAdmin: false })
       )
     );
+    expect(axiosInstance.get).toHaveBeenCalledWith('/csrf/');
     expect(axiosInstance.post).toHaveBeenCalledWith('/login/', { username: 'anna_alan', password: 'pw' });
+    expect(axiosInstance.get).toHaveBeenCalledWith('/me/');
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/dashboard'));
   });
 
   test('shows an error message on failed login', async () => {
+    axiosInstance.get.mockResolvedValueOnce({ data: {} }); // /csrf/
     axiosInstance.post.mockRejectedValueOnce({ response: { data: { error: 'Invalid credentials' } } });
     renderLogin();
     fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'x' } });

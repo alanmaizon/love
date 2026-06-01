@@ -55,6 +55,12 @@ class LedgerEntryAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'entry_type', 'account', 'amount', 'currency', 'donation')
     list_filter = ('entry_type', 'account', 'currency')
     # Append-only: ledger rows must never be edited or deleted from the admin.
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_staff
+
+    def has_add_permission(self, request):
+        return False
+
     def has_change_permission(self, request, obj=None):
         return False
 

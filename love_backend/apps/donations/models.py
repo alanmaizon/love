@@ -66,7 +66,9 @@ class PayoutAccount(models.Model):
     charity = models.OneToOneField(
         Charity, on_delete=models.CASCADE, related_name="payout_account"
     )
-    stripe_account_id = models.CharField(max_length=255, unique=True)
+    # Not globally unique: several charities may share one Connect account in local
+    # dev (import --stripe-account). Production uses one account per charity.
+    stripe_account_id = models.CharField(max_length=255, db_index=True)
     charges_enabled = models.BooleanField(default=False)
     payouts_enabled = models.BooleanField(default=False)
     details_submitted = models.BooleanField(default=False)  # gate "publish" on this

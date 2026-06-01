@@ -4,22 +4,33 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import DonationForm from '../src/components/DonationForm';
+import { AuthContext } from '../src/context/AuthContext';
 import axiosInstance from '../src/api/axiosInstance';
 
 vi.mock('../src/api/axiosInstance', () => ({
   default: { get: vi.fn(), post: vi.fn() },
 }));
 
-const renderForm = () =>
-  render(<MemoryRouter><DonationForm /></MemoryRouter>);
+const TEST_CAMPAIGN = { slug: 'anna-and-alan', title: "Anna & Alan's Wedding" };
 
+const renderForm = () =>
+  render(
+    <AuthContext.Provider value={{ campaign: TEST_CAMPAIGN, authUser: null, setAuthUser: vi.fn(), publicProfile: null }}>
+      <MemoryRouter><DonationForm /></MemoryRouter>
+    </AuthContext.Provider>
+  );
+
+// The component fires get('/csrf/') then get('/charities/') in the same effect.
+// Both calls must be mocked or the second returns undefined and throws.
 const loadCharities = () =>
-  axiosInstance.get.mockResolvedValueOnce({
-    data: [
-      { id: 1, name: 'Charity One' },
-      { id: 2, name: 'Charity Two' },
-    ],
-  });
+  axiosInstance.get
+    .mockResolvedValueOnce({ data: {} })  // /csrf/ — ignored
+    .mockResolvedValueOnce({
+      data: [
+        { id: 1, name: 'Charity One' },
+        { id: 2, name: 'Charity Two' },
+      ],
+    });
 
 describe('DonationForm (v2: Stripe Checkout)', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -47,7 +58,7 @@ describe('DonationForm (v2: Stripe Checkout)', () => {
     expect(axiosInstance.post).not.toHaveBeenCalled();
   });
 
-  test('posts to the checkout endpoint when the form is filled in', async () => {
+  test('posts to the checkout endpoint with campaign when the form is filled in', async () => {
     loadCharities();
     axiosInstance.post.mockResolvedValueOnce({ data: { checkout_url: 'https://stripe.test/cs_123' } });
     // jsdom can't perform real navigation; make location.href assignable so the
@@ -75,6 +86,7 @@ describe('DonationForm (v2: Stripe Checkout)', () => {
       donor_email: 'john@example.com',
       amount: 50,
       charity: '1',
+      campaign: 'anna-and-alan',
     });
   });
 });

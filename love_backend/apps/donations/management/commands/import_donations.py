@@ -34,6 +34,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from donations.models import Charity, Donation
+from donations.stripe_payout import wire_stripe_account_to_charities
 from campaigns.models import Campaign, CampaignBeneficiary
 from messaging.models import Message
 
@@ -70,10 +71,21 @@ class Command(BaseCommand):
             action="store_true",
             help="Parse and report, but write nothing to the database.",
         )
+        parser.add_argument(
+            "--stripe-account",
+            default="",
+            metavar="ACCT_ID",
+            help=(
+                "Stripe test-mode connected account id (acct_...). When set, wires "
+                "every verified charity to that account (same acct_ is OK locally). "
+                "Or run: python manage.py wire_stripe_account acct_..."
+            ),
+        )
 
     def handle(self, *args, **options):
         path = options["csv"]
         dry_run = options["dry_run"]
+        stripe_account = (options.get("stripe_account") or "").strip()
 
         try:
             with open(path, newline="", encoding="utf-8") as fh:
@@ -81,7 +93,7 @@ class Command(BaseCommand):
         except FileNotFoundError:
             raise CommandError(f"CSV not found: {path}")
 
-        stats = self._import(rows, dry_run)
+        stats = self._import(rows, dry_run, stripe_account)
 
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS(
@@ -95,7 +107,7 @@ class Command(BaseCommand):
         ))
 
     @transaction.atomic
-    def _import(self, rows, dry_run):
+    def _import(self, rows, dry_run, stripe_account=""):
         stats = {"charities": 0, "created": 0, "skipped": 0, "messages": 0, "junk": 0}
 
         # --- 1. Charities (verified) ---
@@ -104,6 +116,13 @@ class Command(BaseCommand):
             charity = self._upsert_charity(info)
             charity_by_csv_id[csv_id] = charity
             stats["charities"] += 1
+
+        if stripe_account and not dry_run:
+            for name, created, sid in wire_stripe_account_to_charities(
+                stripe_account, charity_by_csv_id.values(),
+            ):
+                verb = "wired (new)" if created else "wired"
+                self.stdout.write(f"  · {verb} {name} -> {sid}")
 
         # --- 2. Flagship campaign + beneficiaries ---
         campaign = self._get_or_create_campaign()

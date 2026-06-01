@@ -89,6 +89,8 @@ python manage.py migrate
 python manage.py runserver
 # seed real history (idempotent; preserves dates; does NOT email guests):
 python manage.py import_donations --csv ../love_frontend/public/data/donations.csv
+# Phase 0 smoke (no Stripe network): pending → webhook → ledger → receipt
+python manage.py smoke_donate_flow --drain
 
 # frontend
 cd love_frontend && npm ci && npm run dev      # build: npm run build ; test: npm test

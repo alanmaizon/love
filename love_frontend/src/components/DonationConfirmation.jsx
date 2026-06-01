@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
+
+// React Strict Mode runs effects twice; avoid duplicate sync-checkout POSTs on SQLite.
+const syncInFlight = new Set();
 
 // v2: donors return here from Stripe-hosted Checkout (success_url carries
 // ?session_id=...). Payment already happened on Stripe — no Revolut links, no
@@ -9,6 +13,29 @@ function DonationConfirmation() {
   const params = new URLSearchParams(location.search);
   const sessionId = params.get('session_id');
   const donation = location.state?.donation;
+  const [syncStatus, setSyncStatus] = useState(null);
+
+  // Local dev: Stripe Dashboard/CLI webhooks often never hit localhost — confirm
+  // from the cs_ id on the success URL (DEBUG-only API).
+  useEffect(() => {
+    if (!sessionId || syncInFlight.has(sessionId)) return undefined;
+    syncInFlight.add(sessionId);
+    let cancelled = false;
+    (async () => {
+      try {
+        await axiosInstance.get('/csrf/');
+        const { data } = await axiosInstance.post('/payments/sync-checkout/', {
+          session_id: sessionId,
+        });
+        if (!cancelled) setSyncStatus(data.status === 'confirmed' ? 'confirmed' : data.status);
+      } catch {
+        if (!cancelled) setSyncStatus('pending');
+      } finally {
+        syncInFlight.delete(sessionId);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [sessionId]);
 
   return (
     <div className="container mt-5 text-center">
@@ -21,6 +48,12 @@ function DonationConfirmation() {
       )}
       {sessionId && (
         <p className="text-muted"><small>Payment reference: {sessionId}</small></p>
+      )}
+      {syncStatus === 'pending' && (
+        <p className="text-warning small">
+          Payment received by Stripe; confirmation is still processing. If this persists,
+          run <code>stripe listen --forward-to localhost:8000/api/payments/webhook/</code>.
+        </p>
       )}
       <p>A receipt will be emailed to you shortly.</p>
       <div className="mt-4">

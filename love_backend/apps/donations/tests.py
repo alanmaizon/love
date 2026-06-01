@@ -521,6 +521,16 @@ class OnboardingFlowTests(APITestCase):
         self.assertIn("onboarding_url", ok.json())
 
 
+class WireStripeAccountTests(APITestCase):
+    def test_same_acct_id_on_multiple_charities(self):
+        from donations.stripe_payout import wire_stripe_account_to_charities
+        from donations.models import PayoutAccount
+        c1 = Charity.objects.create(name="A", slug="a", verification_status=Charity.VERIFIED)
+        c2 = Charity.objects.create(name="B", slug="b", verification_status=Charity.VERIFIED)
+        wire_stripe_account_to_charities("acct_shared_test", [c1, c2])
+        self.assertEqual(PayoutAccount.objects.filter(stripe_account_id="acct_shared_test").count(), 2)
+
+
 class LegacyModuleTests(APITestCase):
     def test_retired_v1_charts_module_not_importable(self):
         import importlib

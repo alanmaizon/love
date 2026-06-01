@@ -21,6 +21,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      await axiosInstance.get('/csrf/').catch(() => {});
       await axiosInstance.post('/login/', { username, password });
       localStorage.removeItem('loggedOut');
 

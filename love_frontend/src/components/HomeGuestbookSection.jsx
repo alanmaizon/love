@@ -4,11 +4,12 @@ import GuestMessagesCarousel from './GuestMessagesCarousel';
 
 // v2: guest messages come from the moderated API (approved only), not the static
 // CSV. Mapped to the {donor_name, message} shape GuestMessagesCarousel expects.
-function HomeGuestbookSection() {
+function HomeGuestbookSection({ campaignSlug }) {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    axiosInstance.get('/messages/?campaign=anna-and-alan')
+    if (!campaignSlug) return undefined;
+    axiosInstance.get(`/messages/?campaign=${encodeURIComponent(campaignSlug)}`)
       .then((res) => {
         const list = Array.isArray(res.data) ? res.data : res.data?.results || [];
         setMessages(
@@ -18,7 +19,7 @@ function HomeGuestbookSection() {
         );
       })
       .catch((error) => console.error('Error loading messages:', error));
-  }, []);
+  }, [campaignSlug]);
 
   return <GuestMessagesCarousel messages={messages} />;
 }

@@ -18,6 +18,7 @@ from campaigns.models import Campaign
 from core.models import OutboxEvent
 from donations.models import Charity, Donation, LedgerEntry, PayoutAccount, Receipt
 from payments.models import WebhookEvent
+from payments import services
 from payments import webhooks as webhooks_module
 
 
@@ -123,6 +124,21 @@ class WebhookProcessingTests(TestCase):
         self.assertEqual(LedgerEntry.objects.filter(donation=self.donation).count(), 0)
 
 
+class SmokeDonateFlowTests(TestCase):
+    """Phase 0: donation confirm path without Stripe network."""
+
+    def test_smoke_donate_flow_command(self):
+        from django.core.management import call_command
+        from io import StringIO
+        call_command("import_donations", csv="../love_frontend/public/data/donations.csv", stdout=StringIO())
+        out = StringIO()
+        with mock.patch("donations.helpers.send_donation_confirmation_email"):
+            call_command("smoke_donate_flow", "--drain", stdout=out)
+        self.assertIn("Phase 0 smoke OK", out.getvalue())
+        self.assertTrue(Donation.objects.filter(status="confirmed").exists())
+        self.assertTrue(Receipt.objects.filter(donation__donor_email="smoke@example.com").exists())
+
+
 class OutboxDrainTests(TestCase):
     def test_drain_issues_one_receipt(self):
         donation = _make_donation()
@@ -138,6 +154,36 @@ class OutboxDrainTests(TestCase):
             call_command("drain_outbox")  # second run must not duplicate
         self.assertEqual(Receipt.objects.filter(donation=donation).count(), 1)
         self.assertEqual(OutboxEvent.objects.filter(status=OutboxEvent.DONE).count(), 1)
+
+
+class PayoutValidationTests(TestCase):
+    def test_resolve_payout_reads_stripe_account_object(self):
+        """Account.retrieve returns StripeObject, not dict — must not call .get()."""
+        charity = Charity.objects.create(
+            name="Y", slug="y", verification_status=Charity.VERIFIED,
+        )
+        PayoutAccount.objects.create(
+            charity=charity, stripe_account_id="acct_test123", charges_enabled=True,
+        )
+
+        class FakeAccount:
+            charges_enabled = True
+
+        with mock.patch("payments.services._client") as client:
+            client.return_value.Account.retrieve.return_value = FakeAccount()
+            payout = services._resolve_payout_for_checkout(charity)
+        self.assertEqual(payout.stripe_account_id, "acct_test123")
+
+    def test_placeholder_account_rejected(self):
+        charity = Charity.objects.create(
+            name="X", slug="x", verification_status=Charity.VERIFIED,
+        )
+        PayoutAccount.objects.create(
+            charity=charity, stripe_account_id="acct_smoke_test", charges_enabled=True,
+        )
+        with self.assertRaises(ValueError) as ctx:
+            services._resolve_payout_for_checkout(charity)
+        self.assertIn("placeholder", str(ctx.exception).lower())
 
 
 class CheckoutAuthorizationTests(TestCase):

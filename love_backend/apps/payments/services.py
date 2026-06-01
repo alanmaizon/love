@@ -17,12 +17,28 @@ from donations.models import Charity, Donation, PayoutAccount
 
 logger = logging.getLogger(__name__)
 
+# Local smoke/webhook tests only — never sent to Stripe as transfer destinations.
+_PLACEHOLDER_ACCOUNT_PREFIXES = ("acct_smoke",)
+
 
 def _client():
     if not settings.STRIPE_SECRET_KEY:
         raise RuntimeError("STRIPE_SECRET_KEY is not configured")
     stripe.api_key = settings.STRIPE_SECRET_KEY
     return stripe
+
+
+def _stripe_value(obj, key: str, default=None):
+    """Read a field from a Stripe API object or a webhook/event dict."""
+    if obj is None:
+        return default
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
+def _stripe_bool(obj, key: str) -> bool:
+    return bool(_stripe_value(obj, key, False))
 
 
 # --- Connect onboarding -----------------------------------------------------
@@ -64,9 +80,9 @@ def refresh_account_status(charity: Charity) -> PayoutAccount:
     s = _client()
     payout = charity.payout_account
     acct = s.Account.retrieve(payout.stripe_account_id)
-    payout.charges_enabled = bool(acct.get("charges_enabled"))
-    payout.payouts_enabled = bool(acct.get("payouts_enabled"))
-    payout.details_submitted = bool(acct.get("details_submitted"))
+    payout.charges_enabled = _stripe_bool(acct, "charges_enabled")
+    payout.payouts_enabled = _stripe_bool(acct, "payouts_enabled")
+    payout.details_submitted = _stripe_bool(acct, "details_submitted")
     payout.save(update_fields=["charges_enabled", "payouts_enabled", "details_submitted", "updated_at"])
     return payout
 
@@ -74,6 +90,42 @@ def refresh_account_status(charity: Charity) -> PayoutAccount:
 # --- Checkout ---------------------------------------------------------------
 def _application_fee_minor(amount_minor: int) -> int:
     return (amount_minor * settings.PLATFORM_FEE_BPS) // 10000
+
+
+def _resolve_payout_for_checkout(charity: Charity) -> PayoutAccount:
+    """Return a payout row that exists in Stripe and can receive destination charges."""
+    payout = getattr(charity, "payout_account", None)
+    if not payout or not payout.charges_enabled:
+        raise ValueError(
+            "Charity payout account is not ready (charges disabled). "
+            "Complete Stripe Connect onboarding for this charity."
+        )
+    acct_id = (payout.stripe_account_id or "").strip()
+    if not acct_id.startswith("acct_"):
+        raise ValueError("Charity payout account is misconfigured.")
+    if any(acct_id.startswith(p) for p in _PLACEHOLDER_ACCOUNT_PREFIXES):
+        raise ValueError(
+            "Charity uses a placeholder Stripe account from a local smoke test. "
+            "Run: python manage.py repair_placeholder_payouts "
+            "then import_donations --stripe-account acct_... or Connect onboarding."
+        )
+
+    s = _client()
+    try:
+        acct = s.Account.retrieve(acct_id)
+    except stripe.InvalidRequestError as exc:
+        logger.warning("Stripe account %s invalid: %s", acct_id, exc)
+        raise ValueError(
+            f"Stripe does not recognize connected account {acct_id}. "
+            "Use a test-mode acct_ from your Stripe Dashboard or re-run "
+            "import_donations --stripe-account acct_..."
+        ) from exc
+    if not _stripe_bool(acct, "charges_enabled"):
+        raise ValueError(
+            "Charity Stripe account exists but charges are not enabled yet. "
+            "Finish Connect onboarding in the Stripe Dashboard."
+        )
+    return payout
 
 
 def create_checkout_session(donation: Donation) -> str:
@@ -88,9 +140,7 @@ def create_checkout_session(donation: Donation) -> str:
 
     if not charity.is_verified:
         raise ValueError("Charity is not verified; cannot accept donations.")
-    payout = getattr(charity, "payout_account", None)
-    if not payout or not payout.charges_enabled:
-        raise ValueError("Charity payout account is not ready (charges disabled).")
+    payout = _resolve_payout_for_checkout(charity)
 
     amount_minor = int(donation.amount * 100)
     currency = (donation.currency or settings.STRIPE_CURRENCY).lower()

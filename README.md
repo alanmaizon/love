@@ -11,7 +11,7 @@ Stripe to a *verified* charity, with an append-only ledger, content moderation,
 and row-level multitenancy. The real wedding it started as (27 gifts, **€3,780**,
 27 guest messages) is migrated in as the **flagship campaign**.
 
-📐 [SCHEMA_DESIGN.md](SCHEMA_DESIGN.md) · 🚀 [DEPLOY.md](DEPLOY.md) · 🤝 [CLAUDE.md](CLAUDE.md)
+📐 [SCHEMA_DESIGN.md](SCHEMA_DESIGN.md) · 🚀 [DEPLOY.md](DEPLOY.md) · 🤝 [CLAUDE.md](CLAUDE.md) · 📋 [Phase 0](docs/PHASE0.md) · 🚢 [Phase 1](docs/PHASE1.md) · 🎉 [Phase 2](docs/PHASE2.md) · 🔌 [API v2](docs/API_V2.md)
 
 ---
 
@@ -67,19 +67,21 @@ stripe listen --forward-to localhost:8000/api/payments/webhook/
 The `whsec_…` it prints is your `STRIPE_WEBHOOK_SECRET`. A test donation then
 flows: Checkout → webhook → `LedgerEntry` + `Receipt` (via the outbox).
 
+**Quick verify (no Stripe network):**
+```bash
+cd love_backend && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py smoke_donate_flow --drain
+```
+See [docs/PHASE0.md](docs/PHASE0.md) for the full stabilization checklist.
+
 ## Tests
 ```bash
-# backend — 34 tests: authz boundary, no-PII contract, idempotent webhook, ledger
+# backend — donations, payments, smoke command
 cd love_backend && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py test donations payments
 
-# frontend — vitest (see note below)
-cd love_frontend && npm test
+# frontend — vitest (DonationForm, Login, axios CSRF contract, dashboards)
+cd love_frontend && npm test -- --run
 ```
-> **Frontend test note:** the backend suite is the source of truth for v2
-> behavior. Several React unit suites were inherited from v0 and assert old UI /
-> mock `axios` in a way that predates the shared axios instance; they need a
-> refresh. `DonationConfirmation` is updated for the Stripe flow; the others are
-> tracked as a known cleanup.
+> **API changes:** see [docs/API_V2.md](docs/API_V2.md) (CSRF, register→login, checkout `campaign` + email).
 
 ## Core invariants (do not violate)
 1. Money can only ever reach a **verified** `Charity`.
