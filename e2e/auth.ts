@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
-const WEB_ORIGIN = process.env.E2E_BASE_URL || 'http://127.0.0.1:5173';
+const WEB_ORIGIN = process.env.E2E_BASE_URL || 'http://localhost:5173';
 const API_URL = process.env.E2E_API_URL || WEB_ORIGIN;
 
 /** Session login via API (reliable CSRF cookies in Playwright vs SPA form). */

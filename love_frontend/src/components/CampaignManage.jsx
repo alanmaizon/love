@@ -34,6 +34,7 @@ function CampaignManage() {
   };
 
   useEffect(() => {
+    axiosInstance.get('/csrf/').catch(() => {});
     load();
   }, [slug]);
 

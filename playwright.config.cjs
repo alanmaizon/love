@@ -4,7 +4,7 @@ const path = require('path');
 const root = __dirname;
 
 const apiUrl = process.env.E2E_API_URL || 'http://127.0.0.1:8000';
-const webUrl = process.env.E2E_BASE_URL || 'http://127.0.0.1:5173';
+const webUrl = process.env.E2E_BASE_URL || 'http://localhost:5173';
 
 module.exports = defineConfig({
   testDir: path.join(root, 'e2e'),
@@ -40,7 +40,7 @@ module.exports = defineConfig({
         },
         {
           command:
-            'cd love_frontend && VITE_API_URL=http://127.0.0.1:5173 npm run dev -- --host 127.0.0.1 --port 5173',
+            'cd love_frontend && VITE_API_URL=http://localhost:5173 npm run dev -- --host 127.0.0.1 --port 5173',
           url: webUrl,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

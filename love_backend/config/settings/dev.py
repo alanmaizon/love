@@ -20,9 +20,13 @@ def _configure_sqlite(connection, **kwargs):
 connection_created.connect(_configure_sqlite)
 
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = json.loads(os.getenv(
+_csrf_origins = json.loads(os.getenv(
     "CSRF_TRUSTED_ORIGINS", '["http://localhost:5173","http://127.0.0.1:5173"]',
 ))
+for _origin in ("http://localhost:5173", "http://127.0.0.1:5173"):
+    if _origin not in _csrf_origins:
+        _csrf_origins.append(_origin)
+CSRF_TRUSTED_ORIGINS = _csrf_origins
 
 # Plain http://localhost — do not require HTTPS-only / cross-site cookies.
 SESSION_COOKIE_SECURE = False
