@@ -86,7 +86,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Wired {acct} to {verified.count()} charities"))
         os.environ["E2E_STRIPE_ACCOUNT_ID"] = acct
 
-        host_password = os.environ.get("E2E_HOST_PASSWORD", "e2e-test-pass-12!")
+        # `or` (not get-default): CI writes E2E_HOST_PASSWORD= (empty) when the
+        # secret is unset, and the Playwright side falls back the same way, so
+        # both must resolve an empty value to the shared default.
+        host_password = os.environ.get("E2E_HOST_PASSWORD") or "e2e-test-pass-12!"
         host, created = User.objects.get_or_create(
             username=HOST_USERNAME,
             defaults={"first_name": "Anna & Alan", "email": "e2e-host@invalid.local"},

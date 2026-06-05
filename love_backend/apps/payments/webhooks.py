@@ -49,6 +49,10 @@ def _platform_fee_from_stripe(payment_intent_id):
     s = _stripe_client()
     if not s or not payment_intent_id:
         return None
+    # Synthetic ids from the E2E confirm hook never exist in Stripe; skip the
+    # lookup (and the noisy error log) and let the caller use the persisted fee.
+    if str(payment_intent_id).startswith("pi_e2e_"):
+        return None
     try:
         pi = s.PaymentIntent.retrieve(payment_intent_id)
         charge_id = _stripe_value(pi, "latest_charge")
