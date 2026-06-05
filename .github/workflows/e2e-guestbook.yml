@@ -1,4 +1,9 @@
-# Optional: live Stripe guestbook E2E (Playwright).
+# Guestbook E2E (Playwright). CI runs the DECOUPLED test: it asserts the backend
+# creates a valid Stripe Checkout Session, confirms the donation via the real
+# webhook code path (DEBUG + E2E_TEST_HOOKS), then drives the browser through
+# guestbook → approve → public. The full live Stripe-hosted Checkout UI walk
+# (@live) is excluded from CI (Stripe blocks headless traffic); run it locally
+# with `npm run e2e:live`.
 #
 # Repository SECRETS (not variables):
 #   STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY  — required
@@ -59,6 +64,7 @@ jobs:
           CSRF_TRUSTED_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173"]
           CORS_ALLOWED_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173"]
           FRONTEND_URL=http://localhost:5173
+          E2E_TEST_HOOKS=True
           EOF
 
       - name: Install frontend deps

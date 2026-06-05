@@ -8,11 +8,14 @@ const webUrl = process.env.E2E_BASE_URL || 'http://localhost:5173';
 
 module.exports = defineConfig({
   testDir: path.join(root, 'e2e'),
-  timeout: 240_000,
+  timeout: 120_000,
   expect: { timeout: 30_000 },
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
+  // The live Stripe-hosted Checkout walk (@live) is unreliable in headless CI
+  // (Stripe blocks datacenter/automated traffic). Run it locally via `e2e:live`.
+  grepInvert: process.env.E2E_INCLUDE_LIVE === '1' ? undefined : /@live/,
   reporter: [['list'], ['html', { open: 'never' }]],
   globalSetup: path.join(root, 'e2e', 'global-setup.cjs'),
   use: {
@@ -32,7 +35,7 @@ module.exports = defineConfig({
     : [
         {
           command:
-            'cd love_backend && . .venv/bin/activate && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py runserver 127.0.0.1:8000',
+            'cd love_backend && . .venv/bin/activate && DJANGO_SETTINGS_MODULE=config.settings.dev E2E_TEST_HOOKS=1 python manage.py runserver 127.0.0.1:8000',
           url: `${apiUrl}/health/`,
           // Reuse only when explicitly requested; a stale `npm run dev` without
           // VITE_API_URL + /api proxy breaks session/CSRF and hangs on Approve.

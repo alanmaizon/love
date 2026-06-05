@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "e2e": "playwright test -c playwright.config.cjs",
+    "e2e:live": "E2E_INCLUDE_LIVE=1 playwright test -c playwright.config.cjs -g @live",
     "e2e:ui": "playwright test -c playwright.config.cjs --ui",
     "e2e:prepare": "cd love_backend && . .venv/bin/activate && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py e2e_prepare",
     "e2e:install": "playwright install chromium"

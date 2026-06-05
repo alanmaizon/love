@@ -204,6 +204,45 @@ def sync_checkout_session(request):
 
 @api_view(["POST"])
 @renderer_classes([JSONRenderer])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def e2e_confirm_donation(request):
+    """
+    Test-only: confirm a donation by id through the real webhook code path,
+    without driving Stripe's hosted Checkout UI (which blocks headless CI traffic).
+
+    Guarded by DEBUG *and* settings.E2E_TEST_HOOKS so it can never run in prod.
+    """
+    if not (settings.DEBUG and getattr(settings, "E2E_TEST_HOOKS", False)):
+        return Response({"error": "not available"}, status=404)
+    if not request_origin_allowed(request):
+        return Response({"error": "Invalid request origin."}, status=403)
+
+    donation_id = request.data.get("donation_id")
+    donation = Donation.objects.filter(id=donation_id).first() if donation_id else None
+    if donation is None:
+        return Response({"error": "Donation not found."}, status=404)
+
+    if donation.status != "confirmed":
+        # Synthetic session mirrors a paid checkout.session.completed event so the
+        # confirm path writes the ledger, outbox, and pending guestbook message.
+        _handle_checkout_completed({
+            "metadata": {"donation_id": str(donation.id)},
+            "payment_status": "paid",
+            "currency": (donation.currency or "eur").lower(),
+            "payment_intent": f"pi_e2e_{donation.id}",
+        })
+        donation.refresh_from_db()
+
+    return Response({
+        "donation_id": donation.id,
+        "status": donation.status,
+        "stripe_payment_intent_id": donation.stripe_payment_intent_id,
+    })
+
+
+@api_view(["POST"])
+@renderer_classes([JSONRenderer])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def start_connect_onboarding(request):

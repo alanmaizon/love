@@ -118,6 +118,11 @@ MAX_CHECKOUT_AMOUNT = None if _max_checkout == "" else _max_checkout
 WEBHOOK_PAYLOAD_RETENTION_DAYS = int(os.environ.get("WEBHOOK_PAYLOAD_RETENTION_DAYS", "90"))
 ADMIN_REQUIRE_2FA = os.environ.get("ADMIN_REQUIRE_2FA", "False") == "True"
 
+# Test-only hooks (e.g. confirm a donation without driving Stripe's hosted
+# Checkout UI in CI). Endpoints guard on DEBUG *and* this flag, so they are
+# unavailable in production even if DEBUG were accidentally on.
+E2E_TEST_HOOKS = os.environ.get("E2E_TEST_HOOKS", "False").lower() in ("true", "1", "yes")
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [

@@ -343,6 +343,63 @@ class SyncCheckoutGuestbookTests(TestCase):
         self.assertEqual(msg.moderation_status, Message.PENDING)
 
 
+class E2EConfirmDonationTests(TestCase):
+    """Test-only confirm-by-id hook used by the decoupled CI E2E (no Stripe UI)."""
+
+    def setUp(self):
+        self.client = APIClient()
+        charity = Charity.objects.create(
+            name="E2E", slug="e2e-c", verification_status=Charity.VERIFIED,
+        )
+        PayoutAccount.objects.create(
+            charity=charity, stripe_account_id="acct_e2e", charges_enabled=True,
+        )
+        host = User.objects.create_user(username="e2ehost", password="x")
+        self.campaign = Campaign.objects.create(
+            owner=host, type=Campaign.WEDDING, title="E", slug="e2e-camp",
+            visibility=Campaign.PUBLIC, status=Campaign.ACTIVE, event_date=date(2025, 6, 1),
+        )
+        from campaigns.models import CampaignBeneficiary
+        CampaignBeneficiary.objects.create(
+            campaign=self.campaign, charity=charity, split_percent=100,
+        )
+        self.donation = Donation.objects.create(
+            charity=charity, campaign=self.campaign, donor_name="E2E Guest",
+            donor_email="e2e@example.com", amount=Decimal("20"),
+            message="E2E hook says hi", status="pending",
+        )
+        from django.conf import settings
+        self.origin = getattr(settings, "FRONTEND_URL", "http://localhost:5173")
+
+    def _post(self):
+        return self.client.post(
+            "/api/payments/e2e-confirm/",
+            {"donation_id": self.donation.id},
+            format="json",
+            HTTP_ORIGIN=self.origin,
+        )
+
+    def test_unavailable_without_test_hooks(self):
+        with self.settings(DEBUG=True, E2E_TEST_HOOKS=False):
+            self.assertEqual(self._post().status_code, 404)
+
+    def test_unavailable_when_not_debug(self):
+        with self.settings(DEBUG=False, E2E_TEST_HOOKS=True):
+            self.assertEqual(self._post().status_code, 404)
+
+    def test_confirms_and_creates_pending_message(self):
+        with self.settings(DEBUG=True, E2E_TEST_HOOKS=True, STRIPE_SECRET_KEY=""):
+            resp = self._post()
+        self.assertEqual(resp.status_code, 200, resp.content)
+        self.assertEqual(resp.json()["status"], "confirmed")
+        self.donation.refresh_from_db()
+        self.assertEqual(self.donation.status, "confirmed")
+        self.assertTrue(LedgerEntry.objects.filter(donation=self.donation).exists())
+        msg = Message.objects.get(donation=self.donation)
+        self.assertEqual(msg.body, "E2E hook says hi")
+        self.assertEqual(msg.moderation_status, Message.PENDING)
+
+
 class SmokeDonateFlowTests(TestCase):
     """Phase 0: donation confirm path without Stripe network."""
 

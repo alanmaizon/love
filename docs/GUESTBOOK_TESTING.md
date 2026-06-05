@@ -73,7 +73,14 @@ npm run e2e:install
 npm run e2e
 ```
 
-`e2e_prepare` runs in global setup (migrate, seed, wire Connect, reset `anna_alan` password). The spec donates with message `4242…` on `checkout.stripe.com`, syncs via thank-you (`DEBUG`), host approves on manage, asserts public API + campaign page.
+`e2e_prepare` runs in global setup (migrate, seed, wire Connect, reset `anna_alan` password).
+
+There are two specs:
+
+- **`guestbook-donate.spec.ts` (default, CI):** decoupled. Fills the donate form, asserts the backend returns a valid `checkout.stripe.com` session URL + `donation_id` (Stripe's hosted page is **not** driven), confirms the donation through the real webhook code path via `POST /api/payments/e2e-confirm/` (gated on `DEBUG` **and** `E2E_TEST_HOOKS`), then drives the browser: pending guestbook → host approves on manage → public.
+- **`guestbook-donate.live.spec.ts` (`@live`, local only):** the full Stripe-hosted Checkout card walk. Excluded from CI because Stripe blocks headless/datacenter traffic with an agent-identity challenge and never completes the charge. Run it with `npm run e2e:live`.
+
+Why decoupled: the Stripe-hosted page is PCI SAQ-A territory — you don't own or control it, so automating it in CI tests Stripe, not this app, and is chronically brittle.
 
 Skip bundled servers only if you start them with the same settings Playwright uses:
 
@@ -100,7 +107,7 @@ Workflow [`.github/workflows/e2e-guestbook.yml`](../.github/workflows/e2e-guestb
 - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` (required)
 - Optional: `E2E_STRIPE_ACCOUNT_ID`, `E2E_HOST_PASSWORD`
 
-`VITE_API_URL` is **not** a secret — CI sets it in the Playwright `webServer` command (`http://localhost:5173`) so the Vite `/api` proxy and CSRF work. Checkout uses `locale=en` by default (`STRIPE_CHECKOUT_LOCALE`) for a stable Stripe UI in headless CI.
+`VITE_API_URL` is **not** a secret — CI sets it in the Playwright `webServer` command (`http://localhost:5173`) so the Vite `/api` proxy and CSRF work. The backend webServer sets `E2E_TEST_HOOKS=1` so the decoupled confirm hook is available (it stays 404 in production, which never runs with `DEBUG`).
 
 `e2e_prepare` deletes prior rows whose body starts with `E2E guestbook ` so the manage UI stays uncluttered.
 
