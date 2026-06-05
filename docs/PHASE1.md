@@ -6,6 +6,30 @@
 
 ---
 
+## One-command go-live (recommended)
+
+[`scripts/phase1-golive.sh`](../scripts/phase1-golive.sh) wires the steps below into
+idempotent, re-runnable subcommands. It reads everything from Terraform outputs and
+reuses `phase1-ssm.sh` / `phase1-deploy-frontend.sh`.
+
+```bash
+cd love
+export AWS_REGION=eu-west-1
+export TF_VAR_db_password='…'            # or create infra/terraform/terraform.tfvars
+
+./scripts/phase1-golive.sh all                    # infra → ssm → image → migrate → frontend → verify
+./scripts/phase1-golive.sh acm api.YOURDOMAIN.com # HTTPS: prints DNS CNAME, waits, re-applies
+./scripts/phase1-golive.sh frontend               # rebuild SPA against the https:// API
+./scripts/phase1-golive.sh webhook whsec_…        # after adding the Stripe Dashboard endpoint
+```
+
+`acm` and `webhook` are separate because each needs one manual action (add the DNS
+record / create the Stripe endpoint); the script automates everything around them.
+Run `./scripts/phase1-golive.sh help` for the full subcommand list. The manual,
+per-step path below is equivalent and useful for debugging.
+
+---
+
 ## Quick path (Terraform)
 
 Full detail: [infra/README.md](../infra/README.md)
