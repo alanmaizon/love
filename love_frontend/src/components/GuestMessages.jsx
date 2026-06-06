@@ -19,7 +19,11 @@ function GuestMessages() {
         setMessages(
           list
             .filter((m) => m.body && m.body.trim() !== '')
-            .map((m) => ({ donor_name: m.display_name, message: m.body })),
+            .map((m) => ({
+              donor_name: m.display_name,
+              message: m.body,
+              created_at: m.published_at || m.created_at,
+            })),
         );
       })
       .catch((error) => console.error('Error loading messages:', error));

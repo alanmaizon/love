@@ -15,7 +15,13 @@ function HomeGuestbookSection({ campaignSlug }) {
         setMessages(
           list
             .filter((m) => m.body && m.body.trim() !== '')
-            .map((m) => ({ donor_name: m.display_name, message: m.body })),
+            .map((m) => ({
+              donor_name: m.display_name,
+              message: m.body,
+              // "Gifted on" date — published_at carries the original gift date
+              // for seeded history; created_at for live messages.
+              created_at: m.published_at || m.created_at,
+            })),
         );
       })
       .catch((error) => console.error('Error loading messages:', error));

@@ -63,10 +63,12 @@ function GuestMessagesCarousel({ messages, autoScrollDelay = 10000 }) {
           <div key={msg.id} className="card-square">
             {/* Main Message Centered */}
             <p className="card-message">{msg.message}</p>
-            {/* Date at Bottom Left */}
-            <small className="card-date">
-              Gifted on {new Date(msg.created_at).toLocaleDateString()}
-            </small>
+            {/* Date at Bottom Left (omit when missing/invalid) */}
+            {msg.created_at && !Number.isNaN(new Date(msg.created_at).getTime()) && (
+              <small className="card-date">
+                Gifted on {new Date(msg.created_at).toLocaleDateString()}
+              </small>
+            )}
             {/* Donor Name as Signature at Bottom Right */}
             <small className="card-signature">{msg.donor_name}</small>
           </div>
