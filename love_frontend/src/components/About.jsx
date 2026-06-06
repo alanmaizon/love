@@ -42,13 +42,12 @@ function Bio() {
           <h1 style={{ color: '#EAD7BB' }}>Thank you for your support</h1>
           <p style={{ color: '#EAD7BB' }}>
             We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
-            we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
-            together, and the other <strong>50% will go directly to some of the charities</strong> we care about.
+            in lieu of gifts we asked our guests to give instead — and <strong>100% of every donation
+            goes directly to the charities</strong> we care about.
           </p>
           <p style={{ color: '#EAD7BB' }}>
-            This way, your love and generosity not only supports our future, but also helps important causes 
-            that we believe in. We hope to use the 50% of your donation that’s going to us towards a trip to Argentina to visit Alan’s family, who Anna hasn’t met yet. 
-            This would be a dream come true for us!
+            This way, your love and generosity supports important causes 
+            that we believe in. Thank you for being part of our day and for your donation to these wonderful causes.
           </p>
         </div>
       </div>
@@ -73,10 +72,10 @@ function Bio() {
         </p>
         <p>
           Your love, support, presence and prayers on our wedding day, whether in person or virtually, 
-          are the greatest gifts you could give to us. However, if you wish to contribute in another way, 
-          we would greatly appreciate a little something to start us off as we set up our life together, 
-          and at the same time, allowing us to share our love more broadly and in a more concrete and practical way, 
-          through the three charitable organisations that we have chosen. Hence, this website, instead of traditional gifts! 
+          are the greatest gifts you could give to us. If you wish to contribute in another way, 
+          we invite you to share in our joy by giving to the three charitable organisations we have chosen — 
+          every donation goes directly to them. This lets us celebrate by doing a little good in the world, 
+          in a concrete and practical way. Hence, this website, instead of traditional gifts! 
         </p>
         <p>
           There are countless organisations doing great work, so we have chosen just three that inspire us 

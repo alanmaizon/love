@@ -157,6 +157,14 @@ form .form-group {
   margin-bottom: 20px;
 }
 
+/* Muted/secondary text: Bootstrap's default gray (#6c757d) reads as near-black
+   and fails contrast on the brown theme. Use a dimmed beige instead. */
+.text-muted,
+.card .text-muted,
+.text-muted small {
+  color: #CBB49A !important;
+}
+
 /* 🎨 Layout Fixes */
 .container {
   max-width: 1200px;

@@ -44,11 +44,11 @@ function BioShort() {
           <h1 style={{ color: '#EAD7BB' }}>Thank you for your support</h1>
           <p style={{ color: '#EAD7BB' }}>
             We're thrilled to be celebrating our wedding with you. To make it extra meaningful, 
-            we've decided that <strong>50% of every donation</strong> will help us as we start our new life 
-            together, and the other <strong>50% will go directly to some of the charities</strong> we care about.
+            in lieu of gifts we asked our guests to give instead — and <strong>100% of every donation
+            goes directly to the charities</strong> we care about.
           </p>
           <p style={{ color: '#EAD7BB' }}>
-            This way, your love and generosity not only supports our future, but also helps important causes 
+            This way, your love and generosity supports important causes 
             that we believe in.
           </p>
           <p className="text-center fst-italic mt-3">

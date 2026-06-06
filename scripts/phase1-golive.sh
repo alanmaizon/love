@@ -175,6 +175,15 @@ cmd_migrate() {
   run_task "manage.py post_deploy_check" python manage.py post_deploy_check
 }
 
+# Seed the flagship wedding campaign from the CSV baked into the image
+# (love_backend/seed/donations.csv). Idempotent: re-running skips existing rows.
+cmd_seed() {
+  require_cmd aws; require_cmd python3
+  require_stack
+  run_task "manage.py import_donations" \
+    python manage.py import_donations --csv seed/donations.csv
+}
+
 cmd_frontend() {
   require_cmd aws; require_cmd npm
   require_stack
@@ -229,6 +238,7 @@ main() {
     ssm)      cmd_ssm "$@" ;;
     image)    cmd_image "$@" ;;
     migrate)  cmd_migrate "$@" ;;
+    seed)     cmd_seed "$@" ;;
     frontend) cmd_frontend "$@" ;;
     webhook)  cmd_webhook "$@" ;;
     verify)   cmd_verify "$@" ;;
