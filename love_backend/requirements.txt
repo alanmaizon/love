@@ -19,7 +19,8 @@ psycopg2-binary>=2.9.12,<3
 dj_database_url==0.5.0
 
 # Serving / static
-gunicorn==20.1.0
+# 23.x drops the pkg_resources/setuptools import that breaks on Python 3.12-slim.
+gunicorn>=23,<24
 whitenoise==6.0.0
 
 # Media: S3 via django-storages (pillow backs Django ImageField).

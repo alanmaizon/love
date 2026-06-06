@@ -26,8 +26,32 @@ variable "db_name" {
 
 variable "frontend_domain" {
   type        = string
-  description = "Public site hostname, e.g. lovethatgivesback.com (for CORS/CSRF docs — set in SSM manually)"
+  description = "Public SPA hostname served by CloudFront, e.g. www.lovethatgivesback.com. Empty = serve on the CloudFront default domain."
   default     = ""
+}
+
+variable "api_domain" {
+  type        = string
+  description = "Public API hostname on the ALB, e.g. api.lovethatgivesback.com. Drives ALLOWED_HOSTS and the api_base_url output."
+  default     = ""
+}
+
+variable "root_domain" {
+  type        = string
+  description = "Apex/root domain, e.g. lovethatgivesback.com. Used when manage_dns = true."
+  default     = ""
+}
+
+variable "manage_dns" {
+  type        = bool
+  description = "When true, create a Route 53 hosted zone and manage all records (after switching the registrar's nameservers to the zone's NS)."
+  default     = false
+}
+
+variable "enable_apex" {
+  type        = bool
+  description = "When true, serve the SPA on the apex too (apex A-ALIAS to CloudFront + apex added to the frontend cert). Enable only AFTER the nameserver cutover so ACM can validate via Route 53."
+  default     = false
 }
 
 variable "api_desired_count" {

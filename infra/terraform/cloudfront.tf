@@ -5,10 +5,18 @@ resource "aws_cloudfront_origin_access_control" "web" {
   signing_protocol                  = "sigv4"
 }
 
+# Resolve the AWS-managed CachingOptimized policy by name rather than hardcoding
+# its UUID — the literal id can fail with NoSuchCachePolicy in some accounts.
+data "aws_cloudfront_cache_policy" "caching_optimized" {
+  name = "Managed-CachingOptimized"
+}
+
 resource "aws_cloudfront_distribution" "web" {
   enabled             = true
   default_root_object = "index.html"
   comment             = "${local.name_prefix} frontend"
+
+  aliases = var.frontend_domain != "" ? compact([var.frontend_domain, var.enable_apex ? var.root_domain : ""]) : null
 
   origin {
     domain_name              = aws_s3_bucket.web.bucket_regional_domain_name
@@ -22,7 +30,7 @@ resource "aws_cloudfront_distribution" "web" {
     target_origin_id       = "s3-web"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
-    cache_policy_id        = "658327ce-f403-4efa-b87d-38dceccc7d50" # AWS managed CachingOptimized
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
   }
 
   # SPA routing
@@ -45,7 +53,10 @@ resource "aws_cloudfront_distribution" "web" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.frontend_domain == "" ? true : null
+    acm_certificate_arn            = one(aws_acm_certificate_validation.frontend[*].certificate_arn)
+    ssl_support_method             = var.frontend_domain != "" ? "sni-only" : null
+    minimum_protocol_version       = var.frontend_domain != "" ? "TLSv1.2_2021" : null
   }
 
   tags = { Name = "${local.name_prefix}-cdn" }

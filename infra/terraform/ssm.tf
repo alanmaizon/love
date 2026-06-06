@@ -11,7 +11,7 @@ resource "aws_ssm_parameter" "database_url" {
 resource "aws_ssm_parameter" "allowed_hosts" {
   name  = "${local.ssm_prefix}ALLOWED_HOSTS"
   type  = "String"
-  value = jsonencode(compact([aws_lb.api.dns_name, var.frontend_domain != "" ? "api.${var.frontend_domain}" : ""]))
+  value = jsonencode(compact([aws_lb.api.dns_name, var.api_domain]))
 
   tags = { Name = "${local.name_prefix}-allowed-hosts" }
 }
@@ -46,8 +46,11 @@ resource "aws_ssm_parameter" "app_secrets" {
   type  = each.key == "DEBUG" || each.key == "PLATFORM_FEE_BPS" || each.key == "STRIPE_CURRENCY" ? "String" : "SecureString"
   value = each.key == "DEBUG" ? "False" : (each.key == "PLATFORM_FEE_BPS" ? "0" : (each.key == "STRIPE_CURRENCY" ? "eur" : "CHANGEME_OVERWRITE"))
 
+  # value: set out-of-band by scripts/phase1-ssm.sh (and Stripe keys manually).
+  # type:  the script writes these as String; don't fight it on apply (changing
+  #        type would re-push the placeholder value and clobber the real one).
   lifecycle {
-    ignore_changes = [value]
+    ignore_changes = [value, type]
   }
 
   tags = { Name = "${local.name_prefix}-${lower(each.key)}" }

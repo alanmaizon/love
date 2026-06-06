@@ -96,9 +96,12 @@ cmd_ssm() {
   require_cmd aws
   require_stack
   bold "[ssm] writing /love/* parameters"
+  local frontend_url
+  frontend_url="$(tf_output frontend_url)"
+  [[ -n "$frontend_url" ]] || frontend_url="$(tf_output cloudfront_domain)"
   AWS_REGION="$REGION" \
     API_URL="$(tf_output api_base_url)" \
-    FRONTEND_URL="$(tf_output cloudfront_domain)" \
+    FRONTEND_URL="$frontend_url" \
     MEDIA_BUCKET="$(tf_output media_bucket)" \
     "$ROOT/scripts/phase1-ssm.sh"
 
@@ -119,8 +122,11 @@ cmd_image() {
   registry="$account.dkr.ecr.$REGION.amazonaws.com"
   repo="$(tf_output ecr_repository_url | cut -d/ -f2-)"
   aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$registry"
-  docker build -t "$registry/$repo:latest" "$ROOT/love_backend/"
-  docker push "$registry/$repo:latest"
+  # Fargate runs linux/amd64 by default; force the platform so the image runs even
+  # when built on Apple Silicon. --provenance=false keeps a single-arch manifest
+  # that ECR/Fargate accept (buildx attestations otherwise produce a manifest list).
+  docker buildx build --platform linux/amd64 --provenance=false \
+    -t "$registry/$repo:latest" --push "$ROOT/love_backend/"
   aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --force-new-deployment --region "$REGION" >/dev/null
   info "waiting for service to stabilize…"
   aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE" --region "$REGION"

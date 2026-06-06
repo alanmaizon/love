@@ -26,9 +26,11 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Collect static at build time -> immutable image, fast cold start.
-# SECRET_KEY has a fallback in settings, so no real secrets are needed here.
+# prod settings require a real SECRET_KEY; collectstatic never uses it, so pass a
+# throwaway key for this build step only. The runtime key comes from SSM.
 # Media uses S3 at runtime (django-storages); static is local via WhiteNoise.
-RUN python manage.py collectstatic --noinput
+RUN SECRET_KEY=build-time-only-not-used-at-runtime-collectstatic \
+    python manage.py collectstatic --noinput
 
 # Run as non-root.
 RUN useradd --create-home appuser && chown -R appuser /app

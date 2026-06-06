@@ -12,3 +12,10 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
+
+# CloudFront viewer certificates must live in us-east-1, regardless of the
+# stack's primary region. Used only for the frontend custom-domain cert.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}

@@ -20,6 +20,22 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 SECURE_SSL_REDIRECT = True
 
+# ALB/ECS health checks hit /health/ over plain HTTP with Host = the container's
+# private IP (or localhost for the container-level check). Allow those hosts and
+# skip the HTTPS redirect for the health path so the target group sees a 200, not
+# a 301 — without opening ALLOWED_HOSTS to '*'.
+SECURE_REDIRECT_EXEMPT = [r"^health/?$"]
+import socket as _socket  # noqa: E402
+for _h in ("localhost", "127.0.0.1"):
+    if _h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_h)
+try:
+    _local_ip = _socket.gethostbyname(_socket.gethostname())
+    if _local_ip and _local_ip not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_local_ip)
+except Exception:
+    pass
+
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'

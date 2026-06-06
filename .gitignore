@@ -27,6 +27,8 @@ love_frontend/dist/
 infra/terraform/.terraform/
 infra/terraform/*.tfstate*
 infra/terraform/terraform.tfvars
+infra/terraform/*.plan
+infra/terraform/tfplan*
 
 # OS
 .DS_Store

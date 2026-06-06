@@ -4,8 +4,8 @@ output "alb_dns_name" {
 }
 
 output "api_base_url" {
-  description = "Use as VITE_API_URL once HTTPS is enabled (set api_acm_certificate_arn)"
-  value       = "${local.api_url_scheme}://${aws_lb.api.dns_name}"
+  description = "Use as VITE_API_URL. Custom api_domain when set (cert match), else the ALB DNS."
+  value       = var.api_domain != "" ? "https://${var.api_domain}" : "${local.api_url_scheme}://${aws_lb.api.dns_name}"
 }
 
 output "cloudfront_domain" {
