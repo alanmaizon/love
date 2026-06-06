@@ -72,6 +72,18 @@ class Command(BaseCommand):
             help="Parse and report, but write nothing to the database.",
         )
         parser.add_argument(
+            "--charity-fraction",
+            default="1",
+            metavar="FRACTION",
+            help=(
+                "Fraction of each CSV amount actually recorded as reaching "
+                "charity. The historical wedding split donations 50/50, so use "
+                "0.5 to record only the charitable half (the platform tracks "
+                "charity money only). Default 1 = full amount. Re-running with a "
+                "different fraction heals existing rows in place."
+            ),
+        )
+        parser.add_argument(
             "--stripe-account",
             default="",
             metavar="ACCT_ID",
@@ -86,6 +98,12 @@ class Command(BaseCommand):
         path = options["csv"]
         dry_run = options["dry_run"]
         stripe_account = (options.get("stripe_account") or "").strip()
+        try:
+            fraction = Decimal(str(options.get("charity_fraction") or "1"))
+        except InvalidOperation:
+            raise CommandError(f"bad --charity-fraction: {options.get('charity_fraction')!r}")
+        if fraction <= 0 or fraction > 1:
+            raise CommandError("--charity-fraction must be in (0, 1]")
 
         try:
             with open(path, newline="", encoding="utf-8") as fh:
@@ -93,7 +111,7 @@ class Command(BaseCommand):
         except FileNotFoundError:
             raise CommandError(f"CSV not found: {path}")
 
-        stats = self._import(rows, dry_run, stripe_account)
+        stats = self._import(rows, dry_run, stripe_account, fraction)
 
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS(
@@ -107,7 +125,7 @@ class Command(BaseCommand):
         ))
 
     @transaction.atomic
-    def _import(self, rows, dry_run, stripe_account=""):
+    def _import(self, rows, dry_run, stripe_account="", fraction=Decimal("1")):
         stats = {"charities": 0, "created": 0, "skipped": 0, "messages": 0, "junk": 0}
 
         # --- 1. Charities (verified) ---
@@ -149,6 +167,11 @@ class Command(BaseCommand):
                 stats["junk"] += 1
                 continue
 
+            # The platform tracks charity money only. The historical wedding
+            # split 50/50, so --charity-fraction records just the charitable
+            # portion as the donation amount.
+            recorded = (amount * fraction).quantize(Decimal("0.01"))
+
             charity = charity_by_csv_id.get(csv_id)
             if charity is None:
                 self.stderr.write(f"  ! unknown charity_id {csv_id!r}, skipping")
@@ -161,25 +184,33 @@ class Command(BaseCommand):
             created_ts = self._parse_dt(row.get("created_at"))
             updated_ts = self._parse_dt(row.get("updated_at")) or created_ts
 
+            # Match seeded rows whether still at full amount or already halved,
+            # so re-running with a new fraction heals in place (never duplicates).
             donation = Donation.objects.filter(
-                donor_email=donor_email, amount=amount, message=message_text,
+                donor_email=donor_email, message=message_text,
+                amount__in=[amount, recorded],
             ).first()
 
             if donation:
                 stats["skipped"] += 1
-                # Heal older imports that predate campaigns.
+                heal = []
                 if donation.campaign_id is None:
                     donation.campaign = campaign
-                    donation.save(update_fields=["campaign"])
+                    heal.append("campaign")
+                if donation.amount != recorded:
+                    donation.amount = recorded
+                    heal.append("amount")
+                if heal and not dry_run:
+                    donation.save(update_fields=heal)
             else:
-                self.stdout.write(f"  + {donor_name} — €{amount} -> {charity.name}")
+                self.stdout.write(f"  + {donor_name} — €{recorded} -> {charity.name}")
                 if dry_run:
                     stats["created"] += 1
                 else:
                     donation = Donation.objects.create(
                         charity=charity, campaign=campaign,
                         donor_name=donor_name, donor_email=donor_email,
-                        amount=amount, message=message_text,
+                        amount=recorded, message=message_text,
                         status=status, user=None,
                     )
                     # created_at/updated_at are auto-managed; preserve CSV dates.

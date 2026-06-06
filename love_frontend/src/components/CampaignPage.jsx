@@ -51,7 +51,7 @@ function CampaignPage() {
           style={{ padding: '4rem 1rem', backgroundColor: '#a47864' }}
         >
           <div className="container">
-            <CountdownTimer targetDate={eventDate} />
+            <CountdownTimer targetDate={eventDate} videoId={campaign.livestream_video_id} />
             <p className="mt-3">
               {new Date(eventDate).toLocaleDateString('en-US', {
                 weekday: 'long',

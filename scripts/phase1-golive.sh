@@ -180,8 +180,10 @@ cmd_migrate() {
 cmd_seed() {
   require_cmd aws; require_cmd python3
   require_stack
+  # The historical wedding split donations 50/50; record only the charitable
+  # half so the flagship total reflects what actually reached charity.
   run_task "manage.py import_donations" \
-    python manage.py import_donations --csv seed/donations.csv
+    python manage.py import_donations --csv seed/donations.csv --charity-fraction 0.5
 }
 
 cmd_frontend() {
@@ -190,6 +192,7 @@ cmd_frontend() {
   bold "[frontend] build SPA + sync to S3 + invalidate CloudFront"
   AWS_REGION="$REGION" \
     VITE_API_URL="$(tf_output api_base_url)" \
+    VITE_YOUTUBE_VIDEO_ID="${VITE_YOUTUBE_VIDEO_ID:-dfcp0ehXXKg}" \
     FRONTEND_BUCKET="$(tf_output web_bucket)" \
     CLOUDFRONT_ID="$(tf_output cloudfront_distribution_id)" \
     "$ROOT/scripts/phase1-deploy-frontend.sh"

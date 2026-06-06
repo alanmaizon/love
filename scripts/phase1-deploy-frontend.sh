@@ -22,7 +22,12 @@ if [[ -z "${FRONTEND_BUCKET:-}" ]]; then
 fi
 
 cd "$ROOT/love_frontend"
-echo "VITE_API_URL=$VITE_API_URL" > .env.production
+{
+  echo "VITE_API_URL=$VITE_API_URL"
+  # Optional build-time fallback video for the flagship; per-campaign ids from
+  # the API take precedence at runtime.
+  [[ -n "${VITE_YOUTUBE_VIDEO_ID:-}" ]] && echo "VITE_YOUTUBE_VIDEO_ID=$VITE_YOUTUBE_VIDEO_ID"
+} > .env.production
 npm ci
 npm run build
 

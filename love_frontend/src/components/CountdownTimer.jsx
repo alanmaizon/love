@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, videoId }) {
   const [timeLeft, setTimeLeft] = useState({});
   const [isCountdownFinished, setIsCountdownFinished] = useState(false);
   const [broadcastStatus, setBroadcastStatus] = useState(null);
-  const youtubeVideoId = import.meta.env.VITE_YOUTUBE_VIDEO_ID;
+  // Prefer a per-campaign video id; fall back to a build-time default.
+  const youtubeVideoId = videoId || import.meta.env.VITE_YOUTUBE_VIDEO_ID;
 
   // Countdown logic
   useEffect(() => {
